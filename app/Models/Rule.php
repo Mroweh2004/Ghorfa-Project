@@ -13,7 +13,8 @@ class Rule extends Model
         'title',
     ];
 
-    public function properties(){
-        return $this->belongsTo(Property::class);
+    public function properties()
+    {
+        return $this->belongsToMany(Property::class, 'property_rule');
     }
 }

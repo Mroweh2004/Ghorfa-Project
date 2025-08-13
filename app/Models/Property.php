@@ -25,6 +25,16 @@ class Property extends Model
         'user_id'
     ];
 
+    public function amenities()
+    {
+        return $this->belongsToMany(Amenity::class, 'amenity_property');
+    }
+
+    public function rules()
+    {
+        return $this->belongsToMany(Rule::class, 'property_rule');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

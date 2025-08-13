@@ -23,7 +23,7 @@ class AuthenticationController extends Controller
         ]);
           
         if(Auth::attempt(['email'=>$incomingFields['email'],'password'=>$incomingFields['password']])){
-            $request -> session()->regenerate();
+            $request->session()->regenerate();
             return redirect()->route('home');
         }
 

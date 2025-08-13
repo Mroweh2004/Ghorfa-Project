@@ -13,9 +13,8 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('users'));
     }
 
-    public function deleteUser($id)
+    public function deleteUser(User $user)
     {
-        $user = User::findOrFail($id);
         if ($user->role !== 'admin') {
             $user->delete();
             return redirect()->route('admin.dashboard')->with('success', 'User deleted successfully');

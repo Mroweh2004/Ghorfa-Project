@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone-nb')->unique();
             $table->string('profile-image')->nullable();
+            $table->enum('role', ['client', 'admin'])->default('client');
             $table->rememberToken();
             $table->timestamps();
         });
