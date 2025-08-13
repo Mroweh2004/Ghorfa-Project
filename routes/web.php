@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\AuthenticationController;
-use App\Http\Controllers\PropertyController;
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\AuthenticationController;
 
 //-----------Pages Routes-----------------
 Route::get('/', [MainController::class,"homePage" ] )->name('home');
@@ -37,7 +38,7 @@ Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])-
 Route::get('/filter-search', [PropertyController::class, 'filterSearch'])->name('filter-search');
 
 //----------------Admin Routes-------------------
-Route::middleware(['web', 'auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->group(function () {
+Route::middleware(['web', 'auth', AdminMiddleware::class])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
 });

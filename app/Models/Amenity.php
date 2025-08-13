@@ -12,7 +12,8 @@ class Amenity extends Model
     protected $fillable = [
         'title',
     ];
-    public function properties(){
-        return $this->belongsTo(Property::class);
+    public function properties()
+    {
+        return $this->belongsToMany(Property::class, 'amenity_property');
     }
 }
