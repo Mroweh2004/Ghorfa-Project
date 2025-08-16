@@ -12,7 +12,7 @@
                     <h3>Location</h3>
                     <div class="search-input">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="location" name="location" placeholder="Enter city or area...">
+                        <input type="text" id="location" name="location" placeholder="Enter city or area..." value="{{ request('location') }}">
                     </div>
                 </div>
 
@@ -21,12 +21,12 @@
                     <div class="price-range">
                         <div class="search-input">
                             <i class="fas fa-dollar-sign"></i>
-                            <input type="number" id="min-price" placeholder="Min">
+                            <input type="number" id="min-price" name="min-price" placeholder="Min" min="0" value="{{ request('min-price') }}" oninput="validatePriceRange()">
                         </div>
                         <span>-</span>
                         <div class="search-input">
                             <i class="fas fa-dollar-sign"></i>
-                            <input type="number" id="max-price" placeholder="Max">
+                            <input type="number" id="max-price" name="max-price" placeholder="Max" min="0" value="{{ request('max-price') }}" oninput="validatePriceRange()">
                         </div>
                     </div>
                 </div>
@@ -35,16 +35,16 @@
                     <h3>Property Type</h3>
                     <div class="checkbox-group">
                         <label>
-                            <input type="checkbox" value="apartment"> Appartment
+                            <input type="checkbox" name="property_type[]" value="apartment" {{ is_array(request('property_type')) && in_array('apartment', request('property_type')) ? 'checked' : '' }}> Appartment
                         </label>
                         <label>
-                            <input type="checkbox" value="house"> House
+                            <input type="checkbox" name="property_type[]" value="house" {{ is_array(request('property_type')) && in_array('house', request('property_type')) ? 'checked' : '' }}> House
                         </label>
                         <label>
-                            <input type="checkbox" value="dorm"> Dorm
+                            <input type="checkbox" name="property_type[]" value="dorm" {{ is_array(request('property_type')) && in_array('dorm', request('property_type')) ? 'checked' : '' }}> Dorm
                         </label>
                         <label>
-                            <input type="checkbox" value="other"> Other
+                            <input type="checkbox" name="property_type[]" value="other" {{ is_array(request('property_type')) && in_array('other', request('property_type')) ? 'checked' : '' }}> Other
                         </label>
                     </div>
                 </div>
@@ -52,47 +52,34 @@
                     <h3>Listing Type</h3>
                     <div class="checkbox-group">
                         <label>
-                            <input type="checkbox" value="Rent"> For Rent
+                            <input type="checkbox" name="listing_type[]" value="Rent" {{ is_array(request('listing_type')) && in_array('Rent', request('listing_type')) ? 'checked' : '' }}> For Rent
                         </label>
                         <label>
-                            <input type="checkbox" value="Sale"> For Sale
+                            <input type="checkbox" name="listing_type[]" value="Sale" {{ is_array(request('listing_type')) && in_array('Sale', request('listing_type')) ? 'checked' : '' }}> For Sale
                         </label>
                     </div>
                 </div>
+
 
                 <div class="filter-group">
                     <h3>Amenities</h3>
                     <div class="checkbox-group">
+                        @foreach ($amenities as $amenity )
                         <label>
-                            <input type="checkbox" value="wifi"> Wi-Fi
+                            <input type="checkbox" name="amenities[]" value="{{ $amenity->id }}" {{ is_array(request('amenities')) && in_array($amenity->id, request('amenities')) ? 'checked' : '' }}> {{ $amenity->name }}
                         </label>
-                        <label>
-                            <input type="checkbox" value="ac"> Air Conditioning
-                        </label>
-                        <label>
-                            <input type="checkbox" value="furnished"> Furnished
-                        </label>
-                        <label>
-                            <input type="checkbox" value="parking"> Parking
-                        </label>
-                        <label>
-                            <input type="checkbox" value="gym"> Gym
-                        </label>
+                        @endforeach
                     </div>
                 </div>
 
                 <div class="filter-group">
-                    <h3>More Filters</h3>
+                    <h3>Rules</h3>
                     <div class="checkbox-group">
-                        <label>
-                            <input type="checkbox" value="pets"> Pet Friendly
-                        </label>
-                        <label>
-                            <input type="checkbox" value="smoking"> Smoking Allowed
-                        </label>
-                        <label>
-                            <input type="checkbox" value="students"> Student Friendly
-                        </label>
+                        @foreach ($rules as $rule )
+                            <label>
+                            <input type="checkbox" name="rules[]" value="{{ $rule->name }}" {{ is_array(request('rules')) && in_array($rule->name, request('rules')) ? 'checked' : '' }}> {{ $rule->name }}
+                            </label>
+                        @endforeach
                     </div>
                 </div>
 
@@ -125,7 +112,7 @@
                 @foreach($properties as $property)
                 <div class="listing-card">
                     <div class="listing-image">
-                        <img src="{{ $property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267' }}" alt="{{ $property->title }}">
+                        <img src="{{ $property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267' }}" alt="{{ $property->name }}">
                         <span class="listing-tag">For {{ $property->listing_type }}</span>
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                         <ul class="setting-list">
@@ -147,7 +134,7 @@
                     </div>
                     <div class="listing-content">
                         <div class="listing-price">{{ $property->price }}$/month</div>
-                        <h3>{{ $property->title }}</h3>
+                        <h3>{{ $property->name }}</h3>
                         <p class="listing-location">
                             <i class="fas fa-map-marker-alt"></i> 
                             {{ $property->address }}, {{ $property->city }}, {{ $property->country }}
@@ -199,4 +186,4 @@
             </div>
         </section>
     </main>
-@endsection 
+@endsection

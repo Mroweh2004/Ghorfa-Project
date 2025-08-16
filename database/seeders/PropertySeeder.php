@@ -18,7 +18,7 @@ class PropertySeeder extends Seeder
 
         $beirutProperties = [
             [
-                'title'        => 'Modern Apartment in Downtown Beirut',
+                'name'        => 'Modern Apartment in Downtown Beirut',
                 'description'  => 'Beautiful modern apartment in the heart of Beirut with sea view.',
                 'property_type'=> 'Apartment',
                 'listing_type' => 'Rent',
@@ -33,7 +33,7 @@ class PropertySeeder extends Seeder
                 'user_id'      => $adminUser?->id,
             ],
             [
-                'title'        => 'Luxury Villa in Achrafieh',
+                'name'        => 'Luxury Villa in Achrafieh',
                 'description'  => 'Spacious villa with garden in one of Beirut\'s most prestigious neighborhoods.',
                 'property_type'=> 'Villa',
                 'listing_type' => 'Sale',
@@ -48,7 +48,7 @@ class PropertySeeder extends Seeder
                 'user_id'      => $regularUser?->id,
             ],
             [
-                'title'        => 'Cozy Studio in Hamra',
+                'name'        => 'Cozy Studio in Hamra',
                 'description'  => 'Perfect studio apartment for students or young professionals.',
                 'property_type'=> 'Apartment',
                 'listing_type' => 'Rent',
@@ -66,7 +66,7 @@ class PropertySeeder extends Seeder
 
         $baalbekProperties = [
             [
-                'title'        => 'Traditional House in Baalbek',
+                'name'        => 'Traditional House in Baalbek',
                 'description'  => 'Authentic Lebanese house with traditional architecture.',
                 'property_type'=> 'House',
                 'listing_type' => 'Sale',
@@ -81,7 +81,7 @@ class PropertySeeder extends Seeder
                 'user_id'      => $regularUser?->id,
             ],
             [
-                'title'        => 'Farm House in Baalbek',
+                'name'        => 'Farm House in Baalbek',
                 'description'  => 'Beautiful farm house with large garden and agricultural land.',
                 'property_type'=> 'House',
                 'listing_type' => 'Sale',
@@ -96,7 +96,7 @@ class PropertySeeder extends Seeder
                 'user_id'      => $regularUser?->id,
             ],
             [
-                'title'        => 'Modern Apartment in Baalbek',
+                'name'        => 'Modern Apartment in Baalbek',
                 'description'  => 'Newly built apartment with modern amenities.',
                 'property_type'=> 'Apartment',
                 'listing_type' => 'Rent',
@@ -111,7 +111,7 @@ class PropertySeeder extends Seeder
                 'user_id'      => $regularUser?->id,
             ],
             [
-                'title'        => 'Villa with Mountain View',
+                'name'        => 'Villa with Mountain View',
                 'description'  => 'Luxurious villa with stunning mountain views.',
                 'property_type'=> 'Villa',
                 'listing_type' => 'Sale',
@@ -129,7 +129,7 @@ class PropertySeeder extends Seeder
 
         $tyreProperties = [
             [
-                'title'        => 'Beachfront Apartment in Tyre',
+                'name'        => 'Beachfront Apartment in Tyre',
                 'description'  => 'Stunning apartment with direct access to the beach.',
                 'property_type'=> 'Apartment',
                 'listing_type' => 'Rent',
@@ -144,7 +144,7 @@ class PropertySeeder extends Seeder
                 'user_id'      => $regularUser?->id ?? 2, // fallback ID if you want
             ],
             [
-                'title'        => 'Traditional House in Old Tyre',
+                'name'        => 'Traditional House in Old Tyre',
                 'description'  => 'Charming house in the historic part of Tyre.',
                 'property_type'=> 'House',
                 'listing_type' => 'Sale',
@@ -162,7 +162,7 @@ class PropertySeeder extends Seeder
 
         $saidaProperty = [
             [
-                'title'        => 'Luxury Apartment in Saida',
+                'name'        => 'Luxury Apartment in Saida',
                 'description'  => 'High-end apartment with sea view in Saida.',
                 'property_type'=> 'Apartment',
                 'listing_type' => 'Sale',
