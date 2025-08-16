@@ -52,3 +52,18 @@ document.addEventListener('DOMContentLoaded', function() {
     ShowFilterToggle();
     ShowSettingslist();
 });
+function validatePriceRange() {
+    const minInput = document.getElementById('min-price');
+    const maxInput = document.getElementById('max-price');
+    if (minInput.value !== '' && maxInput.value !== '') {
+        const min = parseFloat(minInput.value);
+        const max = parseFloat(maxInput.value);
+        if (min > max) {
+            minInput.setCustomValidity('Min price cannot be greater than max price.');
+        } else {
+            minInput.setCustomValidity('');
+        }
+    } else {
+        minInput.setCustomValidity('');
+    }
+}

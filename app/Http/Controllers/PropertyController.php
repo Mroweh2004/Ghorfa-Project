@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Rule;
+use App\Models\Amenity;
 use App\Models\Property;
-use App\Models\PropertyImage;
 use Illuminate\Http\Request;
+use App\Models\PropertyImage;
 use Illuminate\Support\Facades\Storage;
 
 class PropertyController extends Controller
@@ -15,24 +17,95 @@ class PropertyController extends Controller
     public function index()
     {
         $properties = Property::paginate(12);
-        return view('search', compact('properties'));
+        $amenities = Amenity::all();
+        $rules = Rule::all();
+        return view('search', compact('properties', 'amenities', 'rules'));
     }
 
     public function filterSearch(Request $request)
-    {
-        $query = $request->input('location');
-        
-        if (empty($query)) {      
-            return redirect()->route('search');
+    {   
+        $amenities = Amenity::all();
+        $rules = Rule::all();
+        $query = Property::query();
+
+        // Location
+        if ($request->filled('location')) {
+            $location = $request->input('location');
+            $query->where(function($q) use ($location) {
+                $q->where('country', 'like', "%$location%")
+                  ->orWhere('city', 'like', "%$location%")
+                  ->orWhere('address', 'like', "%$location%");
+            });
         }
 
-        $properties = Property::where(function($q) use ($query) {
-            $q->where('country', 'like', '%' . $query . '%')
-              ->orWhere('city', 'like', '%' . $query . '%')
-              ->orWhere('address', 'like', '%' . $query . '%');
-        })->paginate(12);
-        
-        return view('search', compact('properties', 'request'));
+        // Price Range
+        if ($request->filled('min-price')) {
+            $query->where('price', '>=', $request->input('min-price'));
+        }
+        if ($request->filled('max-price')) {
+            $query->where('price', '<=', $request->input('max-price'));
+        }
+
+        // Property Type
+        if ($request->has('property_type')) {
+            $query->whereIn('property_type', (array)$request->input('property_type'));
+        }
+
+        // Listing Type
+        if ($request->has('listing_type')) {
+            $query->whereIn('listing_type', (array)$request->input('listing_type'));
+        }
+
+        // Amenities (expects amenities[] as array of amenity IDs)
+        if ($request->has('amenities')) {
+            $amenitiesInput = (array)$request->input('amenities');
+            // Extract IDs if input is array of objects (JSON strings)
+            $amenityIds = array_map(function($item) {
+                if (is_array($item)) {
+                    return $item['id'] ?? null;
+                }
+                // If item is a JSON string, decode it
+                if (is_string($item) && str_starts_with($item, '{')) {
+                    $decoded = json_decode($item, true);
+                    return $decoded['id'] ?? null;
+                }
+                // Otherwise, assume it's an ID
+                return $item;
+            }, $amenitiesInput);
+            $amenityIds = array_filter($amenityIds); // Remove nulls
+            if (count($amenityIds) > 0) {
+                $query->whereHas('amenities', function($q) use ($amenityIds) {
+                    $q->whereIn('amenities.id', $amenityIds);
+                }, '=', count($amenityIds));
+            }
+        }
+
+        // Rules (expects rules[] as array of rule titles)
+        if ($request->has('rules')) {
+            $rulesInput = (array)$request->input('rules');
+            // Extract titles if input is array of objects (JSON strings)
+            $ruleTitles = array_map(function($item) {
+                if (is_array($item)) {
+                    return $item['title'] ?? null;
+                }
+                // If item is a JSON string, decode it
+                if (is_string($item) && str_starts_with($item, '{')) {
+                    $decoded = json_decode($item, true);
+                    return $decoded['title'] ?? null;
+                }
+                // Otherwise, assume it's a title
+                return $item;
+            }, $rulesInput);
+            $ruleTitles = array_filter($ruleTitles); // Remove nulls
+            if (count($ruleTitles) > 0) {
+                $query->whereHas('rules', function($q) use ($ruleTitles) {
+                    $q->whereIn('rules.title', $ruleTitles);
+                }, '=', count($ruleTitles)); // Only properties with ALL selected rules
+            }
+        }
+
+        $properties = $query->paginate(12);
+        return view('search', compact('properties', 'request', 'amenities', 'rules'));
     }
 
     /**

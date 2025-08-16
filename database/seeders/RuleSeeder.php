@@ -19,8 +19,8 @@ class RuleSeeder extends Seeder
             'No Loud Music',
         ];
 
-        foreach ($rules as $title) {
-            Rule::create(['title' => $title]);
+        foreach ($rules as $name) {
+            Rule::create(['name' => $name]);
         }
     }
 }
