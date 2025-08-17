@@ -7,6 +7,7 @@
         <section id="Main-Container" class="Main-Container">
             <div class="Main-Container-content">
                 <h1>Find Your Perfect Living Space</h1>
+                <h2>Hello World</h2>
                 <p>Connect with roommates and discover affordable housing in destination cities</p>
                 <div class="search-container">
                     <form class="search-box" action="{{ route('filter-search') }}" method="GET">
