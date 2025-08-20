@@ -103,16 +103,17 @@
                         <option value="recommended">Recommended</option>
                         <option value="price-low">Price: Low to High</option>
                         <option value="price-high">Price: High to Low</option>
-                        <option value="newest">Newest First</option>
+                        <option value="newest">Newest</option>
+                        <option value="latest">Latest</option>
                     </select>
                 </div>
             </div>
 
             <div class="listings-grid">
                 @foreach($properties as $property)
-                <div class="listing-card">
+                <div class="listing-card" data-price="{{ $property->price }}" data-created="{{ $property->created_at->timestamp }}">
                     <div class="listing-image">
-                        <img src="{{ $property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267' }}" alt="{{ $property->name }}">
+                        <img src="{{ $property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267' }}" alt="{{ $property->title }}">
                         <span class="listing-tag">For {{ $property->listing_type }}</span>
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                         <ul class="setting-list">
@@ -134,7 +135,7 @@
                     </div>
                     <div class="listing-content">
                         <div class="listing-price">{{ $property->price }}$/month</div>
-                        <h3>{{ $property->name }}</h3>
+                        <h3>{{ $property->title }}</h3>
                         <p class="listing-location">
                             <i class="fas fa-map-marker-alt"></i> 
                             {{ $property->address }}, {{ $property->city }}, {{ $property->country }}

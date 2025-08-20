@@ -50,7 +50,7 @@
                 <h1 class="form-section-title">Location</h1>
                 <div class="form-input">
                     <label for="country">Country</label>
-                    <select name="country" id="country" placeholder="Country" required></select>
+                    <select name="country" id="country" placeholder="Country" ></select>
                 </div>
                 <div class="form-input">
                     <label for="city">City</label>

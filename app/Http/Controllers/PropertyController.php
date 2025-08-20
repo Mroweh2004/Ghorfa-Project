@@ -211,7 +211,7 @@ class PropertyController extends Controller
             'description' => 'nullable|string',
             'property_type' => 'required|string',
             'listing_type' => 'required|string',
-            'country' => 'required|string',
+            'country' => 'string',
             'city' => 'required|string',
             'address' => 'required|string',
             'price' => 'required|numeric|min:0',
@@ -225,17 +225,15 @@ class PropertyController extends Controller
             $property = Property::create($validated);
             if ($request->hasFile('images')) {
                 $images = $request->file('images');
-                
-                foreach ($images as  $image) {
-                       
-                        $path = $image->store('property-images', 'public');
-                        $propertyImage = PropertyImage::create([
-                            'property_id' => $property->id,
-                            'path' => $path,
-                            'is_primary' => $index === 0
-                        ]);
-                         }
+                foreach ($images as $index => $image) {
+                    $path = $image->store('property-images', 'public');
+                    PropertyImage::create([
+                        'property_id' => $property->id,
+                        'path' => $path,
+                        'is_primary' => $index === 0
+                    ]);
                 }
+            }
           
 
             return redirect()->route('search')->with('success', 'Property listed successfully!');

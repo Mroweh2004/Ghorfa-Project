@@ -81,3 +81,61 @@ document.addEventListener('DOMContentLoaded', function() {
     ShowFilterToggle();
     ShowSettingslist();
 });
+/*-----------------------------------------*/
+document.addEventListener('DOMContentLoaded', () => {
+  const select = document.getElementById('sort-options');
+  const grid = document.querySelector('.listings-grid');
+
+  if (!select || !grid) return;
+
+  // Keep a snapshot of the original order for "recommended"
+  const original = Array.from(grid.children);
+
+  function readNum(val, fallback = 0) {
+    const n = Number(val);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function sortCards(mode) {
+    let cards = Array.from(grid.children);
+
+    const byPriceAsc  = (a, b) => readNum(a.dataset.price, Infinity) - readNum(b.dataset.price, Infinity);
+    const byPriceDesc = (a, b) => readNum(b.dataset.price, -Infinity) - readNum(a.dataset.price, -Infinity);
+
+    const byDateDesc  = (a, b) => readNum(b.dataset.created) - readNum(a.dataset.created); // Newest first
+    const byDateAsc   = (a, b) => readNum(a.dataset.created) - readNum(b.dataset.created); // Latest→Newest (oldest first)
+
+    switch (mode) {
+      case 'price-low':
+        cards.sort(byPriceAsc);
+        break;
+      case 'price-high':
+        cards.sort(byPriceDesc);
+        break;
+      case 'newest':
+        cards.sort(byDateDesc);
+        break;
+      case 'latest':
+        cards.sort(byDateAsc);
+        break;
+      case 'recommended':
+      default:
+        cards = original.slice(); // restore original order
+        break;
+    }
+
+    // Re-append in the new order
+    const frag = document.createDocumentFragment();
+    cards.forEach(card => frag.appendChild(card));
+    grid.appendChild(frag);
+  }
+
+  // Set default to "newest" and apply once on load
+  select.value = 'newest';
+  sortCards('newest');
+
+  // Re-sort on change
+  select.addEventListener('change', (e) => {
+    sortCards(e.target.value);
+  });
+});
