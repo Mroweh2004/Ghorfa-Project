@@ -11,11 +11,17 @@ function loadCountries() {
                     });
                 }
                 selectDrop.innerHTML = options;
+                $('#country').select2({
+                    placeholder: "Select Country",
+                    allowClear: true,
+                    width: "100%"
+                });
             })
             .catch(err => {
-                console.log(err);
+                console.error(err);
                 selectDrop.innerHTML = '<option value="">Country list unavailable</option>';
             });
     }
 }
+
 document.addEventListener('DOMContentLoaded', loadCountries);
