@@ -235,7 +235,6 @@ class PropertyController extends Controller
                 }
             }
           
-
             return redirect()->route('search')->with('success', 'Property listed successfully!');
         
             if (isset($property)) {

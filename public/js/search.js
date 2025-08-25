@@ -125,7 +125,7 @@ function initPropertySort(selectId = 'sort-options', gridSelector = '.listings-g
       case 'price-low':  cards.sort(byPriceAsc);  break;
       case 'price-high': cards.sort(byPriceDesc); break;
       case 'newest':     cards.sort(byDateDesc);  break;
-      case 'latest':     cards.sort(byDateAsc);   break; // per your spec
+      case 'latest':     cards.sort(byDateAsc);   break; 
       case 'recommended':
       default:
         cards = original.slice();
