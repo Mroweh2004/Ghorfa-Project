@@ -90,6 +90,7 @@
         </section>
         
         <section class="search-results">
+            <button class="search-show-btn"><i class="fas fa-search"></i> Show Filters</button>
             <div class="results-header">
                 <div class="results-count">
                     <h2>{{ $properties->total() }} Rooms Found</h2>
