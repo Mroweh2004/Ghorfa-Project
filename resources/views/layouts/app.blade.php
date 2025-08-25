@@ -12,9 +12,9 @@
 </head>
 <body>
     @include('partials.nav')
-    <main>
+    
     @yield('content')
-    </main>
+  
     @include('partials.footer')
     @include('partials.mobile-nav')
 </body>

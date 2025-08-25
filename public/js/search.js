@@ -4,34 +4,42 @@
 
 function ShowFilterToggle() {
   const filterToggleBtn = document.querySelector('.filter-toggle-btn');
+  const searchShowBtn = document.querySelector('.search-show-btn');
   const searchFilters = document.querySelector('.search-filters');
 
-  if (filterToggleBtn && searchFilters) {
-    filterToggleBtn.addEventListener('click', () => {
-      searchFilters.classList.toggle('active');
+    if (filterToggleBtn && searchFilters) {
+      filterToggleBtn.addEventListener('click', () => {
+        searchFilters.classList.toggle('active');
+        searchFilters.classList.remove('fixed-hide');
+      });
 
-      // When closing, clear all filter values
-      const inputs = searchFilters.querySelectorAll('input');
-      inputs.forEach(input => {
-        if (input.type === 'checkbox' || input.type === 'radio') {
-          input.checked = false;
-        } else {
-          input.value = '';
-        }
-
-        // Remove custom validity if any
-        if (typeof input.setCustomValidity === 'function') {
-          input.setCustomValidity('');
+      document.addEventListener('click', (e) => {
+        if (!searchFilters.contains(e.target) && !filterToggleBtn.contains(e.target) && !searchShowBtn.contains(e.target)) {
+          searchFilters.classList.remove('active');
+          searchFilters.classList.add('fixed-hide');
         }
       });
-    });
+    }
 
-    document.addEventListener('click', (e) => {
-      if (!searchFilters.contains(e.target) && !filterToggleBtn.contains(e.target)) {
-        searchFilters.classList.remove('active');
-      }
-    });
-  }
+    // Add event for search-show-btn to always show/fix filters
+    if (searchShowBtn && searchFilters) {
+      searchShowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        searchFilters.classList.add('active');
+        searchFilters.classList.remove('fixed-hide');
+        searchFilters.style.position = 'fixed';
+        searchFilters.style.top = '100px';
+        searchFilters.style.left = '20px';
+        searchFilters.style.zIndex = '1002';
+        searchFilters.style.background = '#fff';
+        searchFilters.style.boxShadow = '0 4px 24px rgba(44,62,80,0.18)';
+        searchFilters.style.width = '320px';
+        searchFilters.style.height = 'auto';
+        searchFilters.style.maxHeight = '80vh';
+        searchFilters.style.overflowY = 'auto';
+        searchFilters.style.borderRadius = '15px';
+      });
+    }
 }
 
 
