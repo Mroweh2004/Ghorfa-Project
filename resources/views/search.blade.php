@@ -157,7 +157,7 @@
                     </div>
                     <div class="listing-meta">
                             <span class="available-from">Listed {{ $property->created_at->diffForHumans() }}</span>
-                            <a href="{{ route('properties.show', $property->id) }}" class="btn-secondary">View Details</a>
+                            <a href="{{ route('properties.show', $property->id) }}" class="view-btn">View Details</a>
                     </div>
                 </div>
                 @endforeach
