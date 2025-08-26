@@ -8,15 +8,15 @@
     <div class="profile-card">
         <h2>{{ Auth::user()->name }}</h2>
         <div class="profile-image">
-                @if(Auth::user()->{'profile-image'})
-                    <img src="{{ asset('storage/' . Auth::user()->{'profile-image'}) }}" alt="Profile Image">
-                @else
-                    <img src="{{ asset('images/default-profile.png') }}" alt="Default Profile Image">
-                @endif
+            @if(Auth::user()->profile_image)
+                <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="Profile Image">       
+             @else
+                <img src="{{ asset('images/default-profile.png') }}" alt="Default Profile Image">
+            @endif
         </div>
         <div class="profile-info">
             <p></strong> {{ Auth::user()->email }}</p>
-            <p><span>Phone: +961 {{ Auth::user()->{'phone-nb'} }} </span></p>
+            <p><span>Phone: +961 {{ Auth::user()->{'phone_nb'} }} </span></p>
            
         </div>
         <form method="post" action="{{ route('logout') }}">

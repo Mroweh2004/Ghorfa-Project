@@ -16,8 +16,8 @@ class UserSeeder extends Seeder
             'email' => 'admin@example.com',
             'password' => Hash::make('123'),
             'role' => 'admin',
-            'phone-nb' => '70000001',
-            'profile-image' => null
+            'phone_nb' => '70000001',
+            'profile_image' => null
         ]);
 
         // Create regular user
@@ -26,8 +26,8 @@ class UserSeeder extends Seeder
             'email' => 'user@example.com',
             'password' => Hash::make('password'),
             'role' => 'client',
-            'phone-nb' => '70000002',
-            'profile-image' => null
+            'phone_nb' => '70000002',
+            'profile_image' => null
         ]);
     }
 } 

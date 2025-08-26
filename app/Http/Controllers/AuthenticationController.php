@@ -48,22 +48,23 @@ class AuthenticationController extends Controller
             'name'=> 'required',
             'email'=> 'required|email|unique:users',
             'password'=> 'required|min:8|confirmed',
+            'phone_nb' => 'required|string',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);  
         $IncomingFields['password'] =  Hash::make($IncomingFields['password']);
         
-        if ($request->hasFile('profile_image')) {
+        if ($request->hasFile(key: 'profile_image')) {
             $filename = time().'_'.$request->file('profile_image')->getClientOriginalName();
             $path = $request->file('profile_image')->storeAs('profile_images', $filename, 'public');
-            $IncomingFields['profile-image'] = $path;
+            $IncomingFields['profile_image'] = $path;
         }
       
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone-nb' => $request->input('phone-nb'),
-            'profile-image' => $IncomingFields['profile-image'] ?? null,
+        $user = User::create( [
+            'name' => $IncomingFields['name'],
+            'email' => $IncomingFields['email'],
+            'password' => $IncomingFields['password'],
+            'phone_nb' => $IncomingFields['phone_nb'],
+            'profile_image' => $IncomingFields['profile_image'] ?? null,
         ]);
 
         Auth::login($user);

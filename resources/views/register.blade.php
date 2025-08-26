@@ -39,9 +39,9 @@
                     <span class="text.danger">@error('name') {{$message}} @enderror</span>
                 </div>
                 <div class="form-group">
-                    <label for="phone-nb">Phone Number</label>
-                    <input type="text" id="phone-nb" name="phone-nb" required>
-                    <span class="text.danger">@error('phone-nb') {{$message}} @enderror</span>
+                    <label for="phone_nb">Phone Number</label>
+                    <input type="text" id="phone_nb" name="phone_nb" required>
+                    <span class="text.danger">@error('phone_nb') {{$message}} @enderror</span>
                 </div>
                 <div class="form-group">
                     <button type="submit" class="register-btn">Create Account</button>
