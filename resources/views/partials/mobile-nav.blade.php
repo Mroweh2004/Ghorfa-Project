@@ -16,7 +16,6 @@
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 @endif
             @endauth
-            <li><a href="{{route('profile')}}"><i class="fa-solid fa-user"></i>Profile</a></li>
         </ul>
     </div>
 </body>

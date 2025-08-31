@@ -45,13 +45,18 @@ class AuthenticationController extends Controller
 
     function submitRegister(Request $request){
         $IncomingFields = $request->validate([
-            'name'=> 'required',
-            'email'=> 'required|email|unique:users',
-            'password'=> 'required|min:8|confirmed',
-            'phone_nb' => 'required|string',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'phone_nb' => 'required|string|unique:users',
+            'date_of_birth' => 'nullable|date|before:today',
+            'address' => 'nullable|string',
+            'is_landlord' => 'boolean',
+            'role' => 'nullable|in:client,admin',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);  
-        $IncomingFields['password'] =  Hash::make($IncomingFields['password']);
+        $IncomingFields['password'] = Hash::make($IncomingFields['password']);
         
         if ($request->hasFile(key: 'profile_image')) {
             $filename = time().'_'.$request->file('profile_image')->getClientOriginalName();
@@ -59,11 +64,16 @@ class AuthenticationController extends Controller
             $IncomingFields['profile_image'] = $path;
         }
       
-        $user = User::create( [
-            'name' => $IncomingFields['name'],
+        $user = User::create([
+            'first_name' => $IncomingFields['first_name'],
+            'last_name' => $IncomingFields['last_name'],
             'email' => $IncomingFields['email'],
             'password' => $IncomingFields['password'],
             'phone_nb' => $IncomingFields['phone_nb'],
+            'date_of_birth' => $IncomingFields['date_of_birth'] ?? null,
+            'address' => $IncomingFields['address'] ?? null,
+            'is_landlord' => $IncomingFields['is_landlord'] ?? false,
+            'role' => $IncomingFields['role'] ?? 'client',
             'profile_image' => $IncomingFields['profile_image'] ?? null,
         ]);
 

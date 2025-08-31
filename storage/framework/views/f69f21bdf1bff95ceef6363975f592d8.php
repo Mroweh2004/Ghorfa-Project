@@ -2,7 +2,7 @@
 <?php if(auth()->guard()->check()): ?>
 <script src="<?php echo e(asset('js/search.js')); ?>"></script>
 <link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
-<div class="profile-container">
+<main><div class="profile-container">
     <div class="profile-card">
         <h2><?php echo e(Auth::user()->name); ?></h2>
         <div class="profile-image">
@@ -103,9 +103,10 @@
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>
+        </div>
     </div>
-    </div>
-    
+</main>
+
 <?php endif; ?>
 <?php if(auth()->guard()->guest()): ?>
 <h1 style="color:red;">Please login first!</h1>

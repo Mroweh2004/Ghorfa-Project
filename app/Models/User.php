@@ -20,12 +20,17 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'role',
-    'phone_nb',
-    'profile_image'
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'role',
+        'phone_nb',
+        'profile_image',
+        'date_of_birth',
+        'address',
+        'is_landlord',
+        'last_login_at'
     ];
 
     /**
@@ -44,16 +49,33 @@ class User extends Authenticatable
      * @return array<string, string>
      */
     protected $casts = [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'phone-nb' => 'string',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'phone_nb' => 'string',
         'role' => 'string',
-        ];
+        'date_of_birth' => 'date',
+        'is_landlord' => 'boolean',
+        'last_login_at' => 'datetime',
+    ];
 
     public function properties()
     {
         return $this->hasMany(Property::class);
     }
 
-    
+    /**
+     * Get the user's full name.
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    /**
+     * Get the user's full name.
+     */
+    public function getNameAttribute()
+    {
+        return $this->getFullNameAttribute();
+    }
 }
