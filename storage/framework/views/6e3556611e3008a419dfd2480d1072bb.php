@@ -16,7 +16,6 @@
                 <li><a href="<?php echo e(route('admin.dashboard')); ?>" class="<?php echo e(request()->routeIs('admin.dashboard') ? 'active' : ''); ?>"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 <?php endif; ?>
             <?php endif; ?>
-            <li><a href="<?php echo e(route('profile')); ?>"><i class="fa-solid fa-user"></i>Profile</a></li>
         </ul>
     </div>
 </body>

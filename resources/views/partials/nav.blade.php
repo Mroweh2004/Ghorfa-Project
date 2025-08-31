@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Ghorfa</title>
-    <!-- You can include your CSS here -->
+    <script src="{{ asset('js/profile.js') }}"></script>
 </head>
 <body>
 
@@ -18,14 +18,33 @@
             </div>
             <ul class="nav-links">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>
-                <li><a href="{{ route('profile') }}" class="{{ request()->routeIs('profile') ? 'active' : '' }}"><i class="fa-solid fa-user"></i> Profile</a></li>
+                <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>                
                 @if(auth()->user()->role === 'admin')
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 @endif
             </ul>
-            <button class="main-list-btn" onclick="location.href='{{ route('list-property') }}'"><i class="fas fa-plus"></i> List Your Space</button>
+            <div class="nav-right">
+                <button class="main-list-btn" onclick="location.href='{{ route('list-property') }}'"><i class="fas fa-plus"></i> List Your Space</button>
+                <div id="profile-link">
+                    <div class="nav-profile-image">
+                        @if(Auth::user()->profile_image)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="Profile Image">       
+                        @else
+                            <img src="{{ asset('images/default-profile.png') }}" alt="Default Profile Image">
+                        @endif
+                    </div>
+                    <img src="{{ asset( 'img/up.png') }}" alt="Up Arrow" class="up">
+                    <img src="{{ asset('img/down.png') }}" alt="Down Arrow" class="down">
+                </div>
+            </div>
         </nav>
+            <form method="post" class="profile-dropdown" action="{{ route('logout') }}">
+            @csrf
+                <a href="{{ route('profileInfo') }}" class="profile-dropdown-option">Profile</a>
+                <a href="{{ route( 'profileProperties') }}" class="profile-dropdown-option">My Properties</a>
+                <a href="{{ route(name: 'profileProperties') }}" class="profile-dropdown-option">My Favorites</a>
+                <button type="submit" class="profile-dropdown-option"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </form>
     </header>
     @endauth
 

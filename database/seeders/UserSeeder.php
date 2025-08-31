@@ -10,24 +10,30 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create admin user
         User::create([
-            'name' => 'Admin User',
+            'first_name' => 'Admin',
+            'last_name' => 'User',
             'email' => 'admin@example.com',
             'password' => Hash::make('123'),
             'role' => 'admin',
+            'is_landlord' => true,
             'phone_nb' => '70000001',
-            'profile_image' => null
+            'profile_image' => null,
+            'date_of_birth' => '1990-01-01',
+            'address' => 'Beirut, Lebanon'
         ]);
 
-        // Create regular user
         User::create([
-            'name' => 'Regular User',
+            'first_name' => 'Regular',
+            'last_name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('password'),
             'role' => 'client',
+            'is_landlord' => false,
             'phone_nb' => '70000002',
-            'profile_image' => null
+            'profile_image' => null,
+            'date_of_birth' => '1995-05-15',
+            'address' => 'Tripoli, Lebanon'
         ]);
     }
 } 

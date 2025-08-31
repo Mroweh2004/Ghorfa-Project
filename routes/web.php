@@ -8,13 +8,21 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\AuthenticationController;
 
 //-----------Pages Routes-----------------
-Route::get('/', [MainController::class,"homePage" ] )->name('home');
+Route::get( '/', [MainController::class,"homePage"])->name(name: 'home');
+Route::prefix('profile')->group(function (): void {
+    Route::get('/info', [MainController::class, 'profileInfo'])->name('profileInfo');
+    Route::get('/properties',  [MainController::class, 'profileProperties'])->name('profileProperties');
+    Route::get('/favorites', [MainController::class, 'profileFavorities'])->name('profileFavorities');
+    Route::get('/security',  [MainController::class, 'profileSecurity'])->name('profileSecurity');
+    Route::put('/info', [MainController::class, 'updateProfile'])->name('profile.update')->middleware('auth');
+    Route::put('/photo', [MainController::class, 'updateProfilePhoto'])->name('profile.update.photo')->middleware('auth');
+});
 Route::get('/profile', [MainController::class,"profilePage"])->name('profile');
 Route::get('/search', [PropertyController::class, 'index'])->name('search');
 Route::get('/list-property', [MainController::class, 'propertyPage'])->name('list-property');
 
 //--------------Authentication Routes-------------------
-Route::get('/login', [AuthenticationController::class, 'loginPage'])->name( 'login');
+Route::get('/login', [AuthenticationController::class, 'loginPage'])->name( name: 'login');
 Route::post('/login', [AuthenticationController::class, 'submitLogin'])->name('submit.login');
 
 Route::get('/register', [AuthenticationController::class, 'registerPage'])->name('register');
