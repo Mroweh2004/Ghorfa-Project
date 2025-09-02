@@ -44,4 +44,29 @@ class Property extends Model
     {
         return $this->hasMany(PropertyImage::class);
     }
+
+    /**
+     * Get the users who have liked this property
+     */
+    public function likedBy()
+    {
+        return $this->belongsToMany(User::class, 'property_likes')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Check if a specific user has liked this property
+     */
+    public function isLikedBy($userId)
+    {
+        return $this->likedBy()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Get the total number of likes for this property
+     */
+    public function getLikesCountAttribute()
+    {
+        return $this->likedBy()->count();
+    }
 }

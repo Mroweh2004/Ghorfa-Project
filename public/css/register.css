@@ -25,7 +25,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: var(--bg);  /* clean light background */
+    background: var(--bg);  
     padding: 40px 18px;
   }
   .auth-shell{
@@ -42,7 +42,6 @@
     margin-top:60px;
   }
   
-  /* Aside (left) */
   .auth-aside{
     position: relative;
     padding: 48px;
@@ -235,7 +234,6 @@
   .switch input:checked + .slider:before{ transform: translateX(20px) }
   .switch-label{ color: var(--text) }
   
-  /* Button */
   .register-btn{
     width:100%; margin-top: 6px;
     padding: 14px 16px; 
@@ -256,7 +254,6 @@
   .terms a{ color: var(--brand); text-decoration: none }
   .terms a:hover{ text-decoration: underline }
   
-  /* Validation text */
   .text-danger{
     color: var(--error); font-size: 12px; margin-top: 6px; display: inline-block
   }

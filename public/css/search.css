@@ -538,3 +538,15 @@
 .filter-toggle-btn i {
     font-size: 1.1rem;
 }
+
+/* Like functionality animations */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}

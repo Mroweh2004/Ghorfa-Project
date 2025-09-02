@@ -42,7 +42,7 @@
             @csrf
                 <a href="{{ route('profileInfo') }}" class="profile-dropdown-option">Profile</a>
                 <a href="{{ route( 'profileProperties') }}" class="profile-dropdown-option">My Properties</a>
-                <a href="{{ route(name: 'profileProperties') }}" class="profile-dropdown-option">My Favorites</a>
+                <a href="{{ route( 'profileFavorites') }}" class="profile-dropdown-option">My Favorites</a>
                 <button type="submit" class="profile-dropdown-option"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </form>
     </header>

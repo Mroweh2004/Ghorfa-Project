@@ -132,7 +132,20 @@
                                 @endif
                             @endif
                         </ul>
-                        <button class="favorite-btn"><i class="fa-regular fa-heart"></i></button>
+                        @auth
+                            <button 
+                                class="favorite-btn like-btn" 
+                                data-property-id="{{ $property->id }}"
+                                data-liked="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
+                            >
+                                <i class="fa-{{ $property->isLikedBy(auth()->id()) ? 'solid' : 'regular' }} fa-heart"></i>
+                            </button>
+                            <span class="like-count" id="like-count-{{ $property->id }}" style="display: none;">{{ $property->likedBy()->count() }}</span>
+                        @else
+                            <button class="favorite-btn" onclick="window.location.href='{{ route('login') }}'">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                        @endauth
                     </div>
                     <div class="listing-content">
                         <div class="listing-price">{{ $property->price }}$/month</div>

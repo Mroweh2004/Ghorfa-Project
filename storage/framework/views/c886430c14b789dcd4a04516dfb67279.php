@@ -42,7 +42,7 @@
             <?php echo csrf_field(); ?>
                 <a href="<?php echo e(route('profileInfo')); ?>" class="profile-dropdown-option">Profile</a>
                 <a href="<?php echo e(route( 'profileProperties')); ?>" class="profile-dropdown-option">My Properties</a>
-                <a href="<?php echo e(route(name: 'profileProperties')); ?>" class="profile-dropdown-option">My Favorites</a>
+                <a href="<?php echo e(route( 'profileFavorites')); ?>" class="profile-dropdown-option">My Favorites</a>
                 <button type="submit" class="profile-dropdown-option"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </form>
     </header>

@@ -73,9 +73,9 @@ class MainController extends Controller
         $properties = Property::where('user_id', auth()->id())->paginate(12);
         return view("profile.properties", compact('properties'));
     }
-    function profileFavorities(){
-        $properties = Property::where('user_id', auth()->id())->paginate(12);
-        return view("profile.favorites");   
+    function profileFavorites(){
+        $properties = auth()->user()->likedProperties()->paginate(12);
+        return view("profile.favorites", compact('properties'));   
     }
     function profileSecurity (){
         return view("profile.security");    

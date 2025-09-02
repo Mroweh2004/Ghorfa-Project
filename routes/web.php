@@ -12,7 +12,7 @@ Route::get( '/', [MainController::class,"homePage"])->name(name: 'home');
 Route::prefix('profile')->group(function (): void {
     Route::get('/info', [MainController::class, 'profileInfo'])->name('profileInfo');
     Route::get('/properties',  [MainController::class, 'profileProperties'])->name('profileProperties');
-    Route::get('/favorites', [MainController::class, 'profileFavorities'])->name('profileFavorities');
+    Route::get('/favorites', [MainController::class, 'profileFavorites'])->name('profileFavorites');
     Route::get('/security',  [MainController::class, 'profileSecurity'])->name('profileSecurity');
     Route::put('/info', [MainController::class, 'updateProfile'])->name('profile.update')->middleware('auth');
     Route::put('/photo', [MainController::class, 'updateProfilePhoto'])->name('profile.update.photo')->middleware('auth');
@@ -34,7 +34,7 @@ Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logou
 Route::post('/submit-listing', [PropertyController::class, 'submitListing'])->name('submit-listing');
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
-
+Route::post('/properties/{property}/like', [PropertyController::class, 'like'])->name('property.like');
 
 
 //-------------------for property setting list--------------------
