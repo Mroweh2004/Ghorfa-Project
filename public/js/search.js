@@ -166,6 +166,7 @@ function initPropertySort(selectId = 'sort-options', gridSelector = '.listings-g
   const byPriceDesc = (a, b) => readNum(b.dataset.price, -Infinity) - readNum(a.dataset.price, -Infinity);
   const byDateDesc  = (a, b) => readNum(b.dataset.created) - readNum(a.dataset.created); // Newest first
   const byDateAsc   = (a, b) => readNum(a.dataset.created) - readNum(b.dataset.created); // Oldest first
+  const byLikesDesc = (a, b) => readNum(b.dataset.likes, 0) - readNum(a.dataset.likes, 0); // Highest likes first
 
   function sortCards(mode) {
     let cards = Array.from(grid.children);
@@ -177,7 +178,7 @@ function initPropertySort(selectId = 'sort-options', gridSelector = '.listings-g
       case 'latest':     cards.sort(byDateAsc);   break; 
       case 'recommended':
       default:
-        cards = original.slice();
+        cards.sort(byLikesDesc); // Sort by highest likes first
         break;
     }
 
@@ -282,6 +283,18 @@ function initLikeButtons() {
               }
             }, 300);
           }
+        }
+
+        // Update the data-likes attribute on the card
+        const card = button.closest('.listing-card');
+        if (card) {
+          card.setAttribute('data-likes', data.count);
+        }
+
+        // Re-sort if currently on recommended view
+        const sortSelect = document.getElementById('sort-options');
+        if (sortSelect && (sortSelect.value === 'recommended' || sortSelect.value === '')) {
+          initPropertySort(); // Re-initialize sorting to apply new like counts
         }
       } catch (error) {
         console.error("Error toggling like:", error);

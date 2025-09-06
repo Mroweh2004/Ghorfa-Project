@@ -113,7 +113,7 @@
 
             <div class="listings-grid">
                 <?php $__currentLoopData = $properties; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $property): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <div class="listing-card" data-price="<?php echo e($property->price); ?>" data-created="<?php echo e($property->created_at->timestamp); ?>">
+                <div class="listing-card" data-price="<?php echo e($property->price); ?>" data-created="<?php echo e($property->created_at->timestamp); ?>" data-likes="<?php echo e($property->likedBy()->count()); ?>">
                     <div class="listing-image">
                         <img src="<?php echo e($property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'); ?>" alt="<?php echo e($property->title); ?>">
                         <span class="listing-tag">For <?php echo e($property->listing_type); ?></span>
