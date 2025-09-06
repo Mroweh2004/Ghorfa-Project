@@ -133,7 +133,20 @@
                                 <?php endif; ?>
                             <?php endif; ?>
                         </ul>
-                        <button class="favorite-btn"><i class="fa-regular fa-heart"></i></button>
+                        <?php if(auth()->guard()->check()): ?>
+                            <button 
+                                class="favorite-btn like-btn" 
+                                data-property-id="<?php echo e($property->id); ?>"
+                                data-liked="<?php echo e($property->isLikedBy(auth()->id()) ? 'true' : 'false'); ?>"
+                            >
+                                <i class="fa-<?php echo e($property->isLikedBy(auth()->id()) ? 'solid' : 'regular'); ?> fa-heart"></i>
+                            </button>
+                            <span class="like-count" id="like-count-<?php echo e($property->id); ?>" style="display: none;"><?php echo e($property->likedBy()->count()); ?></span>
+                        <?php else: ?>
+                            <button class="favorite-btn" onclick="window.location.href='<?php echo e(route('login')); ?>'">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                        <?php endif; ?>
                     </div>
                     <div class="listing-content">
                         <div class="listing-price"><?php echo e($property->price); ?>$/month</div>

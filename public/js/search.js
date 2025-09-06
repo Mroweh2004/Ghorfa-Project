@@ -1,4 +1,36 @@
 /* =========================
+   Clear filters functionality
+========================= */
+function clearAllFilters() {
+  const form = document.querySelector('.filter-container form');
+  if (!form) return;
+
+  // Clear text inputs
+  const textInputs = form.querySelectorAll('input[type="text"], input[type="number"]');
+  textInputs.forEach(input => {
+    input.value = '';
+  });
+
+  // Clear checkboxes
+  const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+
+  // Clear select elements
+  const selects = form.querySelectorAll('select');
+  selects.forEach(select => {
+    select.selectedIndex = 0;
+  });
+
+  // Clear any custom validation messages
+  const inputs = form.querySelectorAll('input');
+  inputs.forEach(input => {
+    input.setCustomValidity('');
+  });
+}
+
+/* =========================
    Filters toggle
 ========================= */
 
@@ -9,6 +41,15 @@ function ShowFilterToggle() {
 
     if (filterToggleBtn && searchFilters) {
       filterToggleBtn.addEventListener('click', () => {
+        // Clear all filters before toggling
+        clearAllFilters();
+        
+        // Submit the form to apply cleared filters
+        const form = document.querySelector('.filter-container form');
+        if (form) {
+          form.submit();
+        }
+        
         searchFilters.classList.toggle('active');
         searchFilters.classList.remove('fixed-hide');
       });
@@ -178,4 +219,73 @@ document.addEventListener('DOMContentLoaded', () => {
   ShowFilterToggle();
   ShowSettingslist();
   initPropertySort(); // attaches to #sort-options and .listings-grid
+  initLikeButtons(); // Initialize like functionality
 });
+
+/* =========================
+   Like functionality
+========================= */
+function initLikeButtons() {
+  console.log("DOM loaded, looking for like buttons...");
+  const likeButtons = document.querySelectorAll(".like-btn");
+  console.log("Found", likeButtons.length, "like buttons");
+  
+  likeButtons.forEach(button => {
+    button.addEventListener("click", async (e) => {
+      e.preventDefault();
+      console.log("Like button clicked!");
+      
+      const propertyId = button.getAttribute("data-property-id");
+      const heartIcon = button.querySelector("i");
+      
+      console.log("Property ID:", propertyId);
+      console.log("CSRF Token:", document.querySelector('meta[name="csrf-token"]')?.content);
+      
+      try {
+        let response = await fetch(`/properties/${propertyId}/like`, {
+          method: "POST",
+          headers: {
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          }
+        });
+
+        console.log("Response status:", response.status);
+        let data = await response.json();
+        console.log("Response data:", data);
+        
+        // Update like count if element exists
+        const likeCountElement = document.getElementById(`like-count-${propertyId}`);
+        if (likeCountElement) {
+          likeCountElement.textContent = data.count;
+        }
+
+        // Update heart icon
+        if (data.status === "liked") {
+          heartIcon.className = "fa-solid fa-heart";
+          button.setAttribute("data-liked", "true");
+        } else {
+          heartIcon.className = "fa-regular fa-heart";
+          button.setAttribute("data-liked", "false");
+          
+          // Remove the card from favorites page when unliked
+          const card = button.closest('.listing-card');
+          if (card && window.location.pathname.includes('/favorites')) {
+            card.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+              card.remove();
+              // Check if no more cards
+              const remainingCards = document.querySelectorAll('.listing-card');
+              if (remainingCards.length === 0) {
+                location.reload(); // Reload to show empty state
+              }
+            }, 300);
+          }
+        }
+      } catch (error) {
+        console.error("Error toggling like:", error);
+      }
+    });
+  });
+}

@@ -205,24 +205,26 @@ class PropertyController extends Controller
 
     public function submitListing(Request $request)
     {
-      
-        $validated = $request->validate([
-            'title' => 'required|string|max:50',
-            'description' => 'nullable|string',
-            'property_type' => 'required|string',
-            'listing_type' => 'required|string',
-            'country' => 'string',
-            'city' => 'required|string',
-            'address' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'area_m3' => 'nullable|numeric|min:0',
-            'room_nb' => 'nullable|integer|min:0',
-            'bathroom_nb' => 'nullable|integer|min:0',
-            'bedroom_nb' => 'nullable|integer|min:0',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:50',
+                'description' => 'nullable|string',
+                'property_type' => 'required|string',
+                'listing_type' => 'required|string',
+                'country' => 'string',
+                'city' => 'required|string',
+                'address' => 'required|string',
+                'price' => 'required|numeric|min:0',
+                'area_m3' => 'nullable|numeric|min:0',
+                'room_nb' => 'nullable|integer|min:0',
+                'bathroom_nb' => 'nullable|integer|min:0',
+                'bedroom_nb' => 'nullable|integer|min:0',
+                'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+            
             $validated['user_id'] = auth()->id();
             $property = Property::create($validated);
+            
             if ($request->hasFile('images')) {
                 $images = $request->file('images');
                 foreach ($images as $index => $image) {
@@ -236,15 +238,37 @@ class PropertyController extends Controller
             }
           
             return redirect()->route('search')->with('success', 'Property listed successfully!');
-        
+        } catch (\Exception $e) {
             if (isset($property)) {
-                        foreach ($property->images as $image) {
-                        Storage::disk('public')->delete($image->path);
-                    }
-                    $property->delete();             
+                foreach ($property->images as $image) {
+                    Storage::disk('public')->delete($image->path);
+                }
+                $property->delete();             
             }
             
             return back()->with('error', 'Failed to create property: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Toggle like status for a property
+     */
+    public function like(Property $property)
+    {
+        $user = auth()->user();
+        
+        if ($property->likedBy()->where('user_id', $user->id)->exists()) {
+            $property->likedBy()->detach($user->id);
+            $status = 'unliked';
+        } else {
+            $property->likedBy()->attach($user->id);
+            $status = 'liked';
+        }
+        
+        return response()->json([
+            'status' => $status,
+            'count' => $property->likedBy()->count(),
+        ]);
+    }
+}
 

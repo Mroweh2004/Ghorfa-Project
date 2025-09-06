@@ -64,6 +64,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the properties that the user has liked
+     */
+    public function likedProperties()
+    {
+        return $this->belongsToMany(Property::class, 'property_likes')
+                    ->withTimestamps();
+    }
+
+    /**
      * Get the user's full name.
      */
     public function getFullNameAttribute()

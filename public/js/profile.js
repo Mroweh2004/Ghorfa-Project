@@ -220,7 +220,7 @@
           }
         });
   
-        hideDropdown(); // init to hidden
+        hideDropdown(); 
       }
     });
   })();

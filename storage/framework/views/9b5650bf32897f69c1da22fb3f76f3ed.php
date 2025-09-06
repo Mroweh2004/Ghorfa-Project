@@ -26,20 +26,13 @@
                             <?php endif; ?>
                         <?php endif; ?>
                     </ul>
-                    <?php if(auth()->guard()->check()): ?>
-                        <button 
-                            class="favorite-btn like-btn" 
-                            data-property-id="<?php echo e($property->id); ?>"
-                            data-liked="<?php echo e($property->isLikedBy(auth()->id()) ? 'true' : 'false'); ?>"
-                        >
-                            <i class="fa-<?php echo e($property->isLikedBy(auth()->id()) ? 'solid' : 'regular'); ?> fa-heart"></i>
-                        </button>
-                        <span class="like-count" id="like-count-<?php echo e($property->id); ?>" style="display: none;"><?php echo e($property->likedBy()->count()); ?></span>
-                    <?php else: ?>
-                        <button class="favorite-btn" onclick="window.location.href='<?php echo e(route('login')); ?>'">
-                            <i class="fa-regular fa-heart"></i>
-                        </button>
-                    <?php endif; ?>
+                    <button 
+                        class="favorite-btn like-btn" 
+                        data-property-id="<?php echo e($property->id); ?>"
+                        data-liked="true"
+                    >
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
                 </div>
                 <div class="listing-content">
                     <div class="listing-price"><?php echo e($property->price); ?>$/month</div>
@@ -104,5 +97,4 @@
 <h1 style="color:red;">Please login first!</h1>
 <?php endif; ?>
 <?php $__env->stopSection(); ?>
-
-<?php echo $__env->make('layouts/app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/profile/properties.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts/app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/profile/favorites.blade.php ENDPATH**/ ?>
