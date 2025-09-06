@@ -1,4 +1,36 @@
 /* =========================
+   Clear filters functionality
+========================= */
+function clearAllFilters() {
+  const form = document.querySelector('.filter-container form');
+  if (!form) return;
+
+  // Clear text inputs
+  const textInputs = form.querySelectorAll('input[type="text"], input[type="number"]');
+  textInputs.forEach(input => {
+    input.value = '';
+  });
+
+  // Clear checkboxes
+  const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+
+  // Clear select elements
+  const selects = form.querySelectorAll('select');
+  selects.forEach(select => {
+    select.selectedIndex = 0;
+  });
+
+  // Clear any custom validation messages
+  const inputs = form.querySelectorAll('input');
+  inputs.forEach(input => {
+    input.setCustomValidity('');
+  });
+}
+
+/* =========================
    Filters toggle
 ========================= */
 
@@ -9,6 +41,15 @@ function ShowFilterToggle() {
 
     if (filterToggleBtn && searchFilters) {
       filterToggleBtn.addEventListener('click', () => {
+        // Clear all filters before toggling
+        clearAllFilters();
+        
+        // Submit the form to apply cleared filters
+        const form = document.querySelector('.filter-container form');
+        if (form) {
+          form.submit();
+        }
+        
         searchFilters.classList.toggle('active');
         searchFilters.classList.remove('fixed-hide');
       });
