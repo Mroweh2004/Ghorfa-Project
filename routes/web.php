@@ -36,6 +36,12 @@ Route::get('/properties', [PropertyController::class, 'index'])->name('propertie
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::post('/properties/{property}/like', [PropertyController::class, 'like'])->name('property.like');
 
+// Review routes
+Route::post('/properties/{property}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store')->middleware('auth');
+Route::get('/properties/{property}/reviews', [App\Http\Controllers\ReviewController::class, 'index'])->name('reviews.index');
+Route::put('/reviews/{review}', [App\Http\Controllers\ReviewController::class, 'update'])->name('reviews.update')->middleware('auth');
+Route::delete('/reviews/{review}', [App\Http\Controllers\ReviewController::class, 'destroy'])->name('reviews.destroy')->middleware('auth');
+
 
 //-------------------for property setting list--------------------
 Route::get('/properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');

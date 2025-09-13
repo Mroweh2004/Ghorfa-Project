@@ -99,6 +99,75 @@
                         </div>
                     </div>
                     <?php endif; ?>
+
+                    <!-- Reviews Section -->
+                    <div class="reviews-section">
+                        <div class="reviews-header">
+                            <h3>Reviews & Ratings</h3>
+                            <?php if($reviewsCount > 0): ?>
+                                <div class="reviews-summary">
+                                    <div class="overall-rating">
+                                        <div class="rating-number"><?php echo e($avgRating); ?></div>
+                                        <div class="rating-stars-large">
+                                            <?php for($i = 1; $i <= 5; $i++): ?>
+                                                <i class="fa-star <?php echo e($i <= floor($avgRating) ? 'fas' : ($i <= $avgRating ? 'fas half-star' : 'far')); ?>"></i>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <div class="rating-count"><?php echo e($reviewsCount); ?> <?php echo e(\Illuminate\Support\Str::plural('review', $reviewsCount)); ?></div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if($reviewsCount > 0): ?>
+                            <div class="reviews-list">
+                                <?php $__currentLoopData = $property->reviews()->with('user')->latest()->take(5)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $review): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="review-item">
+                                        <div class="review-header">
+                                            <div class="reviewer-info">
+                                                <div class="reviewer-avatar">
+                                                    <?php if($review->user->profile_image): ?>
+                                                        <img src="<?php echo e(Storage::url($review->user->profile_image)); ?>" alt="<?php echo e($review->user->name); ?>" class="avatar-image">
+                                                    <?php else: ?>
+                                                        <i class="fas fa-user"></i>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="reviewer-details">
+                                                    <div class="reviewer-name"><?php echo e($review->user->name); ?></div>
+                                                    <div class="review-date"><?php echo e($review->created_at->format('M d, Y')); ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="review-rating">
+                                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                                    <i class="fa-star <?php echo e($i <= $review->rating ? 'fas' : 'far'); ?>"></i>
+                                                <?php endfor; ?>
+                                            </div>
+                                        </div>
+                                        <div class="review-content">
+                                            <p><?php echo e($review->comment); ?></p>
+                                        </div>
+                                    </div>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                
+                                <?php if($reviewsCount > 5): ?>
+                                    <div class="view-all-reviews">
+                                        <button class="view-all-btn" onclick="showAllReviews()">
+                                            View all <?php echo e($reviewsCount); ?> reviews
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="no-reviews">
+                                <div class="no-reviews-icon">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <h4>No reviews yet</h4>
+                                <p>Be the first to share your experience with this property!</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <!-- Sidebar -->
@@ -133,11 +202,55 @@
                     <!-- Like Button -->
                     <?php if(auth()->guard()->check()): ?>
                     <div class="like-section">
-                        <button class="like-btn" data-property-id="<?php echo e($property->id); ?>" data-liked="<?php echo e($property->isLikedBy(auth()->id()) ? 'true' : 'false'); ?>">
+                        <button
+                            class="like-btn"
+                            data-property-id="<?php echo e($property->id); ?>"
+                            data-liked="<?php echo e($property->isLikedBy(auth()->id()) ? 'true' : 'false'); ?>"
+                        >
                             <i class="fa-<?php echo e($property->isLikedBy(auth()->id()) ? 'solid' : 'regular'); ?> fa-heart"></i>
                             <span><?php echo e($property->isLikedBy(auth()->id()) ? 'Liked' : 'Like'); ?></span>
                         </button>
                         <div class="like-count"><?php echo e($property->likedBy()->count()); ?> likes</div>
+
+                        <hr class="like-divider">
+
+                        <?php
+                            $userHasReviewed = auth()->check() ? $property->hasUserReviewed(auth()->id()) : false;
+                            $userReview = auth()->check() ? $property->getUserReview(auth()->id()) : null;
+                        ?>
+
+                        <!-- Rating summary -->
+                        <div class="rating-summary">
+                            <div class="rating-stars">
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <i class="fa-star <?php echo e($i <= floor($avgRating) ? 'fas' : 'far'); ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <?php if($reviewsCount > 0): ?>
+                                <span class="rating-text"><?php echo e($avgRating); ?> / 5 · <?php echo e($reviewsCount); ?> <?php echo e(\Illuminate\Support\Str::plural('review', $reviewsCount)); ?></span>
+                            <?php else: ?>
+                                <span class="rating-text">No ratings yet</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Review button -->
+                        <?php if($userHasReviewed && $userReview): ?>
+                            <div class="user-review-status">
+                                <div class="user-review-info">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>You reviewed this property</span>
+                                </div>
+                                <button class="review-btn edit-review-btn" data-review-id="<?php echo e($userReview->id); ?>" onclick="editUserReview(this.dataset.reviewId)">
+                                    <i class="fas fa-edit"></i>
+                                    Edit Review
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <button class="review-btn" onclick="openReviewModal()">
+                                <i class="fas fa-star-half-alt"></i>
+                                Write a Review
+                            </button>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -203,6 +316,90 @@
         </div>
     </div>
 </div>
+<!-- Review Modal -->
+<div id="reviewModal" class="image-modal review-modal" onclick="closeReviewModal()">
+    <div class="modal-content modal-card" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeReviewModal()">&times;</span>
+
+        <div class="review-modal-header">
+            <h3>Rate this property</h3>
+            <p class="review-subtitle">Share your experience to help others</p>
+        </div>
+
+        <?php if(session('success')): ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <?php echo e(session('success')); ?>
+
+            </div>
+        <?php endif; ?>
+
+        <?php if(session('error')): ?>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <?php echo e(session('error')); ?>
+
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="<?php echo e(route('reviews.store', $property)); ?>" class="review-form">
+            <?php echo csrf_field(); ?>
+
+            <div class="form-row">
+                <label for="rating">Your Rating</label>
+                <div class="star-rating-container">
+                    <div class="star-rating" id="starRating">
+                        <?php for($i = 5; $i >= 1; $i--): ?>
+                            <input type="radio" id="star<?php echo e($i); ?>" name="rating" value="<?php echo e($i); ?>" <?php echo e(old('rating') == $i ? 'checked' : ''); ?>>
+                            <label for="star<?php echo e($i); ?>" class="star-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                        <?php endfor; ?>
+                    </div>
+                    <div class="rating-text-display" id="ratingText">Select a rating</div>
+                </div>
+                <?php $__errorArgs = ['rating'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <div class="form-error"><?php echo e($message); ?></div> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+            </div>
+
+            <div class="form-row">
+                <label for="comment">Your Review</label>
+                <textarea id="comment" name="comment" rows="6" placeholder="Tell others about your experience with this property..." required><?php echo e(old('comment')); ?></textarea>
+                <div class="char-counter">
+                    <span id="charCount">0</span>/1000 characters
+                </div>
+                <?php $__errorArgs = ['comment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <div class="form-error"><?php echo e($message); ?></div> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+            </div>
+
+            <div class="review-actions">
+                <button type="submit" class="submit-btn" id="submitReviewBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Review
+                </button>
+                <button type="button" class="cancel-btn" onclick="closeReviewModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openReviewModal(){ document.getElementById('reviewModal').style.display = 'flex'; }
+    function closeReviewModal(){ document.getElementById('reviewModal').style.display = 'none'; }
+    window.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeReviewModal(); });
+</script>
+
 
 
 <?php $__env->stopSection(); ?> 

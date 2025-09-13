@@ -393,6 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initBackButton();
     initImageGallery();
     initActionButtons();
+    initReviewSystem();
     
     // Add fade-in animation to main content
     const mainContent = document.querySelector('.property-details');
@@ -408,8 +409,197 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Review functionality
+function initReviewSystem() {
+    // Star rating functionality
+    const starInputs = document.querySelectorAll('.star-rating input[type="radio"]');
+    const ratingText = document.getElementById('ratingText');
+    const ratingTexts = {
+        1: 'Poor',
+        2: 'Fair', 
+        3: 'Good',
+        4: 'Very Good',
+        5: 'Excellent'
+    };
+
+    starInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const rating = this.value;
+            ratingText.textContent = ratingTexts[rating];
+            
+            // Add visual feedback
+            ratingText.style.color = '#f59e0b';
+            ratingText.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                ratingText.style.transform = 'scale(1)';
+            }, 200);
+        });
+    });
+
+    // Character counter for review text
+    const commentTextarea = document.getElementById('comment');
+    const charCount = document.getElementById('charCount');
+    
+    if (commentTextarea && charCount) {
+        commentTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = length;
+            
+            // Change color based on character count
+            if (length > 900) {
+                charCount.style.color = '#ef4444';
+            } else if (length > 800) {
+                charCount.style.color = '#f59e0b';
+            } else {
+                charCount.style.color = '#64748b';
+            }
+        });
+    }
+
+    // Form validation
+    const reviewForm = document.querySelector('.review-form');
+    const submitBtn = document.getElementById('submitReviewBtn');
+    
+    if (reviewForm && submitBtn) {
+        reviewForm.addEventListener('submit', function(e) {
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const comment = document.getElementById('comment');
+            
+            if (!rating) {
+                e.preventDefault();
+                showNotification('Please select a rating before submitting.', 'error');
+                return;
+            }
+            
+            if (!comment.value.trim() || comment.value.trim().length < 10) {
+                e.preventDefault();
+                showNotification('Please write a review with at least 10 characters.', 'error');
+                return;
+            }
+            
+            // Add loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        });
+    }
+}
+
+// Show all reviews functionality
+function showAllReviews() {
+    // This would typically load more reviews via AJAX
+    // For now, we'll just show a message
+    showNotification('Loading all reviews...', 'info');
+    
+    // In a real implementation, you would:
+    // 1. Make an AJAX request to load more reviews
+    // 2. Update the reviews list
+    // 3. Handle pagination
+}
+
+// Edit user review functionality
+function editUserReview(reviewId) {
+    // This would typically load the review data and populate the modal
+    // For now, we'll just open the modal
+    showNotification('Loading your review for editing...', 'info');
+    openReviewModal();
+    
+    // In a real implementation, you would:
+    // 1. Make an AJAX request to get the review data
+    // 2. Populate the form with existing data
+    // 3. Change the form action to update instead of create
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add styles
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'error' ? '#fee2e2' : type === 'success' ? '#d1fae5' : '#dbeafe'};
+        color: ${type === 'error' ? '#991b1b' : type === 'success' ? '#065f46' : '#1e40af'};
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        max-width: 400px;
+        border: 1px solid ${type === 'error' ? '#fca5a5' : type === 'success' ? '#a7f3d0' : '#93c5fd'};
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
+}
+
+// Enhanced review modal functionality
+function openReviewModal() {
+    const modal = document.getElementById('reviewModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on first input
+        setTimeout(() => {
+            const firstStar = document.querySelector('.star-rating input[type="radio"]');
+            if (firstStar) {
+                firstStar.focus();
+            }
+        }, 100);
+    }
+}
+
+function closeReviewModal() {
+    const modal = document.getElementById('reviewModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Reset form
+        const form = modal.querySelector('.review-form');
+        if (form) {
+            form.reset();
+            const ratingText = document.getElementById('ratingText');
+            if (ratingText) {
+                ratingText.textContent = 'Select a rating';
+                ratingText.style.color = '#64748b';
+            }
+            const charCount = document.getElementById('charCount');
+            if (charCount) {
+                charCount.textContent = '0';
+                charCount.style.color = '#64748b';
+            }
+        }
+    }
+}
+
 // Export functions for global access
 window.openImageModal = openImageModal;
 window.closeImageModal = closeImageModal;
 window.nextImage = nextImage;
 window.previousImage = previousImage;
+window.openReviewModal = openReviewModal;
+window.closeReviewModal = closeReviewModal;
+window.showAllReviews = showAllReviews;
+window.editUserReview = editUserReview;

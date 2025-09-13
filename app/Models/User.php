@@ -3,11 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Review;
 use App\Traits\HasAdminRole;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -87,4 +88,22 @@ class User extends Authenticatable
     {
         return $this->getFullNameAttribute();
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+    // app/Models/User.php
+    public function propertyReviews()
+    {
+        return $this->hasManyThrough(
+            Review::class,     
+            Property::class,   
+            'user_id',                    
+            'property_id',                 
+            'id',                         
+            'id'                        
+        );
+    }
+
 }

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Property extends Model
 {
@@ -69,4 +69,43 @@ class Property extends Model
     {
         return $this->likedBy()->count();
     }
+
+    // app/Models/Property.php
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get the average rating for this property
+     */
+    public function getAverageRatingAttribute()
+    {
+        return round($this->reviews()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Get the total number of reviews for this property
+     */
+    public function getReviewsCountAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
+    /**
+     * Check if a user has reviewed this property
+     */
+    public function hasUserReviewed($userId)
+    {
+        return $this->reviews()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Get user's review for this property
+     */
+    public function getUserReview($userId)
+    {
+        return $this->reviews()->where('user_id', $userId)->first();
+    }
+
 }
