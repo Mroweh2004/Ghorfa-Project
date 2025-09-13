@@ -129,8 +129,13 @@ class PropertyController extends Controller
      */
     public function show(Property $property)
     {
-        $property->load('images');
-        return view('show', data: compact('property'));
+        $property->load(['images', 'reviews.user']);
+        
+        // Calculate review statistics
+        $avgRating = $property->average_rating;
+        $reviewsCount = $property->reviews_count;
+        
+        return view('show', compact('property', 'avgRating', 'reviewsCount'));
     }
 
     /**
