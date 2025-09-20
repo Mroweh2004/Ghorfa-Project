@@ -20,7 +20,6 @@ class ReviewController extends Controller
         return view('properties.reviews.index', compact('property','reviews'));
     }
 
-    // POST /properties/{property}/reviews
     public function store(Request $request, Property $property)
     {
         $existingReview = Review::where('property_id', $property->id)
@@ -42,7 +41,7 @@ class ReviewController extends Controller
             'comment.max' => 'Your review cannot exceed 1000 characters.',
         ]);
 
-        Review::create([
+        Review::create(attributes: [
             'property_id' => $property->id,
             'user_id'     => $request->user()->id,
             'rating'      => $data['rating'],

@@ -30,8 +30,7 @@
       </div>
     </aside>
 
-    {{-- Right panel (form) --}}
-    <main class="auth-main">
+    <div class="auth-main">
       <div class="register-card">
 
         {{-- Top-level error summary --}}
@@ -175,7 +174,7 @@
           <p class="terms">By creating an account, you agree to our <a href="{{ url('/terms') }}">Terms</a> & <a href="{{ url('/privacy') }}">Privacy Policy</a>.</p>
         </form>
       </div>
-    </main>
+    </div>
   </div>
 </div>
 

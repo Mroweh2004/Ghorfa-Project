@@ -28,8 +28,7 @@
       </div>
     </aside>
 
-    
-    <main class="auth-main">
+    <div class="auth-main">
       <div class="register-card">
 
         
@@ -243,7 +242,7 @@ unset($__errorArgs, $__bag); ?>
           <p class="terms">By creating an account, you agree to our <a href="<?php echo e(url('/terms')); ?>">Terms</a> & <a href="<?php echo e(url('/privacy')); ?>">Privacy Policy</a>.</p>
         </form>
       </div>
-    </main>
+    </div>
   </div>
 </div>
 
