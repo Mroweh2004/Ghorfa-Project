@@ -9,47 +9,67 @@
     <title>Document</title>
 </head>
 <body>
-    <div class="footer">
-        <div class=" footer-content">
-            <div class="footer-section">
-                <h4>About Ghorfa</h4>
-                <p>Your trusted platform for finding rooms and roommates.</p>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <span class="footer-logo-icon"><img src="<?php echo e(asset('img/white.png')); ?>" alt=""></span>
+                    <span>Ghorfa</span>
+                </div>
+                <p>Discover thoughtfully curated living spaces and connect with roommates who feel like home.</p>
+                <a href="///" class="footer-cta-button">Start exploring</a>
                 <div class="social-links">
-                    <a href="///"><i class="fab fa-facebook"></i></a>
-                    <a href="///"><i class="fab fa-twitter"></i></a>
-                    <a href="///"><i class="fab fa-instagram"></i></a>
-                    <a href="///"><i class="fab fa-linkedin"></i></a>
+                    <a href="///" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="///" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="///" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="///" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                 </div>
             </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="///">Home</a></li>
-                    <li><a href="///">Search</a></li>
-                    <li><a href="///">Search by Map</a></li>
-                    <li><a href="///">Profile</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="///">FAQ</a></li>
-                    <li><a href="///">Terms of Service</a></li>
-                    <li><a href="///">Privacy Policy</a></li>
-                    <li><a href="///">Help Center</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Contact Us</h4>
-                <p><i class="fas fa-envelope"></i> ghorfa@gmail.com</p>
-                <p><i class="fas fa-phone"></i> +961 81 920 211</p>
-                <p><i class="fas fa-map-marker-alt"></i> Beirut</p>
+            <div class="footer-columns">
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="<?php echo e(route('home')); ?>">Home</a></li>
+                        <li><a href="<?php echo e(route('search')); ?>">Search</a></li>
+                        <li><a href="///">Search by Map</a></li>
+                        <li><a href="<?php echo e(route('profileInfo')); ?>">Profile</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="///">FAQ</a></li>
+                        <li><a href="///">Terms of Service</a></li>
+                        <li><a href="///">Privacy Policy</a></li>
+                        <li><a href="///">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section footer-contact">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> ghorfa@gmail.com</p>
+                    <p><i class="fas fa-phone"></i> +961 81 920 211</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Beirut</p>
+                </div>
+                <div class="footer-section footer-subscribe">
+                    <h4>Stay Updated</h4>
+                    <p>Get curated room matches and community updates delivered to your inbox.</p>
+                    <form class="footer-newsletter" action="#" method="get">
+                        <input type="email" name="newsletter_email" placeholder="Email address" aria-label="Email address">
+                        <button type="submit">Join</button>
+                    </form>
+                    <small>No spam. Unsubscribe anytime.</small>
+                </div>
             </div>
         </div>
         <div class="footer-bottom">
             <p>&copy; 2025 Ghorfa. All rights reserved.</p>
+            <div class="footer-bottom-links">
+                <a href="///">Privacy Policy</a>
+                <a href="///">Terms of Service</a>
+                <a href="///">Support</a>
+            </div>
         </div>
-    </div>
- 
+    </footer>
 </body>
-</html><?php /**PATH C:\Ghorfa-Project\resources\views/partials/footer.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\Ghorfa-Project\resources\views/partials/footer.blade.php ENDPATH**/ ?>

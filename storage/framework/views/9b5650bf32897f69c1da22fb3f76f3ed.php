@@ -3,6 +3,11 @@
 <link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
 <main>
 <?php if(auth()->guard()->check()): ?>
+<div class="results-header">
+    <div class="results-count">
+        <h2><?php echo e($properties->total()); ?> Rooms Found</h2>
+    </div>
+</div>
 <div class="listing">
     <div class="listings-grid">
         <?php $__currentLoopData = $properties; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $property): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>

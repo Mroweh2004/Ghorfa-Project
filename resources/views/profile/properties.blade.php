@@ -5,6 +5,11 @@
 <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 <main>
 @auth
+            <div class="results-header">
+                <div class="results-count">
+                    <h2>{{ $properties->total() }} Rooms Found</h2>
+                </div>
+            </div>
 <div class="listing">
     <div class="listings-grid">
         @foreach($properties as $property)
