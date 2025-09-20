@@ -1,3 +1,5 @@
+<?php $__env->startSection('title', 'SignUp Page'); ?>
+
 <?php $__env->startSection('content'); ?>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -30,8 +32,6 @@
 
     <div class="auth-main">
       <div class="register-card">
-
-        
         <?php if($errors->any()): ?>
           <div class="alert">
             <strong>We found <?php echo e($errors->count()); ?> <?php echo e(Str::plural('issue', $errors->count())); ?>:</strong>
@@ -45,7 +45,6 @@
 
         <form action="<?php echo e(route('submit.register')); ?>" method="POST" enctype="multipart/form-data" novalidate>
           <?php echo csrf_field(); ?>
-
           
           <div class="form-row">
             <label for="profile_image" class="profile-image-label">

@@ -9,12 +9,13 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="icon" href="{{ asset('img/logo.png') }}">   
     <title>@yield('title')</title>
 </head>
 <body>
     @include('partials.nav')
     
-    @yield('content')
+    @yield(section: 'content')
   
     @include('partials.footer')
     @include('partials.mobile-nav')

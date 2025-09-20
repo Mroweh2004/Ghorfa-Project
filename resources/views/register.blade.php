@@ -1,4 +1,5 @@
 @extends('layouts/app')
+@section('title', 'SignUp Page')
 
 @section('content')
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,8 +33,6 @@
 
     <div class="auth-main">
       <div class="register-card">
-
-        {{-- Top-level error summary --}}
         @if ($errors->any())
           <div class="alert">
             <strong>We found {{ $errors->count() }} {{ Str::plural('issue', $errors->count()) }}:</strong>
@@ -47,8 +46,7 @@
 
         <form action="{{ route('submit.register') }}" method="POST" enctype="multipart/form-data" novalidate>
           @csrf
-
-          {{-- Profile image --}}
+          
           <div class="form-row">
             <label for="profile_image" class="profile-image-label">
               <div class="profile-image-preview" id="imagePreview">

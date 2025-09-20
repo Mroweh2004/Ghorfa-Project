@@ -27,7 +27,7 @@
     align-items: center;
     background: var(--bg);  
     padding: 40px 18px;
-    margin: 250px 0px;
+    margin: 300px 0px;
   }
   .auth-shell{
     display:grid;
@@ -40,7 +40,6 @@
     box-shadow: var(--shadow);
     overflow: hidden;
     backdrop-filter: blur(8px);
-    margin-top:80px;
   }
   
   .auth-aside{
