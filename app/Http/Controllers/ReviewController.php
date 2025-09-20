@@ -23,7 +23,6 @@ class ReviewController extends Controller
     // POST /properties/{property}/reviews
     public function store(Request $request, Property $property)
     {
-        // Check if user already reviewed this property
         $existingReview = Review::where('property_id', $property->id)
             ->where('user_id', $request->user()->id)
             ->first();
