@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Rule;
 use App\Models\Amenity;
 use App\Models\Property;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use App\Models\PropertyImage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class PropertyController extends Controller
@@ -157,39 +159,67 @@ class PropertyController extends Controller
      */
     public function update(Request $request, Property $property)
     {
-        if (auth()->user()->role === 'admin' || $property->user_id === auth()->id()) {
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'property_type' => 'required|string',
-                'price' => 'required|numeric|min:0',
-                'area_m3' => 'required|numeric|min:0',
-                'room_nb' => 'required|integer|min:0',
-                'bathroom_nb' => 'required|integer|min:0',
-                'bedroom_nb' => 'required|integer|min:0',
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-            ]);
+        if (!(auth()->user()->role === 'admin' || $property->user_id === auth()->id())) {
+            return redirect()->route('properties.show', $property)
+                ->with('error', 'You are not authorized to edit this property!');
+        }
 
+        $validated = $request->validate([
+            'title'         => 'required|string|max:255',
+            'description'   => 'required|string',
+            'property_type' => 'required|string',
+            'price'         => 'required|numeric|min:0',
+            'area_m3'       => 'required|numeric|min:0',
+            'room_nb'       => 'required|integer|min:0',
+            'bathroom_nb'   => 'required|integer|min:0',
+            'bedroom_nb'    => 'required|integer|min:0',
+
+            // optional images
+            'images'        => 'nullable|array',
+            'images.*'      => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
+            // pivots
+            'amenities'     => 'nullable|array',
+            'amenities.*'   => 'integer|exists:amenities,id',
+            'rules'         => 'nullable|array',
+            'rules.*'       => 'integer|exists:rules,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // update main fields
             $property->update($validated);
 
+            // sync amenities / rules (empty array clears selections)
+            $property->amenities()->sync((array)$request->input('amenities', []));
+            $property->rules()->sync((array)$request->input('rules', []));
+
+            // new images (append)
             if ($request->hasFile('images')) {
+                $hasPrimary = $property->images()->where('is_primary', true)->exists();
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('property-images', 'public');
                     PropertyImage::create([
                         'property_id' => $property->id,
-                        'path' => $path,
-                        'is_primary' => false
+                        'path'        => $path,
+                        'is_primary'  => !$hasPrimary && !$property->images()->exists(), // if none exists, set first new as primary
                     ]);
+                    $hasPrimary = $hasPrimary || true;
                 }
             }
 
+            DB::commit();
+
             return redirect()->route('properties.show', $property)
                 ->with('success', 'Property updated successfully!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('properties.show', $property)
+                ->with('error', 'Failed to update property: '.$e->getMessage());
         }
-
-        return redirect()->route('properties.show', $property)
-            ->with('error', 'You are not authorized to edit this property!');
     }
+
 
     public function destroy(Property $property)
     {
@@ -210,50 +240,88 @@ class PropertyController extends Controller
 
     public function submitListing(Request $request)
     {
+        // validate
         try {
             $validated = $request->validate([
-                'title' => 'required|string|max:50',
-                'description' => 'nullable|string',
+                'title'         => 'required|string|max:255',
+                'description'   => 'nullable|string',
                 'property_type' => 'required|string',
-                'listing_type' => 'required|string',
-                'country' => 'string',
-                'city' => 'required|string',
-                'address' => 'required|string',
-                'price' => 'required|numeric|min:0',
-                'area_m3' => 'nullable|numeric|min:0',
-                'room_nb' => 'nullable|integer|min:0',
-                'bathroom_nb' => 'nullable|integer|min:0',
-                'bedroom_nb' => 'nullable|integer|min:0',
-                'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+                'listing_type'  => 'required|string',
+                'country'       => 'required|string',
+                'city'          => 'required|string',
+                'address'       => 'required|string',
+                'price'         => 'required|numeric|min:0',
+                'unit'          => 'required|integer|exists:units,id',
+                'area_m3'       => 'required|numeric|min:0',
+                'room_nb'       => 'nullable|integer|min:0',
+                'bathroom_nb'   => 'required|integer|min:0',
+                'bedroom_nb'    => 'nullable|integer|min:0',
+
+                // images
+                'images'        => 'required|array|min:1',
+                'images.*'      => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
+                // pivots
+                'amenities'     => 'nullable|array',
+                'amenities.*'   => 'integer|exists:amenities,id',
+                'rules'         => 'nullable|array',
+                'rules.*'       => 'integer|exists:rules,id',
             ]);
-            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed:', $e->errors());
+            return back()->withErrors($e->errors())->withInput();
+        }
+
+        DB::beginTransaction();
+
+        try {
             $validated['user_id'] = auth()->id();
+            $validated['unit_id'] = $validated['unit'] ?? null;
+            unset($validated['unit']);
+            $amenityIds = (array)($request->input('amenities', []));
+            $ruleIds    = (array)($request->input('rules', []));
+
+            // create property
             $property = Property::create($validated);
-            
+
+            // sync pivots
+            if (!empty($amenityIds)) {
+                $property->amenities()->sync($amenityIds);
+            }
+            if (!empty($ruleIds)) {
+                $property->rules()->sync($ruleIds);
+            }
+
+            // images
             if ($request->hasFile('images')) {
-                $images = $request->file('images');
-                foreach ($images as $index => $image) {
+                foreach ($request->file('images') as $index => $image) {
                     $path = $image->store('property-images', 'public');
                     PropertyImage::create([
                         'property_id' => $property->id,
-                        'path' => $path,
-                        'is_primary' => $index === 0
+                        'path'        => $path,
+                        'is_primary'  => $index === 0, // first image primary
                     ]);
                 }
             }
-          
+
+            DB::commit();
             return redirect()->route('search')->with('success', 'Property listed successfully!');
-        } catch (\Exception $e) {
-            if (isset($property)) {
-                foreach ($property->images as $image) {
-                    Storage::disk('public')->delete($image->path);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            // cleanup partially stored images (if any)
+            if (isset($property) && $property->exists) {
+                foreach ($property->images as $img) {
+                    Storage::disk('public')->delete($img->path);
                 }
-                $property->delete();             
+                $property->delete();
             }
-            
-            return back()->with('error', 'Failed to create property: ' . $e->getMessage());
+
+            return back()->with('error', 'Failed to create property: '.$e->getMessage())
+                        ->withInput();
         }
     }
+
 
     /**
      * Toggle like status for a property
