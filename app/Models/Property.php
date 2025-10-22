@@ -18,6 +18,7 @@ class Property extends Model
         'city',
         'address',
         'price',
+        'unit_id',
         'area_m3',
         'room_nb',
         'bathroom_nb',
@@ -43,6 +44,11 @@ class Property extends Model
     public function images()
     {
         return $this->hasMany(PropertyImage::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 
     /**

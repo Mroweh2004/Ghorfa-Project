@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('content'); ?>
 <script src="<?php echo e(asset('js/search.js')); ?>"></script>
 <link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">

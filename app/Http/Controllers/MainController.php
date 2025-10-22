@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Rule;
+use App\Models\Unit;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\Models\Amenity;
 use App\Models\Listing;
 use App\Models\Property;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -87,7 +89,10 @@ class MainController extends Controller
     }
 
     function propertyPage(){
-        return view("list-property");
+        $amenities = Amenity::all();
+        $rules = Rule::all();
+        $units= Unit::all();
+        return view("list-property", compact("amenities","rules", "units"));
     }
 }
     
