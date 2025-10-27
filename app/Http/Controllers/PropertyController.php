@@ -147,7 +147,13 @@ class PropertyController extends Controller
     {
         // Allow admin users to edit any property
         if (auth()->user()->role === 'admin' || $property->user_id === auth()->id()) {
-            return view('edit-property', compact('property'));
+            $amenities = Amenity::all();
+            $rules = Rule::all();
+            $units = Unit::all();
+
+            $property->loadMissing(['amenities', 'rules', 'images', 'unit']);
+
+            return view('edit-property', compact('property', 'amenities', 'rules', 'units'));
         }
 
         return redirect()->route('properties.show', $property)
@@ -168,7 +174,12 @@ class PropertyController extends Controller
             'title'         => 'required|string|max:255',
             'description'   => 'required|string',
             'property_type' => 'required|string',
+            'listing_type'  => 'required|string',
+            'country'       => 'required|string',
+            'city'          => 'required|string',
+            'address'       => 'required|string',
             'price'         => 'required|numeric|min:0',
+            'unit'          => 'required|integer|exists:units,id',
             'area_m3'       => 'required|numeric|min:0',
             'room_nb'       => 'required|integer|min:0',
             'bathroom_nb'   => 'required|integer|min:0',
@@ -183,17 +194,46 @@ class PropertyController extends Controller
             'amenities.*'   => 'integer|exists:amenities,id',
             'rules'         => 'nullable|array',
             'rules.*'       => 'integer|exists:rules,id',
+            'remove_images' => 'nullable|array',
+            'remove_images.*' => 'integer|exists:property_images,id',
         ]);
 
         DB::beginTransaction();
 
         try {
+            $validated['unit_id'] = $validated['unit'];
+            unset($validated['unit'], $validated['images'], $validated['remove_images']);
+
             // update main fields
             $property->update($validated);
 
             // sync amenities / rules (empty array clears selections)
             $property->amenities()->sync((array)$request->input('amenities', []));
             $property->rules()->sync((array)$request->input('rules', []));
+
+            $removeImageIds = collect($request->input('remove_images', []))
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->unique();
+
+            if ($removeImageIds->isNotEmpty()) {
+                $imagesToDelete = $property->images()
+                    ->whereIn('id', $removeImageIds)
+                    ->get();
+
+                foreach ($imagesToDelete as $image) {
+                    $image->delete();
+                }
+
+                $property->load('images');
+
+                if ($property->images()->where('is_primary', true)->doesntExist()) {
+                    $nextImage = $property->images()->first();
+                    if ($nextImage) {
+                        $nextImage->setAsPrimary();
+                    }
+                }
+            }
 
             // new images (append)
             if ($request->hasFile('images')) {

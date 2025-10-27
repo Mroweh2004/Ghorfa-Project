@@ -644,7 +644,7 @@ body {
 /* Thumbnail Strip */
 .thumbnail-strip {
     position: absolute;
-    bottom: 20px;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -655,7 +655,7 @@ body {
     backdrop-filter: blur(10px);
     max-width: 90%;
     overflow-x: auto;
-    z-index: 10;
+    z-index: 1001;
 }
 
 .thumbnail-item {
@@ -714,6 +714,9 @@ body {
         font-size: 28px;
         top: 10px;
         right: 10px;
+    }
+    .image-modal{
+        margin: 0 0 5rem 0;
     }
     
     .image-counter {

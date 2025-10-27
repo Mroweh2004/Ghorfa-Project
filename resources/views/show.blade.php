@@ -10,23 +10,19 @@
     <!-- Hero Section with Main Image -->
     <section class="property-hero">
         <div class="hero-image-container">
-            @if($property->images->count() > 0)
-                <img src="{{ Storage::url($property->images->first()->path) }}" alt="{{ $property->title }}" class="hero-image">
-                <div class="image-overlay">
-                    <div class="property-badge">
-                        <span class="badge-text">{{ $property->listing_type }}</span>
-                    </div>
-                    <div class="image-counter">
-                        <i class="fas fa-images"></i>
-                        <span>{{ $property->images->count() }} photos</span>
-                    </div>
+            @php
+                $heroImage = \App\Services\PropertyImageService::getImageUrl($property);
+            @endphp
+            <img src="{{ $heroImage }}" alt="{{ $property->title }}" class="hero-image">
+            <div class="image-overlay">
+                <div class="property-badge">
+                    <span class="badge-text">{{ $property->listing_type }}</span>
                 </div>
-            @else
-                <div class="no-image-placeholder">
-                    <i class="fas fa-home"></i>
-                    <p>No images available</p>
+                <div class="image-counter">
+                    <i class="fas fa-images"></i>
+                    <span>{{ $property->images->count() }} photos</span>
                 </div>
-            @endif
+            </div>
         </div>
     </section>
 
@@ -263,9 +259,9 @@
     <div class="property-actions">
         <div class="container">
             <div class="actions-content">
-                <button onclick="history.back()" class="action-btn back-btn">
+                <button class="action-btn back-btn">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Search
+                    Back
                 </button>
                 @auth
                     @if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id)

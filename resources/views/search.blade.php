@@ -5,7 +5,13 @@
 <script src="{{asset('js/search.js')}}"></script>
 <body>
     <main class="search-page">
+        <!-- Mobile filter overlay -->
+        <div class="filter-overlay"></div>
+        
         <section class="search-filters">
+            <button class="filter-close-btn" aria-label="Close filters">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="filter-container">
                 <form action="{{ route('filter-search') }}" method="GET">
                 <div class="filter-group">
@@ -114,7 +120,7 @@
                 @foreach($properties as $property)
                 <div class="listing-card" data-price="{{ $property->price }}" data-created="{{ $property->created_at->timestamp }}" data-likes="{{ $property->likedBy()->count() }}">
                     <div class="listing-image">
-                        <img src="{{ $property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267' }}" alt="{{ $property->title }}">
+                        <img src="{{ \App\Services\PropertyImageService::getImageUrl($property) }}" alt="{{ $property->title }}">
                         <span class="listing-tag">For {{ $property->listing_type }}</span>
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                         <ul class="setting-list">
@@ -142,13 +148,13 @@
                             </button>
                             <span class="like-count" id="like-count-{{ $property->id }}" style="display: none;">{{ $property->likedBy()->count() }}</span>
                         @else
-                            <button class="favorite-btn" onclick="window.location.href='{{ route('login') }}'">
+                            <button class="favorite-btn" data-login-url="{{ route('login') }}">
                                 <i class="fa-regular fa-heart"></i>
                             </button>
                         @endauth
                     </div>
                     <div class="listing-content">
-                        <div class="listing-price">{{ $property->price }}$/month</div>
+                    <span class="available-from">Listed {{ $property->created_at->diffForHumans() }}</span>
                         <h3>{{ $property->title }}</h3>
                         <p class="listing-location">
                             <i class="fas fa-map-marker-alt"></i> 
@@ -169,8 +175,8 @@
                         </div>
                     </div>
                     <div class="listing-meta">
-                            <span class="available-from">Listed {{ $property->created_at->diffForHumans() }}</span>
-                            <a href="{{ route('properties.show', $property->id) }}" class="view-btn">View Details</a>
+                        <div class="listing-price"><b>${{ $property->price }}</b>/month</div>                       
+                        <a href="{{ route('properties.show', $property->id) }}" class="view-btn">View Details</a>
                     </div>
                 </div>
                 @endforeach
