@@ -38,47 +38,70 @@ function ShowFilterToggle() {
   const filterToggleBtn = document.querySelector('.filter-toggle-btn');
   const searchShowBtn = document.querySelector('.search-show-btn');
   const searchFilters = document.querySelector('.search-filters');
+  const filterOverlay = document.querySelector('.filter-overlay');
+  const filterCloseBtn = document.querySelector('.filter-close-btn');
+
+  function closeFilters() {
+    searchFilters.classList.remove('active');
+    searchFilters.classList.add('fixed-hide');
+    if (filterOverlay) {
+      filterOverlay.classList.remove('active');
+    }
+    document.body.style.overflow = 'auto';
+  }
+
+  function openFilters() {
+    searchFilters.classList.add('active');
+    searchFilters.classList.remove('fixed-hide');
+    if (filterOverlay) {
+      filterOverlay.classList.add('active');
+    }
+    document.body.style.overflow = 'hidden';
+  }
 
     if (filterToggleBtn && searchFilters) {
       filterToggleBtn.addEventListener('click', () => {
-        // Clear all filters before toggling
-        clearAllFilters();
-        
-        // Submit the form to apply cleared filters
-        const form = document.querySelector('.filter-container form');
-        if (form) {
-          form.submit();
-        }
-        
-        searchFilters.classList.toggle('active');
-        searchFilters.classList.remove('fixed-hide');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!searchFilters.contains(e.target) && !filterToggleBtn.contains(e.target) && !searchShowBtn.contains(e.target)) {
-          searchFilters.classList.remove('active');
-          searchFilters.classList.add('fixed-hide');
+        if (searchFilters.classList.contains('active')) {
+          closeFilters();
+        } else {
+          openFilters();
         }
       });
     }
+
+    // Overlay click to close
+    if (filterOverlay) {
+      filterOverlay.addEventListener('click', () => {
+        closeFilters();
+      });
+    }
+
+    // Close button click
+    if (filterCloseBtn) {
+      filterCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeFilters();
+      });
+    }
+
+    // Click outside to close
+    document.addEventListener('click', (e) => {
+      if (!searchFilters.contains(e.target) && 
+          !filterToggleBtn?.contains(e.target) && 
+          !searchShowBtn?.contains(e.target) &&
+          !filterOverlay?.contains(e.target) &&
+          !filterCloseBtn?.contains(e.target)) {
+        closeFilters();
+      }
+    });
 
     // Add event for search-show-btn to always show/fix filters
     if (searchShowBtn && searchFilters) {
       searchShowBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        searchFilters.classList.add('active');
-        searchFilters.classList.remove('fixed-hide');
-        searchFilters.style.position = 'fixed';
-        searchFilters.style.top = '100px';
-        searchFilters.style.left = '20px';
-        searchFilters.style.zIndex = '1002';
-        searchFilters.style.background = '#fff';
-        searchFilters.style.boxShadow = '0 4px 24px rgba(44,62,80,0.18)';
-        searchFilters.style.width = '320px';
-        searchFilters.style.height = 'auto';
-        searchFilters.style.maxHeight = '80vh';
-        searchFilters.style.overflowY = 'auto';
-        searchFilters.style.borderRadius = '15px';
+        e.stopPropagation();
+        openFilters();
       });
     }
 }
@@ -214,6 +237,19 @@ function initPropertySort(selectId = 'sort-options', gridSelector = '.listings-g
 }
 
 /* =========================
+   Login redirect buttons
+========================= */
+function initLoginButtons() {
+  const loginButtons = document.querySelectorAll('.favorite-btn[data-login-url]');
+  loginButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const loginUrl = button.getAttribute('data-login-url');
+      window.location.href = loginUrl;
+    });
+  });
+}
+
+/* =========================
    Boot
 ========================= */
 document.addEventListener('DOMContentLoaded', () => {
@@ -221,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ShowSettingslist();
   initPropertySort(); // attaches to #sort-options and .listings-grid
   initLikeButtons(); // Initialize like functionality
+  initLoginButtons(); // Initialize login redirect buttons
 });
 
 /* =========================

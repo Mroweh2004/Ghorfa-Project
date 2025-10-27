@@ -9,23 +9,19 @@
     <!-- Hero Section with Main Image -->
     <section class="property-hero">
         <div class="hero-image-container">
-            <?php if($property->images->count() > 0): ?>
-                <img src="<?php echo e(Storage::url($property->images->first()->path)); ?>" alt="<?php echo e($property->title); ?>" class="hero-image">
-                <div class="image-overlay">
-                    <div class="property-badge">
-                        <span class="badge-text"><?php echo e($property->listing_type); ?></span>
-                    </div>
-                    <div class="image-counter">
-                        <i class="fas fa-images"></i>
-                        <span><?php echo e($property->images->count()); ?> photos</span>
-                    </div>
+            <?php
+                $heroImage = \App\Services\PropertyImageService::getImageUrl($property);
+            ?>
+            <img src="<?php echo e($heroImage); ?>" alt="<?php echo e($property->title); ?>" class="hero-image">
+            <div class="image-overlay">
+                <div class="property-badge">
+                    <span class="badge-text"><?php echo e($property->listing_type); ?></span>
                 </div>
-            <?php else: ?>
-                <div class="no-image-placeholder">
-                    <i class="fas fa-home"></i>
-                    <p>No images available</p>
+                <div class="image-counter">
+                    <i class="fas fa-images"></i>
+                    <span><?php echo e($property->images->count()); ?> photos</span>
                 </div>
-            <?php endif; ?>
+            </div>
         </div>
     </section>
 
@@ -262,9 +258,9 @@
     <div class="property-actions">
         <div class="container">
             <div class="actions-content">
-                <button onclick="history.back()" class="action-btn back-btn">
+                <button class="action-btn back-btn">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Search
+                    Back
                 </button>
                 <?php if(auth()->guard()->check()): ?>
                     <?php if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id): ?>

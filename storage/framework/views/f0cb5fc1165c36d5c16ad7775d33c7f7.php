@@ -4,7 +4,13 @@
 <script src="<?php echo e(asset('js/search.js')); ?>"></script>
 <body>
     <main class="search-page">
+        <!-- Mobile filter overlay -->
+        <div class="filter-overlay"></div>
+        
         <section class="search-filters">
+            <button class="filter-close-btn" aria-label="Close filters">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="filter-container">
                 <form action="<?php echo e(route('filter-search')); ?>" method="GET">
                 <div class="filter-group">
@@ -115,7 +121,7 @@
                 <?php $__currentLoopData = $properties; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $property): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="listing-card" data-price="<?php echo e($property->price); ?>" data-created="<?php echo e($property->created_at->timestamp); ?>" data-likes="<?php echo e($property->likedBy()->count()); ?>">
                     <div class="listing-image">
-                        <img src="<?php echo e($property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'); ?>" alt="<?php echo e($property->title); ?>">
+                        <img src="<?php echo e(\App\Services\PropertyImageService::getImageUrl($property)); ?>" alt="<?php echo e($property->title); ?>">
                         <span class="listing-tag">For <?php echo e($property->listing_type); ?></span>
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                         <ul class="setting-list">
@@ -143,13 +149,13 @@
                             </button>
                             <span class="like-count" id="like-count-<?php echo e($property->id); ?>" style="display: none;"><?php echo e($property->likedBy()->count()); ?></span>
                         <?php else: ?>
-                            <button class="favorite-btn" onclick="window.location.href='<?php echo e(route('login')); ?>'">
+                            <button class="favorite-btn" data-login-url="<?php echo e(route('login')); ?>">
                                 <i class="fa-regular fa-heart"></i>
                             </button>
                         <?php endif; ?>
                     </div>
                     <div class="listing-content">
-                        <div class="listing-price"><?php echo e($property->price); ?>$/month</div>
+                    <span class="available-from">Listed <?php echo e($property->created_at->diffForHumans()); ?></span>
                         <h3><?php echo e($property->title); ?></h3>
                         <p class="listing-location">
                             <i class="fas fa-map-marker-alt"></i> 
@@ -171,8 +177,8 @@
                         </div>
                     </div>
                     <div class="listing-meta">
-                            <span class="available-from">Listed <?php echo e($property->created_at->diffForHumans()); ?></span>
-                            <a href="<?php echo e(route('properties.show', $property->id)); ?>" class="view-btn">View Details</a>
+                        <div class="listing-price"><b>$<?php echo e($property->price); ?></b>/month</div>                       
+                        <a href="<?php echo e(route('properties.show', $property->id)); ?>" class="view-btn">View Details</a>
                     </div>
                 </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

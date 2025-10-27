@@ -17,17 +17,9 @@ function openImageModal(imageSrc) {
     // Find the index of the clicked image
     currentImageIndex = imageSources.indexOf(imageSrc);
     
-    // If image not found in gallery, add it to the gallery (but check for duplicates first)
+    // If image not found in gallery (shouldn't happen in normal flow), just use index 0
     if (currentImageIndex === -1) {
-        // Check if the image is already in the array to avoid duplicates
-        if (!imageSources.includes(imageSrc)) {
-            imageSources.push(imageSrc);
-            totalImages = imageSources.length;
-            currentImageIndex = totalImages - 1;
-        } else {
-            // If it's already there, find its index
-            currentImageIndex = imageSources.indexOf(imageSrc);
-        }
+        currentImageIndex = 0;
     }
     
     // Show modal first
@@ -322,6 +314,10 @@ function showContactModal(type) {
 function initBackButton() {
     const backBtn = document.querySelector('.back-btn');
     if (backBtn) {
+        // Check if the previous page was an edit page
+        const referrer = document.referrer;
+        const isFromEditPage = referrer && (referrer.includes('/edit') || referrer.includes('edit-property'));
+        
         backBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
@@ -331,7 +327,14 @@ function initBackButton() {
             
             // Use history.back() with a small delay for better UX
             setTimeout(() => {
-                history.back();
+                if (isFromEditPage) {
+                    // If coming from edit page (after form submission),
+                    // go back 2 pages to skip the edit page completely
+                    history.go(-2);
+                } else {
+                    // Otherwise, use browser back
+                    history.back();
+                }
             }, 300);
         });
     }

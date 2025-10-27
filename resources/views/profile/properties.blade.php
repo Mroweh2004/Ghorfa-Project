@@ -15,7 +15,7 @@
         @foreach($properties as $property)
             <div class="listing-card" data-price="{{ $property->price }}" data-created="{{ $property->created_at->timestamp }}">
                 <div class="listing-image">
-                    <img src="{{ $property->images->first() ? Storage::url($property->images->first()->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267' }}" alt="{{ $property->title }}">
+                    <img src="{{ \App\Services\PropertyImageService::getImageUrl($property) }}" alt="{{ $property->title }}">
                     <span class="listing-tag">For {{ $property->listing_type }}</span>
                     <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                     <ul class="setting-list">
