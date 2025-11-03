@@ -15,7 +15,7 @@
 <body>
     @include('partials.nav')
     
-    @yield(section: 'content')
+    @yield('content')
   
     @include('partials.footer')
     @include('partials.mobile-nav')

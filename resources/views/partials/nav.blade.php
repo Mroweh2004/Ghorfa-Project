@@ -18,13 +18,14 @@
             </div>
             <ul class="nav-links">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>                
+                <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>
+                <li><a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'active' : '' }}"><i class="fas fa-map-marked-alt"></i> Map</a></li>                
                 @if(auth()->user()->role === 'admin')
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 @endif
             </ul>
             <div class="nav-right">
-                <button class="main-list-btn" onclick="location.href='{{ route('list-property') }}'"><i class="fas fa-plus"></i> List Your Space</button>
+                <a href="{{ route('list-property') }}" class="main-list-btn"><i class="fas fa-plus"></i> List Your Space</a>
                 <div id="profile-link">
                     <div class="nav-profile-image">
                         @if(Auth::user()->profile_image)
@@ -58,6 +59,7 @@
             <ul class="nav-links">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>
+                <li><a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'active' : '' }}"><i class="fas fa-map-marked-alt"></i> Map</a></li>
             </ul>
             <ul class="nav-links">
                 <li><a href="{{ route('login') }}" class="{{ request()->routeIs('login') ? 'active' : '' }}">Login</a></li>

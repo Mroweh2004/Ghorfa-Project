@@ -11,6 +11,7 @@
         <ul>
             <li><a href="{{route('home')}}"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="{{route('search')}}"><i class="fas fa-search"></i>Search</a></li>
+            <li><a href="{{route('map')}}"><i class="fas fa-map-marked-alt"></i>Map</a></li>
             @auth
                 @if(auth()->user()->role === 'admin')
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
