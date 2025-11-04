@@ -11,6 +11,7 @@
         <ul>
             <li><a href="<?php echo e(route('home')); ?>"><i class="fas fa-home"></i>Home</a></li>
             <li><a href="<?php echo e(route('search')); ?>"><i class="fas fa-search"></i>Search</a></li>
+            <li><a href="<?php echo e(route('map')); ?>"><i class="fas fa-map-marked-alt"></i>Map</a></li>
             <?php if(auth()->guard()->check()): ?>
                 <?php if(auth()->user()->role === 'admin'): ?>
                 <li><a href="<?php echo e(route('admin.dashboard')); ?>" class="<?php echo e(request()->routeIs('admin.dashboard') ? 'active' : ''); ?>"><i class="fas fa-cog"></i> Admin Dashboard</a></li>

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\MainController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\AdminController;
@@ -20,6 +21,10 @@ Route::prefix('profile')->group(function (): void {
 Route::get('/profile', [MainController::class,"profilePage"])->name('profile');
 Route::get('/search', [PropertyController::class, 'index'])->name('search');
 Route::get('/list-property', [MainController::class, 'propertyPage'])->name('list-property');
+//--------------Map Routes-------------------
+Route::get('/map', [MapController::class, 'index'])->name('map');
+Route::post('/map/geocode', [MapController::class, 'geocode']);
+Route::get('/map-test', function() { return view('map-test'); });
 
 //--------------Authentication Routes-------------------
 Route::get('/login', [AuthenticationController::class, 'loginPage'])->name( name: 'login');

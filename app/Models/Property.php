@@ -17,6 +17,8 @@ class Property extends Model
         'country',
         'city',
         'address',
+        'latitude',
+        'longitude',
         'price',
         'unit_id',
         'area_m3',

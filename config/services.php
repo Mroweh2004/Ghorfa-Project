@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'google' => [
+    'maps_browser_key' => env('GOOGLE_MAPS_BROWSER_KEY'),
+    'maps_server_key'  => env('GOOGLE_MAPS_SERVER_KEY'),
+    ],
+
 ];

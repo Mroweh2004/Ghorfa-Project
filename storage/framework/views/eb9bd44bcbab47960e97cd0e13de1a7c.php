@@ -31,7 +31,7 @@
                     <ul>
                         <li><a href="<?php echo e(route('home')); ?>">Home</a></li>
                         <li><a href="<?php echo e(route('search')); ?>">Search</a></li>
-                        <li><a href="///">Search by Map</a></li>
+                        <li><a href="<?php echo e(route('map')); ?>"><i class="fas fa-map-marked-alt"></i> Search by Map</a></li>
                         <li><a href="<?php echo e(route('profileInfo')); ?>">Profile</a></li>
                     </ul>
                 </div>

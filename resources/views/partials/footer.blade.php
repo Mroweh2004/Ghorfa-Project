@@ -31,7 +31,7 @@
                     <ul>
                         <li><a href="{{ route('home') }}">Home</a></li>
                         <li><a href="{{ route('search') }}">Search</a></li>
-                        <li><a href="///">Search by Map</a></li>
+                        <li><a href="{{ route('map') }}"><i class="fas fa-map-marked-alt"></i> Search by Map</a></li>
                         <li><a href="{{ route('profileInfo') }}">Profile</a></li>
                     </ul>
                 </div>

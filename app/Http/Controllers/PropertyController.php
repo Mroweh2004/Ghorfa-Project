@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use App\Models\PropertyImage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Services\GeocodingService;
 
 class PropertyController extends Controller
 {
@@ -18,7 +21,7 @@ class PropertyController extends Controller
      */
     public function index()
     {
-        $properties = Property::paginate(12);
+        $properties = Property::orderBy('created_at', 'desc')->paginate(12);
         $amenities = Amenity::all();
         $rules = Rule::all();
         return view('search', compact('properties', 'amenities', 'rules'));
@@ -146,7 +149,7 @@ class PropertyController extends Controller
     public function edit(Property $property)
     {
         // Allow admin users to edit any property
-        if (auth()->user()->role === 'admin' || $property->user_id === auth()->id()) {
+        if (Auth::check() && (Auth::user()->role === 'admin' || $property->user_id === Auth::id())) {
             $amenities = Amenity::all();
             $rules = Rule::all();
             $units = Unit::all();
@@ -165,7 +168,7 @@ class PropertyController extends Controller
      */
     public function update(Request $request, Property $property)
     {
-        if (!(auth()->user()->role === 'admin' || $property->user_id === auth()->id())) {
+        if (!(Auth::check() && (Auth::user()->role === 'admin' || $property->user_id === Auth::id()))) {
             return redirect()->route('properties.show', $property)
                 ->with('error', 'You are not authorized to edit this property!');
         }
@@ -203,6 +206,15 @@ class PropertyController extends Controller
         try {
             $validated['unit_id'] = $validated['unit'];
             unset($validated['unit'], $validated['images'], $validated['remove_images']);
+
+            // Geocode address if location fields changed
+            if ($this->shouldGeocode($property, $validated)) {
+                $coordinates = $this->geocodeAddress($validated);
+                if ($coordinates) {
+                    $validated['latitude'] = $coordinates['latitude'];
+                    $validated['longitude'] = $coordinates['longitude'];
+                }
+            }
 
             // update main fields
             $property->update($validated);
@@ -264,7 +276,7 @@ class PropertyController extends Controller
     public function destroy(Property $property)
     {
     
-            if (auth()->user()->role === 'admin' || $property->user_id === auth()->id()) {
+            if (Auth::check() && (Auth::user()->role === 'admin' || $property->user_id === Auth::id())) {
                 foreach ($property->images as $image) {
                     Storage::disk('public')->delete($image->path);
                 }
@@ -315,11 +327,18 @@ class PropertyController extends Controller
         DB::beginTransaction();
 
         try {
-            $validated['user_id'] = auth()->id();
+            $validated['user_id'] = Auth::id();
             $validated['unit_id'] = $validated['unit'] ?? null;
             unset($validated['unit']);
             $amenityIds = (array)($request->input('amenities', []));
             $ruleIds    = (array)($request->input('rules', []));
+
+            // Geocode address for new property
+            $coordinates = $this->geocodeAddress($validated);
+            if ($coordinates) {
+                $validated['latitude'] = $coordinates['latitude'];
+                $validated['longitude'] = $coordinates['longitude'];
+            }
 
             // create property
             $property = Property::create($validated);
@@ -368,7 +387,7 @@ class PropertyController extends Controller
      */
     public function like(Property $property)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         if ($property->likedBy()->where('user_id', $user->id)->exists()) {
             $property->likedBy()->detach($user->id);
@@ -382,6 +401,44 @@ class PropertyController extends Controller
             'status' => $status,
             'count' => $property->likedBy()->count(),
         ]);
+    }
+
+    /**
+     * Check if property address has changed and needs geocoding
+     */
+    private function shouldGeocode(Property $property, array $validated): bool
+    {
+        $locationFields = ['address', 'city', 'country'];
+        
+        foreach ($locationFields as $field) {
+            if (isset($validated[$field]) && $property->$field !== $validated[$field]) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Geocode an address using the GeocodingService
+     */
+    private function geocodeAddress(array $data): ?array
+    {
+        $geocodingService = app(GeocodingService::class);
+        
+        $addressParts = array_filter([
+            $data['address'] ?? '',
+            $data['city'] ?? '',
+            $data['country'] ?? ''
+        ]);
+        
+        $address = implode(', ', $addressParts);
+        
+        if (empty($address)) {
+            return null;
+        }
+        
+        return $geocodingService->geocode($address);
     }
 }
 
