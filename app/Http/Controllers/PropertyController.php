@@ -188,6 +188,10 @@ class PropertyController extends Controller
             'bathroom_nb'   => 'required|integer|min:0',
             'bedroom_nb'    => 'required|integer|min:0',
 
+            // coordinates (optional - will use if provided, otherwise geocode)
+            'latitude'      => 'nullable|numeric|between:-90,90',
+            'longitude'     => 'nullable|numeric|between:-180,180',
+
             // optional images
             'images'        => 'nullable|array',
             'images.*'      => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -207,12 +211,20 @@ class PropertyController extends Controller
             $validated['unit_id'] = $validated['unit'];
             unset($validated['unit'], $validated['images'], $validated['remove_images']);
 
-            // Geocode address if location fields changed
-            if ($this->shouldGeocode($property, $validated)) {
-                $coordinates = $this->geocodeAddress($validated);
-                if ($coordinates) {
-                    $validated['latitude'] = $coordinates['latitude'];
-                    $validated['longitude'] = $coordinates['longitude'];
+            // Use provided coordinates if available, otherwise geocode from address
+            if (isset($validated['latitude']) && isset($validated['longitude']) 
+                && !empty($validated['latitude']) && !empty($validated['longitude'])) {
+                // Use coordinates provided by map click
+                $validated['latitude'] = (float) $validated['latitude'];
+                $validated['longitude'] = (float) $validated['longitude'];
+            } else {
+                // Fallback to geocoding from address if location fields changed
+                if ($this->shouldGeocode($property, $validated)) {
+                    $coordinates = $this->geocodeAddress($validated);
+                    if ($coordinates) {
+                        $validated['latitude'] = $coordinates['latitude'];
+                        $validated['longitude'] = $coordinates['longitude'];
+                    }
                 }
             }
 
@@ -309,6 +321,10 @@ class PropertyController extends Controller
                 'bathroom_nb'   => 'required|integer|min:0',
                 'bedroom_nb'    => 'nullable|integer|min:0',
 
+                // coordinates (optional - will use if provided, otherwise geocode)
+                'latitude'      => 'nullable|numeric|between:-90,90',
+                'longitude'     => 'nullable|numeric|between:-180,180',
+
                 // images
                 'images'        => 'required|array|min:1',
                 'images.*'      => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -333,11 +349,19 @@ class PropertyController extends Controller
             $amenityIds = (array)($request->input('amenities', []));
             $ruleIds    = (array)($request->input('rules', []));
 
-            // Geocode address for new property
-            $coordinates = $this->geocodeAddress($validated);
-            if ($coordinates) {
-                $validated['latitude'] = $coordinates['latitude'];
-                $validated['longitude'] = $coordinates['longitude'];
+            // Use provided coordinates if available, otherwise geocode from address
+            if (isset($validated['latitude']) && isset($validated['longitude']) 
+                && !empty($validated['latitude']) && !empty($validated['longitude'])) {
+                // Use coordinates provided by map click
+                $validated['latitude'] = (float) $validated['latitude'];
+                $validated['longitude'] = (float) $validated['longitude'];
+            } else {
+                // Fallback to geocoding from address
+                $coordinates = $this->geocodeAddress($validated);
+                if ($coordinates) {
+                    $validated['latitude'] = $coordinates['latitude'];
+                    $validated['longitude'] = $coordinates['longitude'];
+                }
             }
 
             // create property

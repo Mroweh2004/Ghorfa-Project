@@ -24,6 +24,7 @@ Route::get('/list-property', [MainController::class, 'propertyPage'])->name('lis
 //--------------Map Routes-------------------
 Route::get('/map', [MapController::class, 'index'])->name('map');
 Route::post('/map/geocode', [MapController::class, 'geocode']);
+Route::post('/map/reverse-geocode', [MapController::class, 'reverseGeocode'])->name('map.reverse-geocode');
 Route::get('/map-test', function() { return view('map-test'); });
 
 //--------------Authentication Routes-------------------

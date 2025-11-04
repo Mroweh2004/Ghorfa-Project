@@ -61,9 +61,20 @@
     <!-- Map Container -->
     <div class="map-container">
         <div id="map"></div>
+        <!-- Click to Get Coordinates Toggle -->
+        <div style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            <button id="toggleClickMode" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                📍 Click to Get Coordinates
+            </button>
+            <div id="coordinatesDisplay" style="margin-top: 10px; font-size: 12px; display: none;">
+                <div><strong>Lat:</strong> <span id="displayLat">-</span></div>
+                <div><strong>Lng:</strong> <span id="displayLng">-</span></div>
+            </div>
+        </div>
     </div>
 </div>
 
+<script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
 <script async src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_browser_key')); ?>&callback=initMap&libraries=places"></script>
 
 <!-- Fallback for Google Maps API -->
@@ -81,6 +92,7 @@
 let map;
 let markers = [];
 let infoWindow;
+let mapClickService;
 
 // Properties data from Laravel
 const properties = <?php echo json_encode($properties, 15, 512) ?>;
@@ -120,6 +132,57 @@ function initMap() {
 
     // Add search box
     addSearchBox();
+
+    // Initialize MapClickService
+    initializeMapClickService();
+}
+
+function initializeMapClickService() {
+    // Initialize the click service
+    mapClickService = new MapClickService(map, {
+        showMarker: true,
+        showInfoWindow: true,
+        enableReverseGeocoding: true,
+        reverseGeocodeEndpoint: '<?php echo e(route("map.reverse-geocode")); ?>'
+    });
+
+    // Register callback to update display
+    mapClickService.onClick((coordinates) => {
+        updateCoordinatesDisplay(coordinates);
+        console.log('Coordinates clicked:', coordinates);
+    });
+
+    // Setup toggle button
+    const toggleButton = document.getElementById('toggleClickMode');
+    const coordsDisplay = document.getElementById('coordinatesDisplay');
+    
+    if (toggleButton) {
+        toggleButton.addEventListener('click', () => {
+            if (mapClickService.isEnabled) {
+                mapClickService.disable();
+                toggleButton.textContent = '📍 Click to Get Coordinates';
+                toggleButton.style.background = '#3b82f6';
+                coordsDisplay.style.display = 'none';
+            } else {
+                mapClickService.enable();
+                toggleButton.textContent = '✓ Click Mode Active';
+                toggleButton.style.background = '#10b981';
+                coordsDisplay.style.display = 'block';
+            }
+        });
+    }
+}
+
+function updateCoordinatesDisplay(coordinates) {
+    const latDisplay = document.getElementById('displayLat');
+    const lngDisplay = document.getElementById('displayLng');
+    
+    if (latDisplay) {
+        latDisplay.textContent = coordinates.latitude.toFixed(6);
+    }
+    if (lngDisplay) {
+        lngDisplay.textContent = coordinates.longitude.toFixed(6);
+    }
 }
 
 function addPropertyMarkers() {

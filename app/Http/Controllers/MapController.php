@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Property;
 use App\Models\Amenity;
 use App\Models\Rule;
+use App\Services\GeocodingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -81,6 +82,45 @@ class MapController extends Controller
             return response()->json(['error' => 'Geocoding failed'], 400);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Geocoding service error'], 500);
+        }
+    }
+
+    /**
+     * Reverse geocode coordinates to get address
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reverseGeocode(Request $request)
+    {
+        $latitude = $request->input('latitude');
+        $longitude = $request->input('longitude');
+
+        if (!$latitude || !$longitude) {
+            return response()->json(['error' => 'Latitude and longitude are required'], 400);
+        }
+
+        try {
+            $geocodingService = new GeocodingService();
+            $result = $geocodingService->reverseGeocode(
+                (float) $latitude,
+                (float) $longitude
+            );
+
+            if ($result) {
+                return response()->json([
+                    'formatted_address' => $result['formatted_address'],
+                    'address' => $result['formatted_address'],
+                    'address_components' => $result['address_components'] ?? []
+                ]);
+            }
+
+            return response()->json(['error' => 'Reverse geocoding failed'], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Reverse geocoding service error',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }
