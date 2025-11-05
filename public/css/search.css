@@ -517,8 +517,11 @@
     }
     
     .listings-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 0.1rem;
+    }
+    .listing-card{
+        width: 90%;
+        margin: auto;
     }
     
     .search-show-btn {
@@ -592,10 +595,14 @@
     
     .listings-grid {
         gap: 1rem;
+
+
     }
     
     .listing-card {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        width: 90%;
+        margin: auto;
     }
     
     .listing-image {
