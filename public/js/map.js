@@ -1,13 +1,31 @@
+// Map initialization and management
 let map;
 let markers = [];
 let infoWindow;
+let mapClickService;
 
-// Properties data from Laravel
-const properties = <?php echo json_encode($properties, 15, 512) ?>;
+// Properties data will be passed from Blade template
+let properties = [];
+
+// Initialize properties data from window object (set by Blade template)
+function initializeProperties(data) {
+    properties = data;
+}
 
 function initMap() {
+    console.log('initMap called');
+    console.log('Properties data:', properties);
+    
+    const mapElement = document.getElementById("map");
+    console.log('Map element:', mapElement);
+    
+    if (!mapElement) {
+        console.error('Map element not found!');
+        return;
+    }
+    
     // Initialize map centered on Lebanon
-    map = new google.maps.Map(document.getElementById("map"), {
+    map = new google.maps.Map(mapElement, {
         center: { lat: 33.894917, lng: 35.503083 },
         zoom: 10,
         mapTypeId: 'roadmap',
@@ -20,6 +38,8 @@ function initMap() {
         ]
     });
 
+    console.log('Map initialized:', map);
+
     infoWindow = new google.maps.InfoWindow();
 
     // Add markers for each property
@@ -27,10 +47,77 @@ function initMap() {
 
     // Add search box
     addSearchBox();
+
+    // Initialize MapClickService if available
+    if (typeof MapClickService !== 'undefined') {
+        initializeMapClickService();
+    }
+}
+
+function initializeMapClickService() {
+    // Check if reverseGeocodeEndpoint is available (set by Blade template)
+    const reverseGeocodeEndpoint = window.mapConfig?.reverseGeocodeEndpoint;
+    
+    if (!reverseGeocodeEndpoint) {
+        console.warn('Reverse geocode endpoint not configured');
+        return;
+    }
+
+    // Initialize the click service
+    mapClickService = new MapClickService(map, {
+        showMarker: true,
+        showInfoWindow: true,
+        enableReverseGeocoding: true,
+        reverseGeocodeEndpoint: reverseGeocodeEndpoint
+    });
+
+    // Register callback to update display
+    mapClickService.onClick((coordinates) => {
+        updateCoordinatesDisplay(coordinates);
+        console.log('Coordinates clicked:', coordinates);
+    });
+
+    // Setup toggle button
+    const toggleButton = document.getElementById('toggleClickMode');
+    const coordsDisplay = document.getElementById('coordinatesDisplay');
+    
+    if (toggleButton) {
+        toggleButton.addEventListener('click', () => {
+            if (mapClickService.isEnabled) {
+                mapClickService.disable();
+                toggleButton.textContent = '📍 Click to Get Coordinates';
+                toggleButton.classList.remove('active');
+                if (coordsDisplay) {
+                    coordsDisplay.style.display = 'none';
+                }
+            } else {
+                mapClickService.enable();
+                toggleButton.textContent = '✓ Click Mode Active';
+                toggleButton.classList.add('active');
+                if (coordsDisplay) {
+                    coordsDisplay.style.display = 'block';
+                }
+            }
+        });
+    }
+}
+
+function updateCoordinatesDisplay(coordinates) {
+    const latDisplay = document.getElementById('displayLat');
+    const lngDisplay = document.getElementById('displayLng');
+    
+    if (latDisplay) {
+        latDisplay.textContent = coordinates.latitude.toFixed(6);
+    }
+    if (lngDisplay) {
+        lngDisplay.textContent = coordinates.longitude.toFixed(6);
+    }
 }
 
 function addPropertyMarkers() {
+    console.log('Adding property markers, total properties:', properties.length);
     properties.forEach(property => {
+        console.log('Processing property:', property.title, 'Lat:', property.latitude, 'Lng:', property.longitude);
         if (property.latitude && property.longitude) {
             const marker = new google.maps.Marker({
                 position: { lat: parseFloat(property.latitude), lng: parseFloat(property.longitude) },
@@ -73,9 +160,13 @@ function createInfoWindowContent(property) {
         ? property.images.find(img => img.is_primary) || property.images[0]
         : null;
     
+    // Get storage URL and placeholder from window config (set by Blade template)
+    const storageUrl = window.mapConfig?.storageUrl || '';
+    const placeholderUrl = window.mapConfig?.placeholderUrl || '';
+
     const imageUrl = primaryImage 
-        ? `<?php echo e(asset('storage/')); ?>/${primaryImage.path}`
-        : '<?php echo e(asset("img/placeholder.jpg")); ?>';
+        ? `${storageUrl}/${primaryImage.path}`
+        : placeholderUrl;
 
     return `
         <div class="property-info">
@@ -100,17 +191,30 @@ function addSearchBox() {
     const input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Search for a location...';
+    input.className = 'map-search-input';
     input.style.cssText = `
         background-color: #fff;
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         font-size: 15px;
-        padding: 10px;
+        padding: 12px 16px;
         text-overflow: ellipsis;
         width: 300px;
-        margin: 10px;
+        margin: 12px;
+        transition: all 0.3s ease;
+        font-family: inherit;
     `;
+    
+    input.addEventListener('focus', function() {
+        this.style.borderColor = '#667eea';
+        this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(0,0,0,0.1)';
+    });
+    
+    input.addEventListener('blur', function() {
+        this.style.borderColor = '#e5e7eb';
+        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+    });
 
     const searchBox = new google.maps.places.SearchBox(input);
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
@@ -129,8 +233,12 @@ function addSearchBox() {
 }
 
 function clearFilters() {
-    document.getElementById('filterForm').reset();
-    window.location.href = '<?php echo e(route("map")); ?>';
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        filterForm.reset();
+    }
+    const mapRoute = window.mapConfig?.mapRoute || '/map';
+    window.location.href = mapRoute;
 }
 
 function toggleLike(propertyId) {

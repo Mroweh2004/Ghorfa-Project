@@ -1,20 +1,34 @@
-<?php $__env->startSection('title', 'list-space'); ?>
+<?php $__env->startSection('title', 'Edit Property'); ?>
 <?php $__env->startSection('content'); ?>
+<?php
+  $backgroundImage = \App\Services\PropertyImageService::getImageAssetUrl($property);
+?>
 <link rel="stylesheet" href="<?php echo e(asset('css/list-property.css')); ?>">
 <script src="<?php echo e(asset('js/list-property.js')); ?>"></script>
 <script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
-<section class="title-section">
+<section class="title-section" style="background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url('<?php echo e($backgroundImage); ?>') center/cover;">
   <div class="content-title">
-    <h1>List Your Space</h1>
-    <p>Specify your property details properly</p>
+    <h1>Edit Property</h1>
+    <p>Update your property details</p>
   </div>
 </section>
 
 <section class="content-section">
-  <form class="listing-form" method="POST" action="<?php echo e(route('submit-listing')); ?>" enctype="multipart/form-data" novalidate>
+  
+  <?php if(session('error')): ?>
+    <div class="alert alert-danger mb-4"><?php echo e(session('error')); ?></div>
+  <?php endif; ?>
+
+  <form
+    class="listing-form"
+    method="POST"
+    action="<?php echo e(route('properties.update', $property->id)); ?>"
+    enctype="multipart/form-data"
+    novalidate
+  >
     <?php echo csrf_field(); ?>
-    
-    
+    <?php echo method_field('PUT'); ?>
+
     <?php if($errors->any()): ?>
       <div class="alert alert-danger mb-4">
         <h4>Validation Errors:</h4>
@@ -37,13 +51,13 @@
             type="text"
             id="title"
             name="title"
-            value="<?php echo e(old('title')); ?>"
+            value="<?php echo e(old('title', $property->title)); ?>"
             placeholder="e.g. Sunny 2BR apartment with sea view"
             maxlength="120"
             autocomplete="organization-title"
             required
           >
-          <small>Keep it short & descriptive (max 120 characters).</small>
+          <small>Keep it short and descriptive (max 120 characters).</small>
           <?php $__errorArgs = ['title'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -59,11 +73,11 @@ unset($__errorArgs, $__bag); ?>
           <textarea
             id="description"
             name="description"
-            placeholder="Tell guests what makes this place special: layout, view, nearby landmarks, and any house highlights…"
+            placeholder="Tell guests what makes this place special: layout, view, nearby landmarks, and any house highlights..."
             minlength="30"
             maxlength="1200"
             required
-          ><?php echo e(old('description')); ?></textarea>
+          ><?php echo e(old('description', $property->description)); ?></textarea>
           <small>Be specific: floor, orientation, surroundings, and any rules worth knowing.</small>
           <?php $__errorArgs = ['description'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -77,12 +91,28 @@ unset($__errorArgs, $__bag); ?>
 
         <div class="form-input">
           <label for="property_type" class="inputs-label">Property Type</label>
+          <?php
+            $propertyOptions = [
+              ['value' => 'apartment', 'label' => 'Apartment'],
+              ['value' => 'house', 'label' => 'House'],
+              ['value' => 'villa', 'label' => 'Villa'],
+              ['value' => 'dorm', 'label' => 'Dorm'],
+              ['value' => 'other', 'label' => 'Other'],
+            ];
+            $currentType = old('property_type', $property->property_type);
+          ?>
           <select id="property_type" name="property_type" required>
-            <option value="" disabled <?php echo e(old('property_type') ? '' : 'selected'); ?>>Choose a property type…</option>
-            <option value="apartment" <?php echo e(old('property_type') === 'apartment' ? 'selected' : ''); ?>>Apartment</option>
-            <option value="house"     <?php echo e(old('property_type') === 'house' ? 'selected' : ''); ?>>House</option>
-            <option value="dorm"      <?php echo e(old('property_type') === 'dorm' ? 'selected' : ''); ?>>Dorm</option>
-            <option value="other"     <?php echo e(old('property_type') === 'other' ? 'selected' : ''); ?>>Other</option>
+            <option value="" disabled <?php echo e($currentType ? '' : 'selected'); ?>>Choose a property type...</option>
+            <?php $__currentLoopData = $propertyOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option
+                value="<?php echo e($option['value']); ?>"
+                <?php echo e($currentType && strcasecmp($currentType, $option['value']) === 0 ? 'selected' : ''); ?>
+
+              >
+                <?php echo e($option['label']); ?>
+
+              </option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
           </select>
           <small>Select the closest fit.</small>
           <?php $__errorArgs = ['property_type'];
@@ -97,10 +127,13 @@ unset($__errorArgs, $__bag); ?>
 
         <div class="form-input">
           <label for="listing_type" class="inputs-label">Listing Type</label>
+          <?php
+            $currentListing = old('listing_type', $property->listing_type);
+          ?>
           <select id="listing_type" name="listing_type" required>
-            <option value="" disabled <?php echo e(old('listing_type') ? '' : 'selected'); ?>>Is it for rent or for sale?</option>
-            <option value="rent" <?php echo e(old('listing_type') === 'rent' ? 'selected' : ''); ?>>For Rent</option>
-            <option value="sale" <?php echo e(old('listing_type') === 'sale' ? 'selected' : ''); ?>>For Sale</option>
+            <option value="" disabled <?php echo e($currentListing ? '' : 'selected'); ?>>Is it for rent or for sale?</option>
+            <option value="rent" <?php echo e($currentListing && strcasecmp($currentListing, 'rent') === 0 ? 'selected' : ''); ?>>For Rent</option>
+            <option value="sale" <?php echo e($currentListing && strcasecmp($currentListing, 'sale') === 0 ? 'selected' : ''); ?>>For Sale</option>
           </select>
           <?php $__errorArgs = ['listing_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -117,6 +150,9 @@ unset($__errorArgs, $__bag); ?>
       <div class="inside-form-section">
         <h1 class="form-section-title">Location</h1>
 
+        <?php
+          $countryValue = old('country', $property->country);
+        ?>
         <div class="form-input">
           <label for="country" class="inputs-label">Country</label>
           <select
@@ -124,13 +160,15 @@ unset($__errorArgs, $__bag); ?>
             name="country"
             placeholder="Select country"
             style="width: 100%;"
-            data-placeholder="Search or select a country…"
-            data-old-value="<?php echo e(old('country')); ?>"
+            data-placeholder="Search or select a country..."
+            data-old-value="<?php echo e($countryValue); ?>"
             aria-label="Country"
             required
           >
             <option value="">Select Country</option>
-            
+            <?php if($countryValue): ?>
+              <option value="<?php echo e($countryValue); ?>" selected><?php echo e($countryValue); ?></option>
+            <?php endif; ?>
           </select>
           <small>Start typing to search your country.</small>
           <?php $__errorArgs = ['country'];
@@ -149,7 +187,7 @@ unset($__errorArgs, $__bag); ?>
             type="text"
             id="city"
             name="city"
-            value="<?php echo e(old('city')); ?>"
+            value="<?php echo e(old('city', $property->city)); ?>"
             placeholder="e.g. Beirut"
             autocomplete="address-level2"
             required
@@ -170,12 +208,12 @@ unset($__errorArgs, $__bag); ?>
             type="text"
             id="address"
             name="address"
-            value="<?php echo e(old('address')); ?>"
+            value="<?php echo e(old('address', $property->address)); ?>"
             placeholder="Street, building, floor, apartment number"
             autocomplete="street-address"
             required
           >
-          <small>Don't include sensitive info you don't want public.</small>
+          <small>Do not include sensitive info you do not want public.</small>
           <?php $__errorArgs = ['address'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -187,8 +225,8 @@ unset($__errorArgs, $__bag); ?>
         </div>
 
         
-        <input type="hidden" id="latitude" name="latitude" value="<?php echo e(old('latitude')); ?>">
-        <input type="hidden" id="longitude" name="longitude" value="<?php echo e(old('longitude')); ?>">
+        <input type="hidden" id="latitude" name="latitude" value="<?php echo e(old('latitude', $property->latitude)); ?>">
+        <input type="hidden" id="longitude" name="longitude" value="<?php echo e(old('longitude', $property->longitude)); ?>">
 
         
         <div class="form-input">
@@ -228,25 +266,39 @@ unset($__errorArgs, $__bag); ?>
           <label for="price" class="inputs-label">Price</label>
           <label for="unit">Unit</label>
           <div>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value="<?php echo e(old('price')); ?>"
-            placeholder="e.g. 750 (monthly) or 145000 (sale)"
-            inputmode="decimal"
-            min="0"
-            step="0.01"
-            required
-          >
-          <select name="unit" id="unit">
-            <?php $__currentLoopData = $units; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $unit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option value="<?php echo e($unit->id); ?>" <?php echo e(old('unit') == $unit->id ? 'selected' : ''); ?>><?php echo e($unit->code); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-          </select>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              value="<?php echo e(old('price', $property->price)); ?>"
+              placeholder="e.g. 750 (monthly) or 145000 (sale)"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              required
+            >
+            <select name="unit" id="unit">
+              <?php
+                $selectedUnit = old('unit', $property->unit_id);
+              ?>
+              <?php $__currentLoopData = $units; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $unit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($unit->id); ?>" <?php echo e((string)$selectedUnit === (string)$unit->id ? 'selected' : ''); ?>>
+                  <?php echo e($unit->code); ?>
+
+                </option>
+              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
           </div>
           <small>Enter a numeric value only (currency handled elsewhere).</small>
           <?php $__errorArgs = ['price'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+          <?php $__errorArgs = ['unit'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -262,7 +314,7 @@ unset($__errorArgs, $__bag); ?>
             type="number"
             id="area_m3"
             name="area_m3"
-            value="<?php echo e(old('area_m3')); ?>"
+            value="<?php echo e(old('area_m3', $property->area_m3)); ?>"
             placeholder="e.g. 95"
             inputmode="decimal"
             min="0"
@@ -285,7 +337,7 @@ unset($__errorArgs, $__bag); ?>
             type="number"
             id="room_nb"
             name="room_nb"
-            value="<?php echo e(old('room_nb')); ?>"
+            value="<?php echo e(old('room_nb', $property->room_nb)); ?>"
             placeholder="e.g. 4"
             inputmode="numeric"
             min="0"
@@ -307,7 +359,7 @@ unset($__errorArgs, $__bag); ?>
             type="number"
             id="bathroom_nb"
             name="bathroom_nb"
-            value="<?php echo e(old('bathroom_nb')); ?>"
+            value="<?php echo e(old('bathroom_nb', $property->bathroom_nb)); ?>"
             placeholder="e.g. 2"
             inputmode="numeric"
             min="0"
@@ -329,7 +381,7 @@ unset($__errorArgs, $__bag); ?>
             type="number"
             id="bedroom_nb"
             name="bedroom_nb"
-            value="<?php echo e(old('bedroom_nb')); ?>"
+            value="<?php echo e(old('bedroom_nb', $property->bedroom_nb)); ?>"
             placeholder="e.g. 3"
             inputmode="numeric"
             min="0"
@@ -348,6 +400,11 @@ unset($__errorArgs, $__bag); ?>
         
         <div class="form-input amenities-group">
           <h4 class="checkbox-label">Amenities</h4>
+          <?php
+            $selectedAmenities = collect(old('amenities', $property->amenities->pluck('id')->toArray()))
+              ->map(fn($v) => (int)$v)
+              ->all();
+          ?>
           <div class="amenities-grid">
             <?php $__currentLoopData = $amenities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $amenity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
               <label class="amenity">
@@ -355,7 +412,7 @@ unset($__errorArgs, $__bag); ?>
                   type="checkbox"
                   name="amenities[]"
                   value="<?php echo e($amenity->id); ?>"
-                  <?php echo e((is_array(old('amenities')) && in_array($amenity->id, old('amenities'))) || (is_array(request('amenities')) && in_array($amenity->id, request('amenities'))) ? 'checked' : ''); ?>
+                  <?php echo e(in_array($amenity->id, $selectedAmenities, true) ? 'checked' : ''); ?>
 
                 >
                 <span class="amenity-text"><?php echo e($amenity->name); ?></span>
@@ -368,6 +425,11 @@ unset($__errorArgs, $__bag); ?>
         
         <div class="form-input rules-group">
           <h4 class="checkbox-label">Rules</h4>
+          <?php
+            $selectedRules = collect(old('rules', $property->rules->pluck('id')->toArray()))
+              ->map(fn($v) => (int)$v)
+              ->all();
+          ?>
           <div class="rule-grid">
             <?php $__currentLoopData = $rules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rule): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
               <label class="rule">
@@ -375,7 +437,7 @@ unset($__errorArgs, $__bag); ?>
                   type="checkbox"
                   name="rules[]"
                   value="<?php echo e($rule->id); ?>"
-                  <?php echo e((is_array(old('rules')) && in_array($rule->id, old('rules'))) || (is_array(request('rules')) && in_array($rule->id, request('rules'))) ? 'checked' : ''); ?>
+                  <?php echo e(in_array($rule->id, $selectedRules, true) ? 'checked' : ''); ?>
 
                 >
                 <span class="rule-text"><?php echo e($rule->name); ?></span>
@@ -390,8 +452,27 @@ unset($__errorArgs, $__bag); ?>
       <div class="inside-form-section">
         <h1 class="form-section-title">Images</h1>
 
+        <?php
+          $removedImageIds = collect(old('remove_images', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+          $existingImages = $property->images->map(function ($img) use ($removedImageIds) {
+              return [
+                  'id'         => $img->id,
+                  'url'        => Storage::url($img->path),
+                  'name'       => basename($img->path),
+                  'is_primary' => (bool) $img->is_primary,
+                  'removed'    => in_array($img->id, $removedImageIds, true),
+              ];
+          })->values();
+        ?>
+
         <div class="form-input">
-          <label for="images" class="inputs-label">Upload Images</label>
+          <label for="images" class="inputs-label">Manage Images</label>
           <div class="file-upload-container">
             <input
               type="file"
@@ -401,16 +482,31 @@ unset($__errorArgs, $__bag); ?>
               multiple
               class="file-input"
               aria-describedby="images_help"
-              value="<?php echo e(old('images')); ?>"
             >
             <label for="images" class="file-label">
               <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
               Choose Images
             </label>
             <div id="images_help" class="file-info">
-              Add at least 4 clear photos (cover, living room, bedrooms, bathrooms). PNG or JPEG recommended.
+              Add new photos or remove existing ones. PNG or JPEG recommended.
             </div>
-            <div id="image-previews" class="image-previews" aria-live="polite"></div>
+            <div
+              id="image-previews"
+              class="image-previews"
+              aria-live="polite"
+              data-existing-images='<?php echo json_encode($existingImages, 15, 512) ?>'
+              data-remove-input-name="remove_images[]"
+              data-remove-container-id="removed-images-container"
+            ></div>
+            <div
+              id="removed-images-container"
+              data-role="removed-images-container"
+              style="display:none;"
+            >
+              <?php $__currentLoopData = $removedImageIds; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $removedId): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <input type="hidden" name="remove_images[]" value="<?php echo e($removedId); ?>">
+              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
             <?php if($errors->has('images')): ?>
               <div class="alert alert-danger mt-2">
                 <small>Please upload at least one image.</small>
@@ -430,21 +526,21 @@ unset($__errorArgs, $__bag); ?>
 
       
       <div class="form-control">
-        <button type="submit" aria-label="Submit your listing">Submit Listing</button>
+        <button type="submit" aria-label="Update your listing">Update Property</button>
       </div>
     </div>
   </form>
 </section>
 
 
-<script async src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_browser_key')); ?>&callback=initPropertyLocationMap&libraries=places"></script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_browser_key')); ?>&callback=initEditPropertyLocationMap&libraries=places"></script>
 
 <script>
-let propertyLocationMap;
-let propertyMapClickService;
+let editPropertyLocationMap;
+let editPropertyMapClickService;
 
-function initPropertyLocationMap() {
-    // Initialize map centered on Lebanon (or use geolocation if available)
+function initEditPropertyLocationMap() {
+    // Initialize map centered on property location or default to Lebanon
     const mapElement = document.getElementById('property-location-map');
     
     if (!mapElement) {
@@ -452,29 +548,31 @@ function initPropertyLocationMap() {
         return;
     }
 
-    // Try to get coordinates from old values or default to Lebanon
-    const oldLat = parseFloat(document.getElementById('latitude')?.value) || 33.894917;
-    const oldLng = parseFloat(document.getElementById('longitude')?.value) || 35.503083;
+    // Get coordinates from old values or property values, or default to Lebanon
+    const defaultLat = <?php echo json_encode($property->latitude ?? 33.894917, 15, 512) ?>;
+    const defaultLng = <?php echo json_encode($property->longitude ?? 35.503083, 15, 512) ?>;
+    const oldLat = parseFloat(document.getElementById('latitude')?.value) || defaultLat;
+    const oldLng = parseFloat(document.getElementById('longitude')?.value) || defaultLng;
 
     // Initialize map
-    propertyLocationMap = new google.maps.Map(mapElement, {
+    editPropertyLocationMap = new google.maps.Map(mapElement, {
         center: { lat: oldLat, lng: oldLng },
         zoom: 13,
         mapTypeId: 'roadmap'
     });
 
-    // If there are old coordinates, show a marker
+    // If there are existing coordinates, show a marker
     if (document.getElementById('latitude')?.value && document.getElementById('longitude')?.value) {
         new google.maps.Marker({
             position: { lat: oldLat, lng: oldLng },
-            map: propertyLocationMap,
-            title: 'Selected Location'
+            map: editPropertyLocationMap,
+            title: 'Current Location'
         });
         updateCoordinatesStatus(oldLat, oldLng, true);
     }
 
     // Initialize MapClickService
-    propertyMapClickService = new MapClickService(propertyLocationMap, {
+    editPropertyMapClickService = new MapClickService(editPropertyLocationMap, {
         showMarker: true,
         showInfoWindow: true,
         enableReverseGeocoding: true,
@@ -482,7 +580,7 @@ function initPropertyLocationMap() {
     });
 
     // Register callback to update form fields
-    propertyMapClickService.onClick((coordinates) => {
+    editPropertyMapClickService.onClick((coordinates) => {
         // Update hidden form fields
         document.getElementById('latitude').value = coordinates.latitude;
         document.getElementById('longitude').value = coordinates.longitude;
@@ -490,27 +588,27 @@ function initPropertyLocationMap() {
         // Update status display
         updateCoordinatesStatus(coordinates.latitude, coordinates.longitude, true);
         
-        console.log('Property location set:', coordinates);
+        console.log('Property location updated:', coordinates);
     });
 
     // Setup toggle button
     const enableButton = document.getElementById('enableMapClick');
-    const statusSpan = document.getElementById('coordinatesStatus');
+    const coordsDisplay = document.getElementById('coordinatesStatus');
     
     if (enableButton) {
         enableButton.addEventListener('click', () => {
-            if (propertyMapClickService.isEnabled) {
-                propertyMapClickService.disable();
+            if (editPropertyMapClickService.isEnabled) {
+                editPropertyMapClickService.disable();
                 enableButton.textContent = '📍 Click on Map to Set Location';
                 enableButton.style.background = '#3b82f6';
-                statusSpan.textContent = '';
+                coordsDisplay.style.display = 'none';
             } else {
-                propertyMapClickService.enable();
+                editPropertyMapClickService.enable();
                 enableButton.textContent = '✓ Click Mode Active - Click on Map';
                 enableButton.style.background = '#10b981';
-                statusSpan.textContent = 'Click anywhere on the map to set location';
+                coordsDisplay.style.display = 'block';
                 // Ensure cursor is pointer when enabled - set on map container
-                propertyLocationMap.setOptions({ cursor: 'pointer' });
+                editPropertyLocationMap.setOptions({ cursor: 'pointer' });
                 const mapContainer = document.getElementById('property-location-map');
                 if (mapContainer) {
                     mapContainer.style.cursor = 'pointer';
@@ -521,21 +619,25 @@ function initPropertyLocationMap() {
         // Auto-enable on page load if coordinates are not set
         if (!document.getElementById('latitude')?.value || !document.getElementById('longitude')?.value) {
             // Enable click mode by default
-            propertyMapClickService.enable();
+            editPropertyMapClickService.enable();
             enableButton.textContent = '✓ Click Mode Active - Click on Map';
             enableButton.style.background = '#10b981';
-            statusSpan.textContent = 'Click anywhere on the map to set location';
+            coordsDisplay.style.display = 'block';
             // Ensure cursor is pointer when enabled - set on map container
-            propertyLocationMap.setOptions({ cursor: 'pointer' });
+            editPropertyLocationMap.setOptions({ cursor: 'pointer' });
             const mapContainer = document.getElementById('property-location-map');
             if (mapContainer) {
                 mapContainer.style.cursor = 'pointer';
             }
+        } else {
+            // Show current coordinates status
+            coordsDisplay.style.display = 'block';
+            updateCoordinatesStatus(oldLat, oldLng, true);
         }
     }
 
     // Add search box for address
-    addAddressSearchBox();
+    addEditAddressSearchBox();
 }
 
 function updateCoordinatesStatus(lat, lng, isSet) {
@@ -551,7 +653,7 @@ function updateCoordinatesStatus(lat, lng, isSet) {
     }
 }
 
-function addAddressSearchBox() {
+function addEditAddressSearchBox() {
     const input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Search for address...';
@@ -568,7 +670,7 @@ function addAddressSearchBox() {
     `;
 
     const searchBox = new google.maps.places.SearchBox(input);
-    propertyLocationMap.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+    editPropertyLocationMap.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
     searchBox.addListener('places_changed', () => {
         const places = searchBox.getPlaces();
@@ -578,11 +680,11 @@ function addAddressSearchBox() {
         if (!place.geometry || !place.geometry.location) return;
 
         // Update map center
-        propertyLocationMap.setCenter(place.geometry.location);
-        propertyLocationMap.setZoom(16);
+        editPropertyLocationMap.setCenter(place.geometry.location);
+        editPropertyLocationMap.setZoom(16);
 
         // Simulate click at this location to set coordinates
-        propertyMapClickService.handleMapClick(place.geometry.location);
+        editPropertyMapClickService.handleMapClick(place.geometry.location);
 
         // Update address field if it's empty
         const addressField = document.getElementById('address');
@@ -592,7 +694,7 @@ function addAddressSearchBox() {
     });
 }
 
-// Handle form validation - ensure coordinates are set before submit
+// Handle form validation - ensure coordinates are set before submit (optional for edit)
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('.listing-form');
     if (form) {
@@ -600,25 +702,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const lat = document.getElementById('latitude')?.value;
             const lng = document.getElementById('longitude')?.value;
             
+            // Note: For edit, coordinates are optional (will fallback to geocoding)
+            // But if user intentionally cleared them, we can warn
             if (!lat || !lng) {
-                e.preventDefault();
-                alert('Please set the property location by clicking on the map.');
-                const enableButton = document.getElementById('enableMapClick');
-                if (enableButton) {
-                    enableButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    if (!propertyMapClickService || !propertyMapClickService.isEnabled) {
-                        enableButton.click();
-                    }
-                    // Ensure cursor is set to pointer when enabled
-                    if (propertyMapClickService && propertyMapClickService.isEnabled) {
-                        propertyLocationMap.setOptions({ cursor: 'pointer' });
-                        const mapContainer = document.getElementById('property-location-map');
-                        if (mapContainer) {
-                            mapContainer.style.cursor = 'pointer';
+                const confirmed = confirm('No location coordinates set. The system will try to geocode from address. Continue anyway?');
+                if (!confirmed) {
+                    e.preventDefault();
+                    const enableButton = document.getElementById('enableMapClick');
+                    if (enableButton) {
+                        enableButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        if (!editPropertyMapClickService || !editPropertyMapClickService.isEnabled) {
+                            enableButton.click();
+                        }
+                        // Ensure cursor is set to pointer when enabled
+                        if (editPropertyMapClickService && editPropertyMapClickService.isEnabled) {
+                            editPropertyLocationMap.setOptions({ cursor: 'pointer' });
+                            const mapContainer = document.getElementById('property-location-map');
+                            if (mapContainer) {
+                                mapContainer.style.cursor = 'pointer';
+                            }
                         }
                     }
+                    return false;
                 }
-                return false;
             }
         });
     }
@@ -626,4 +732,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/list-property.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/edit-property.blade.php ENDPATH**/ ?>

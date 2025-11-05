@@ -7,6 +7,7 @@
 @endphp
 <link rel="stylesheet" href="{{ asset('css/list-property.css') }}">
 <script src="{{ asset('js/list-property.js') }}"></script>
+<script src="{{ asset('js/MapClickService.js') }}"></script>
 <section class="title-section" style="background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url('{{ $backgroundImage }}') center/cover;">
   <div class="content-title">
     <h1>Edit Property</h1>
@@ -172,6 +173,25 @@
           >
           <small>Do not include sensitive info you do not want public.</small>
           @error('address') <small class="text-danger">{{ $message }}</small> @enderror
+        </div>
+
+        {{-- Hidden fields for coordinates --}}
+        <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $property->latitude) }}">
+        <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $property->longitude) }}">
+
+        {{-- Map for selecting location --}}
+        <div class="form-input">
+          <label class="inputs-label">Select Location on Map</label>
+          <div style="margin-bottom: 10px;">
+            <button type="button" id="enableMapClick" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+              📍 Click on Map to Set Location
+            </button>
+            <span id="coordinatesStatus" style="margin-left: 10px; font-size: 14px; color: #6b7280;"></span>
+          </div>
+          <div id="property-location-map" style="width: 100%; height: 400px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 10px;"></div>
+          <small>Click on the map to set your property's exact location. This will automatically fill the coordinates.</small>
+          @error('latitude') <small class="text-danger">{{ $message }}</small> @enderror
+          @error('longitude') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
       </div>
 
@@ -396,4 +416,203 @@
     </div>
   </form>
 </section>
+
+{{-- Google Maps API and Map Initialization --}}
+<script async src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_browser_key') }}&callback=initEditPropertyLocationMap&libraries=places"></script>
+
+<script>
+let editPropertyLocationMap;
+let editPropertyMapClickService;
+
+function initEditPropertyLocationMap() {
+    // Initialize map centered on property location or default to Lebanon
+    const mapElement = document.getElementById('property-location-map');
+    
+    if (!mapElement) {
+        console.error('Property location map element not found');
+        return;
+    }
+
+    // Get coordinates from old values or property values, or default to Lebanon
+    const defaultLat = @json($property->latitude ?? 33.894917);
+    const defaultLng = @json($property->longitude ?? 35.503083);
+    const oldLat = parseFloat(document.getElementById('latitude')?.value) || defaultLat;
+    const oldLng = parseFloat(document.getElementById('longitude')?.value) || defaultLng;
+
+    // Initialize map
+    editPropertyLocationMap = new google.maps.Map(mapElement, {
+        center: { lat: oldLat, lng: oldLng },
+        zoom: 13,
+        mapTypeId: 'roadmap'
+    });
+
+    // If there are existing coordinates, show a marker
+    if (document.getElementById('latitude')?.value && document.getElementById('longitude')?.value) {
+        new google.maps.Marker({
+            position: { lat: oldLat, lng: oldLng },
+            map: editPropertyLocationMap,
+            title: 'Current Location'
+        });
+        updateCoordinatesStatus(oldLat, oldLng, true);
+    }
+
+    // Initialize MapClickService
+    editPropertyMapClickService = new MapClickService(editPropertyLocationMap, {
+        showMarker: true,
+        showInfoWindow: true,
+        enableReverseGeocoding: true,
+        reverseGeocodeEndpoint: '{{ route("map.reverse-geocode") }}'
+    });
+
+    // Register callback to update form fields
+    editPropertyMapClickService.onClick((coordinates) => {
+        // Update hidden form fields
+        document.getElementById('latitude').value = coordinates.latitude;
+        document.getElementById('longitude').value = coordinates.longitude;
+        
+        // Update status display
+        updateCoordinatesStatus(coordinates.latitude, coordinates.longitude, true);
+        
+        console.log('Property location updated:', coordinates);
+    });
+
+    // Setup toggle button
+    const enableButton = document.getElementById('enableMapClick');
+    const coordsDisplay = document.getElementById('coordinatesStatus');
+    
+    if (enableButton) {
+        enableButton.addEventListener('click', () => {
+            if (editPropertyMapClickService.isEnabled) {
+                editPropertyMapClickService.disable();
+                enableButton.textContent = '📍 Click on Map to Set Location';
+                enableButton.style.background = '#3b82f6';
+                coordsDisplay.style.display = 'none';
+            } else {
+                editPropertyMapClickService.enable();
+                enableButton.textContent = '✓ Click Mode Active - Click on Map';
+                enableButton.style.background = '#10b981';
+                coordsDisplay.style.display = 'block';
+                // Ensure cursor is pointer when enabled - set on map container
+                editPropertyLocationMap.setOptions({ cursor: 'pointer' });
+                const mapContainer = document.getElementById('property-location-map');
+                if (mapContainer) {
+                    mapContainer.style.cursor = 'pointer';
+                }
+            }
+        });
+
+        // Auto-enable on page load if coordinates are not set
+        if (!document.getElementById('latitude')?.value || !document.getElementById('longitude')?.value) {
+            // Enable click mode by default
+            editPropertyMapClickService.enable();
+            enableButton.textContent = '✓ Click Mode Active - Click on Map';
+            enableButton.style.background = '#10b981';
+            coordsDisplay.style.display = 'block';
+            // Ensure cursor is pointer when enabled - set on map container
+            editPropertyLocationMap.setOptions({ cursor: 'pointer' });
+            const mapContainer = document.getElementById('property-location-map');
+            if (mapContainer) {
+                mapContainer.style.cursor = 'pointer';
+            }
+        } else {
+            // Show current coordinates status
+            coordsDisplay.style.display = 'block';
+            updateCoordinatesStatus(oldLat, oldLng, true);
+        }
+    }
+
+    // Add search box for address
+    addEditAddressSearchBox();
+}
+
+function updateCoordinatesStatus(lat, lng, isSet) {
+    const statusSpan = document.getElementById('coordinatesStatus');
+    if (statusSpan) {
+        if (isSet) {
+            statusSpan.textContent = `✓ Location set: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            statusSpan.style.color = '#10b981';
+        } else {
+            statusSpan.textContent = 'Location not set';
+            statusSpan.style.color = '#6b7280';
+        }
+    }
+}
+
+function addEditAddressSearchBox() {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Search for address...';
+    input.style.cssText = `
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 15px;
+        padding: 10px;
+        text-overflow: ellipsis;
+        width: 300px;
+        margin: 10px;
+    `;
+
+    const searchBox = new google.maps.places.SearchBox(input);
+    editPropertyLocationMap.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    searchBox.addListener('places_changed', () => {
+        const places = searchBox.getPlaces();
+        if (places.length === 0) return;
+
+        const place = places[0];
+        if (!place.geometry || !place.geometry.location) return;
+
+        // Update map center
+        editPropertyLocationMap.setCenter(place.geometry.location);
+        editPropertyLocationMap.setZoom(16);
+
+        // Simulate click at this location to set coordinates
+        editPropertyMapClickService.handleMapClick(place.geometry.location);
+
+        // Update address field if it's empty
+        const addressField = document.getElementById('address');
+        if (addressField && !addressField.value) {
+            addressField.value = place.formatted_address || place.name;
+        }
+    });
+}
+
+// Handle form validation - ensure coordinates are set before submit (optional for edit)
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.listing-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const lat = document.getElementById('latitude')?.value;
+            const lng = document.getElementById('longitude')?.value;
+            
+            // Note: For edit, coordinates are optional (will fallback to geocoding)
+            // But if user intentionally cleared them, we can warn
+            if (!lat || !lng) {
+                const confirmed = confirm('No location coordinates set. The system will try to geocode from address. Continue anyway?');
+                if (!confirmed) {
+                    e.preventDefault();
+                    const enableButton = document.getElementById('enableMapClick');
+                    if (enableButton) {
+                        enableButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        if (!editPropertyMapClickService || !editPropertyMapClickService.isEnabled) {
+                            enableButton.click();
+                        }
+                        // Ensure cursor is set to pointer when enabled
+                        if (editPropertyMapClickService && editPropertyMapClickService.isEnabled) {
+                            editPropertyLocationMap.setOptions({ cursor: 'pointer' });
+                            const mapContainer = document.getElementById('property-location-map');
+                            if (mapContainer) {
+                                mapContainer.style.cursor = 'pointer';
+                            }
+                        }
+                    }
+                    return false;
+                }
+            }
+        });
+    }
+});
+</script>
 @endsection

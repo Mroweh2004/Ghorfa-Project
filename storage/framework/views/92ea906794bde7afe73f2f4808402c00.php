@@ -46,6 +46,13 @@
                         </div>
                     </div>
 
+                    <!-- Property Location Map -->
+                    <?php if($property->latitude && $property->longitude): ?>
+                    <div class="property-location-map-container">
+                        <div id="property-location-map" style="width: 100%; height: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"></div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Property Features -->
                     <div class="property-features">
                         <div class="feature-item">
@@ -389,6 +396,81 @@ unset($__errorArgs, $__bag); ?>
         </form>
     </div>
 </div>
+
+
+<?php if($property->latitude && $property->longitude): ?>
+<script async src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_browser_key')); ?>&callback=initPropertyShowMap&libraries=places"></script>
+<script>
+function initPropertyShowMap() {
+    const mapElement = document.getElementById('property-location-map');
+    
+    if (!mapElement) {
+        return;
+    }
+
+    const propertyLat = parseFloat(<?php echo json_encode($property->latitude, 15, 512) ?>);
+    const propertyLng = parseFloat(<?php echo json_encode($property->longitude, 15, 512) ?>);
+    const propertyTitle = <?php echo json_encode($property->title, 15, 512) ?>;
+    const propertyAddress = <?php echo json_encode($property->address, 15, 512) ?>;
+    const propertyCity = <?php echo json_encode($property->city, 15, 512) ?>;
+    const propertyCountry = <?php echo json_encode($property->country, 15, 512) ?>;
+    const propertyPrice = <?php echo json_encode(number_format($property->price), 15, 512) ?>;
+    const unitSymbol = <?php echo json_encode($property->unit ? $property->unit->symbol : '', 15, 512) ?>;
+
+    // Initialize map centered on property location
+    const propertyMap = new google.maps.Map(mapElement, {
+        center: { lat: propertyLat, lng: propertyLng },
+        zoom: 15,
+        mapTypeId: 'roadmap',
+        styles: [
+            {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+            }
+        ]
+    });
+
+    // Add marker for property location
+    const propertyMarker = new google.maps.Marker({
+        position: { lat: propertyLat, lng: propertyLng },
+        map: propertyMap,
+        title: propertyTitle,
+        icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                '<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle cx="20" cy="20" r="18" fill="#ef4444" stroke="white" stroke-width="3"/>' +
+                '<text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial" font-size="18" font-weight="bold">📍</text>' +
+                '</svg>'
+            ),
+            scaledSize: new google.maps.Size(40, 40),
+            anchor: new google.maps.Point(20, 20)
+        },
+        animation: google.maps.Animation.DROP
+    });
+
+    // Create info window with property details
+    const infoWindow = new google.maps.InfoWindow({
+        content: '<div style="padding: 10px; min-width: 200px;">' +
+            '<h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #1a1a1a;">' + propertyTitle + '</h3>' +
+            '<div style="margin-bottom: 8px; color: #64748b; font-size: 14px;">' +
+            '<i class="fas fa-map-marker-alt" style="color: #ef4444;"></i> ' +
+            propertyAddress + ', ' + propertyCity + ', ' + propertyCountry +
+            '</div>' +
+            '<div style="color: #1a1a1a; font-size: 16px; font-weight: 600;">$' + propertyPrice + ' ' + unitSymbol + '</div>' +
+            '</div>'
+    });
+
+    // Open info window on marker click
+    propertyMarker.addListener('click', function() {
+        infoWindow.open(propertyMap, propertyMarker);
+    });
+
+    // Open info window by default
+    infoWindow.open(propertyMap, propertyMarker);
+}
+</script>
+<?php endif; ?>
 
 <script>
     function openReviewModal(){ document.getElementById('reviewModal').style.display = 'flex'; }
