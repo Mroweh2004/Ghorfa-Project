@@ -74,18 +74,17 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
         </div>
-
-        <div class="form-input">
-          <label for="property_type" class="inputs-label">Property Type</label>
-          <select id="property_type" name="property_type" required>
-            <option value="" disabled <?php echo e(old('property_type') ? '' : 'selected'); ?>>Choose a property type…</option>
-            <option value="apartment" <?php echo e(old('property_type') === 'apartment' ? 'selected' : ''); ?>>Apartment</option>
-            <option value="house"     <?php echo e(old('property_type') === 'house' ? 'selected' : ''); ?>>House</option>
-            <option value="dorm"      <?php echo e(old('property_type') === 'dorm' ? 'selected' : ''); ?>>Dorm</option>
-            <option value="other"     <?php echo e(old('property_type') === 'other' ? 'selected' : ''); ?>>Other</option>
-          </select>
-          <small>Select the closest fit.</small>
-          <?php $__errorArgs = ['property_type'];
+        <div class="row">
+          <div class="form-input">
+            <label for="property_type" class="inputs-label">Property Type</label>
+            <select id="property_type" name="property_type" required>
+              <option value="" disabled <?php echo e(old('property_type') ? '' : 'selected'); ?>>Choose a property type…</option>
+              <option value="apartment" <?php echo e(old('property_type') === 'apartment' ? 'selected' : ''); ?>>Apartment</option>
+              <option value="house"     <?php echo e(old('property_type') === 'house' ? 'selected' : ''); ?>>House</option>
+              <option value="dorm"      <?php echo e(old('property_type') === 'dorm' ? 'selected' : ''); ?>>Dorm</option>
+              <option value="other"     <?php echo e(old('property_type') === 'other' ? 'selected' : ''); ?>>Other</option>
+            </select>
+            <?php $__errorArgs = ['property_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -93,16 +92,16 @@ $message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php e
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-        </div>
+          </div>
 
-        <div class="form-input">
-          <label for="listing_type" class="inputs-label">Listing Type</label>
-          <select id="listing_type" name="listing_type" required>
-            <option value="" disabled <?php echo e(old('listing_type') ? '' : 'selected'); ?>>Is it for rent or for sale?</option>
-            <option value="rent" <?php echo e(old('listing_type') === 'rent' ? 'selected' : ''); ?>>For Rent</option>
-            <option value="sale" <?php echo e(old('listing_type') === 'sale' ? 'selected' : ''); ?>>For Sale</option>
-          </select>
-          <?php $__errorArgs = ['listing_type'];
+          <div class="form-input">
+            <label for="listing_type" class="inputs-label">Listing Type</label>
+            <select id="listing_type" name="listing_type" required>
+              <option value="" disabled <?php echo e(old('listing_type') ? '' : 'selected'); ?>>Is it for rent or for sale?</option>
+              <option value="rent" <?php echo e(old('listing_type') === 'rent' ? 'selected' : ''); ?>>For Rent</option>
+              <option value="sale" <?php echo e(old('listing_type') === 'sale' ? 'selected' : ''); ?>>For Sale</option>
+            </select>
+            <?php $__errorArgs = ['listing_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -110,82 +109,12 @@ $message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php e
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+          </div>
         </div>
-      </div>
-
+        </div>
       
       <div class="inside-form-section">
         <h1 class="form-section-title">Location</h1>
-
-        <div class="form-input">
-          <label for="country" class="inputs-label">Country</label>
-          <select
-            id="country"
-            name="country"
-            placeholder="Select country"
-            style="width: 100%;"
-            data-placeholder="Search or select a country…"
-            data-old-value="<?php echo e(old('country')); ?>"
-            aria-label="Country"
-            required
-          >
-            <option value="">Select Country</option>
-            
-          </select>
-          <small>Start typing to search your country.</small>
-          <?php $__errorArgs = ['country'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-        </div>
-
-        <div class="form-input">
-          <label for="city" class="inputs-label">City</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value="<?php echo e(old('city')); ?>"
-            placeholder="e.g. Beirut"
-            autocomplete="address-level2"
-            required
-          >
-          <?php $__errorArgs = ['city'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-        </div>
-
-        <div class="form-input">
-          <label for="address" class="inputs-label">Address</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value="<?php echo e(old('address')); ?>"
-            placeholder="Street, building, floor, apartment number"
-            autocomplete="street-address"
-            required
-          >
-          <small>Don't include sensitive info you don't want public.</small>
-          <?php $__errorArgs = ['address'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-        </div>
-
         
         <input type="hidden" id="latitude" name="latitude" value="<?php echo e(old('latitude')); ?>">
         <input type="hidden" id="longitude" name="longitude" value="<?php echo e(old('longitude')); ?>">
@@ -193,13 +122,13 @@ unset($__errorArgs, $__bag); ?>
         
         <div class="form-input">
           <label class="inputs-label">Select Location on Map</label>
-          <div style="margin-bottom: 10px;">
-            <button type="button" id="enableMapClick" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+          <div class="map-controls">
+            <button type="button" id="enableMapClick">
               📍 Click on Map to Set Location
             </button>
-            <span id="coordinatesStatus" style="margin-left: 10px; font-size: 14px; color: #6b7280;"></span>
+            <span id="coordinatesStatus"></span>
           </div>
-          <div id="property-location-map" style="width: 100%; height: 400px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 10px;"></div>
+          <div id="property-location-map"></div>
           <small>Click on the map to set your property's exact location. This will automatically fill the coordinates.</small>
           <?php $__errorArgs = ['latitude'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -219,34 +148,59 @@ endif;
 unset($__errorArgs, $__bag); ?>
         </div>
       </div>
+     
 
       
-      <div class="inside-form-section">
-        <h1 class="form-section-title">Details</h1>
+      <div class="details">
+        <div class="inside-form-section">
+          <h1 class="form-section-title">Details</h1>
 
-        <div class="form-input">
-          <label for="price" class="inputs-label">Price</label>
-          <label for="unit">Unit</label>
-          <div>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value="<?php echo e(old('price')); ?>"
-            placeholder="e.g. 750 (monthly) or 145000 (sale)"
-            inputmode="decimal"
-            min="0"
-            step="0.01"
-            required
-          >
-          <select name="unit" id="unit">
-            <?php $__currentLoopData = $units; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $unit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option value="<?php echo e($unit->id); ?>" <?php echo e(old('unit') == $unit->id ? 'selected' : ''); ?>><?php echo e($unit->code); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-          </select>
+          <div class="form-input">
+            <label for="price" class="inputs-label">Price</label>
+            <label for="unit">Unit</label>
+            <div class="row">
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value="<?php echo e(old('price')); ?>"
+                placeholder="e.g. 750 (monthly) or 145000 (sale)"
+                inputmode="decimal"
+                min="0"
+                step="0.01"
+                required
+              >
+              <select name="unit" id="unit">
+                <?php $__currentLoopData = $units; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $unit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($unit->id); ?>" <?php echo e(old('unit') == $unit->id ? 'selected' : ''); ?>><?php echo e($unit->code); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+              </select>
+            </div>
+            <small>Enter a numeric value only (currency handled elsewhere).</small>
+            <?php $__errorArgs = ['price'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
           </div>
-          <small>Enter a numeric value only (currency handled elsewhere).</small>
-          <?php $__errorArgs = ['price'];
+          <div class="row">
+            <div class="form-input">
+              <label for="area_m3" class="inputs-label">Area (m²)</label>
+              <input
+                type="number"
+                id="area_m3"
+                name="area_m3"
+                value="<?php echo e(old('area_m3')); ?>"
+                placeholder="e.g. 95"
+                inputmode="decimal"
+                min="0"
+                step="0.1"
+                required
+              >
+              <?php $__errorArgs = ['area_m3'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -254,22 +208,21 @@ $message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php e
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-        </div>
+            </div>
 
-        <div class="form-input">
-          <label for="area_m3" class="inputs-label">Area (m²)</label>
-          <input
-            type="number"
-            id="area_m3"
-            name="area_m3"
-            value="<?php echo e(old('area_m3')); ?>"
-            placeholder="e.g. 95"
-            inputmode="decimal"
-            min="0"
-            step="0.1"
-            required
-          >
-          <?php $__errorArgs = ['area_m3'];
+            <div class="form-input">
+              <label for="room_nb" class="inputs-label">Rooms</label>
+              <input
+                type="number"
+                id="room_nb"
+                name="room_nb"
+                value="<?php echo e(old('room_nb')); ?>"
+                placeholder="e.g. 4"
+                inputmode="numeric"
+                min="0"
+                required
+              >
+              <?php $__errorArgs = ['room_nb'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -277,21 +230,42 @@ $message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php e
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-        </div>
+            </div>
+            <div class="form-input">
+              <label for="bathroom_nb" class="inputs-label">Bathrooms</label>
+              <input
+                type="number"
+                id="bathroom_nb"
+                name="bathroom_nb"
+                value="<?php echo e(old('bathroom_nb')); ?>"
+                placeholder="e.g. 2"
+                inputmode="numeric"
+                min="0"
+                required
+              >
+              <?php $__errorArgs = ['bathroom_nb'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+            </div>
 
-        <div class="form-input">
-          <label for="room_nb" class="inputs-label">Number of Rooms</label>
-          <input
-            type="number"
-            id="room_nb"
-            name="room_nb"
-            value="<?php echo e(old('room_nb')); ?>"
-            placeholder="e.g. 4"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          <?php $__errorArgs = ['room_nb'];
+            <div class="form-input">
+              <label for="bedroom_nb" class="inputs-label">Bedrooms</label>
+              <input
+                type="number"
+                id="bedroom_nb"
+                name="bedroom_nb"
+                value="<?php echo e(old('bedroom_nb')); ?>"
+                placeholder="e.g. 3"
+                inputmode="numeric"
+                min="0"
+                required
+              >
+              <?php $__errorArgs = ['bedroom_nb'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -299,50 +273,8 @@ $message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php e
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+            </div>
         </div>
-
-        <div class="form-input">
-          <label for="bathroom_nb" class="inputs-label">Number of Bathrooms</label>
-          <input
-            type="number"
-            id="bathroom_nb"
-            name="bathroom_nb"
-            value="<?php echo e(old('bathroom_nb')); ?>"
-            placeholder="e.g. 2"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          <?php $__errorArgs = ['bathroom_nb'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-        </div>
-
-        <div class="form-input">
-          <label for="bedroom_nb" class="inputs-label">Number of Bedrooms</label>
-          <input
-            type="number"
-            id="bedroom_nb"
-            name="bedroom_nb"
-            value="<?php echo e(old('bedroom_nb')); ?>"
-            placeholder="e.g. 3"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          <?php $__errorArgs = ['bedroom_nb'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <small class="text-danger"><?php echo e($message); ?></small> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
         </div>
 
         

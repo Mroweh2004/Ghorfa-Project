@@ -178,9 +178,9 @@ class PropertyController extends Controller
             'description'   => 'required|string',
             'property_type' => 'required|string',
             'listing_type'  => 'required|string',
-            'country'       => 'required|string',
-            'city'          => 'required|string',
-            'address'       => 'required|string',
+            'country'       => 'nullable|string',
+            'city'          => 'nullable|string',
+            'address'       => 'nullable|string',
             'price'         => 'required|numeric|min:0',
             'unit'          => 'required|integer|exists:units,id',
             'area_m3'       => 'required|numeric|min:0',
@@ -189,8 +189,8 @@ class PropertyController extends Controller
             'bedroom_nb'    => 'required|integer|min:0',
 
             // coordinates (optional - will use if provided, otherwise geocode)
-            'latitude'      => 'nullable|numeric|between:-90,90',
-            'longitude'     => 'nullable|numeric|between:-180,180',
+            'latitude'      => 'required|numeric|between:-90,90',
+            'longitude'     => 'required|numeric|between:-180,180',
 
             // optional images
             'images'        => 'nullable|array',
@@ -224,6 +224,16 @@ class PropertyController extends Controller
                     if ($coordinates) {
                         $validated['latitude'] = $coordinates['latitude'];
                         $validated['longitude'] = $coordinates['longitude'];
+                        // Extract country, city, and address from geocoding result
+                        if (isset($coordinates['country']) && !isset($validated['country'])) {
+                            $validated['country'] = $coordinates['country'];
+                        }
+                        if (isset($coordinates['city']) && !isset($validated['city'])) {
+                            $validated['city'] = $coordinates['city'];
+                        }
+                        if (isset($coordinates['address']) && !isset($validated['address'])) {
+                            $validated['address'] = $coordinates['address'];
+                        }
                     }
                 }
             }
@@ -304,6 +314,18 @@ class PropertyController extends Controller
 
     public function submitListing(Request $request)
     {
+        // Check images first
+        if (!$request->hasFile('images')) {
+            Log::error('No images uploaded');
+            return back()->withErrors(['images' => 'Please upload at least one image.'])->withInput();
+        }
+
+        $imageFiles = $request->file('images');
+        if (empty($imageFiles) || count($imageFiles) < 1) {
+            Log::error('Images array is empty');
+            return back()->withErrors(['images' => 'Please upload at least one image.'])->withInput();
+        }
+
         // validate
         try {
             $validated = $request->validate([
@@ -311,32 +333,27 @@ class PropertyController extends Controller
                 'description'   => 'nullable|string',
                 'property_type' => 'required|string',
                 'listing_type'  => 'required|string',
-                'country'       => 'required|string',
-                'city'          => 'required|string',
-                'address'       => 'required|string',
+                'country'       => 'nullable|string',
+                'city'          => 'nullable|string',
+                'address'       => 'nullable|string',
                 'price'         => 'required|numeric|min:0',
                 'unit'          => 'required|integer|exists:units,id',
                 'area_m3'       => 'required|numeric|min:0',
                 'room_nb'       => 'nullable|integer|min:0',
                 'bathroom_nb'   => 'required|integer|min:0',
                 'bedroom_nb'    => 'nullable|integer|min:0',
-
-                // coordinates (optional - will use if provided, otherwise geocode)
-                'latitude'      => 'nullable|numeric|between:-90,90',
-                'longitude'     => 'nullable|numeric|between:-180,180',
-
-                // images
+                'latitude'      => 'required|numeric|between:-90,90',
+                'longitude'     => 'required|numeric|between:-180,180',
                 'images'        => 'required|array|min:1',
-                'images.*'      => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-
-                // pivots
+                'images.*'      => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'amenities'     => 'nullable|array',
                 'amenities.*'   => 'integer|exists:amenities,id',
                 'rules'         => 'nullable|array',
                 'rules.*'       => 'integer|exists:rules,id',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed:', $e->errors());
+            Log::error('Validation failed:', $e->errors());
+            Log::error('Request data:', $request->except(['images', 'password']));
             return back()->withErrors($e->errors())->withInput();
         }
 
@@ -349,20 +366,39 @@ class PropertyController extends Controller
             $amenityIds = (array)($request->input('amenities', []));
             $ruleIds    = (array)($request->input('rules', []));
 
-            // Use provided coordinates if available, otherwise geocode from address
-            if (isset($validated['latitude']) && isset($validated['longitude']) 
-                && !empty($validated['latitude']) && !empty($validated['longitude'])) {
-                // Use coordinates provided by map click
-                $validated['latitude'] = (float) $validated['latitude'];
-                $validated['longitude'] = (float) $validated['longitude'];
+            // Use coordinates to reverse geocode and get address, city, country
+            $latitude = (float) $validated['latitude'];
+            $longitude = (float) $validated['longitude'];
+            
+            $geocodingService = app(GeocodingService::class);
+            $reverseGeocodeResult = $geocodingService->reverseGeocode($latitude, $longitude);
+            
+            if ($reverseGeocodeResult) {
+                $addressComponents = $reverseGeocodeResult['address_components'] ?? [];
+                
+                // Extract address components
+                $validated['country'] = $this->extractAddressComponent($addressComponents, 'country') 
+                    ?? $validated['country'] ?? 'Lebanon';
+                $validated['city'] = $this->extractAddressComponent($addressComponents, 'locality')
+                    ?? $this->extractAddressComponent($addressComponents, 'administrative_area_level_1')
+                    ?? $validated['city'] ?? 'Unknown';
+                $streetNumber = $this->extractAddressComponent($addressComponents, 'street_number');
+                $route = $this->extractAddressComponent($addressComponents, 'route');
+                $address = trim(($streetNumber ?? '') . ' ' . ($route ?? ''));
+                $validated['address'] = $address ?: ($reverseGeocodeResult['formatted_address'] ?? $validated['address'] ?? 'Unknown');
             } else {
-                // Fallback to geocoding from address
-                $coordinates = $this->geocodeAddress($validated);
-                if ($coordinates) {
-                    $validated['latitude'] = $coordinates['latitude'];
-                    $validated['longitude'] = $coordinates['longitude'];
-                }
+                // If reverse geocoding fails, set defaults
+                $validated['country'] = $validated['country'] ?? 'Lebanon';
+                $validated['city'] = $validated['city'] ?? 'Unknown';
+                $validated['address'] = $validated['address'] ?? 'Unknown';
+                Log::warning('Reverse geocoding failed for coordinates', [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude
+                ]);
             }
+
+            $validated['latitude'] = $latitude;
+            $validated['longitude'] = $longitude;
 
             // create property
             $property = Property::create($validated);
@@ -392,6 +428,12 @@ class PropertyController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
 
+            Log::error('Failed to create property', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['images', 'password'])
+            ]);
+
             // cleanup partially stored images (if any)
             if (isset($property) && $property->exists) {
                 foreach ($property->images as $img) {
@@ -400,8 +442,10 @@ class PropertyController extends Controller
                 $property->delete();
             }
 
-            return back()->with('error', 'Failed to create property: '.$e->getMessage())
-                        ->withInput();
+            return back()
+                ->withErrors(['error' => 'Failed to create property: ' . $e->getMessage()])
+                ->withInput()
+                ->with('error', 'Failed to create property. Please check the errors below.');
         }
     }
 
@@ -463,6 +507,23 @@ class PropertyController extends Controller
         }
         
         return $geocodingService->geocode($address);
+    }
+
+    /**
+     * Extract a specific address component from address_components array
+     *
+     * @param array $addressComponents
+     * @param string $type
+     * @return string|null
+     */
+    private function extractAddressComponent(array $addressComponents, string $type): ?string
+    {
+        foreach ($addressComponents as $component) {
+            if (in_array($type, $component['types'] ?? [])) {
+                return $component['long_name'] ?? null;
+            }
+        }
+        return null;
     }
 }
 

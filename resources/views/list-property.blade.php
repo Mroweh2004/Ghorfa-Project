@@ -61,83 +61,33 @@
           <small>Be specific: floor, orientation, surroundings, and any rules worth knowing.</small>
           @error('description') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
+        <div class="row">
+          <div class="form-input">
+            <label for="property_type" class="inputs-label">Property Type</label>
+            <select id="property_type" name="property_type" required>
+              <option value="" disabled {{ old('property_type') ? '' : 'selected' }}>Choose a property type…</option>
+              <option value="apartment" {{ old('property_type') === 'apartment' ? 'selected' : '' }}>Apartment</option>
+              <option value="house"     {{ old('property_type') === 'house' ? 'selected' : '' }}>House</option>
+              <option value="dorm"      {{ old('property_type') === 'dorm' ? 'selected' : '' }}>Dorm</option>
+              <option value="other"     {{ old('property_type') === 'other' ? 'selected' : '' }}>Other</option>
+            </select>
+            @error('property_type') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
 
-        <div class="form-input">
-          <label for="property_type" class="inputs-label">Property Type</label>
-          <select id="property_type" name="property_type" required>
-            <option value="" disabled {{ old('property_type') ? '' : 'selected' }}>Choose a property type…</option>
-            <option value="apartment" {{ old('property_type') === 'apartment' ? 'selected' : '' }}>Apartment</option>
-            <option value="house"     {{ old('property_type') === 'house' ? 'selected' : '' }}>House</option>
-            <option value="dorm"      {{ old('property_type') === 'dorm' ? 'selected' : '' }}>Dorm</option>
-            <option value="other"     {{ old('property_type') === 'other' ? 'selected' : '' }}>Other</option>
-          </select>
-          <small>Select the closest fit.</small>
-          @error('property_type') <small class="text-danger">{{ $message }}</small> @enderror
+          <div class="form-input">
+            <label for="listing_type" class="inputs-label">Listing Type</label>
+            <select id="listing_type" name="listing_type" required>
+              <option value="" disabled {{ old('listing_type') ? '' : 'selected' }}>Is it for rent or for sale?</option>
+              <option value="rent" {{ old('listing_type') === 'rent' ? 'selected' : '' }}>For Rent</option>
+              <option value="sale" {{ old('listing_type') === 'sale' ? 'selected' : '' }}>For Sale</option>
+            </select>
+            @error('listing_type') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
         </div>
-
-        <div class="form-input">
-          <label for="listing_type" class="inputs-label">Listing Type</label>
-          <select id="listing_type" name="listing_type" required>
-            <option value="" disabled {{ old('listing_type') ? '' : 'selected' }}>Is it for rent or for sale?</option>
-            <option value="rent" {{ old('listing_type') === 'rent' ? 'selected' : '' }}>For Rent</option>
-            <option value="sale" {{ old('listing_type') === 'sale' ? 'selected' : '' }}>For Sale</option>
-          </select>
-          @error('listing_type') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
-      </div>
-
       {{-- ================= LOCATION ================= --}}
       <div class="inside-form-section">
         <h1 class="form-section-title">Location</h1>
-
-        <div class="form-input">
-          <label for="country" class="inputs-label">Country</label>
-          <select
-            id="country"
-            name="country"
-            placeholder="Select country"
-            style="width: 100%;"
-            data-placeholder="Search or select a country…"
-            data-old-value="{{ old('country') }}"
-            aria-label="Country"
-            required
-          >
-            <option value="">Select Country</option>
-            {{-- Select2 will fill options. Keep old value via JS if needed --}}
-          </select>
-          <small>Start typing to search your country.</small>
-          @error('country') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
-
-        <div class="form-input">
-          <label for="city" class="inputs-label">City</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value="{{ old('city') }}"
-            placeholder="e.g. Beirut"
-            autocomplete="address-level2"
-            required
-          >
-          @error('city') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
-
-        <div class="form-input">
-          <label for="address" class="inputs-label">Address</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value="{{ old('address') }}"
-            placeholder="Street, building, floor, apartment number"
-            autocomplete="street-address"
-            required
-          >
-          <small>Don't include sensitive info you don't want public.</small>
-          @error('address') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
-
         {{-- Hidden fields for coordinates --}}
         <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
         <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}">
@@ -145,107 +95,110 @@
         {{-- Map for selecting location --}}
         <div class="form-input">
           <label class="inputs-label">Select Location on Map</label>
-          <div style="margin-bottom: 10px;">
-            <button type="button" id="enableMapClick" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+          <div class="map-controls">
+            <button type="button" id="enableMapClick">
               📍 Click on Map to Set Location
             </button>
-            <span id="coordinatesStatus" style="margin-left: 10px; font-size: 14px; color: #6b7280;"></span>
+            <span id="coordinatesStatus"></span>
           </div>
-          <div id="property-location-map" style="width: 100%; height: 400px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 10px;"></div>
+          <div id="property-location-map"></div>
           <small>Click on the map to set your property's exact location. This will automatically fill the coordinates.</small>
           @error('latitude') <small class="text-danger">{{ $message }}</small> @enderror
           @error('longitude') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
       </div>
+     
 
       {{-- ================= DETAILS ================= --}}
-      <div class="inside-form-section">
-        <h1 class="form-section-title">Details</h1>
+      <div class="details">
+        <div class="inside-form-section">
+          <h1 class="form-section-title">Details</h1>
 
-        <div class="form-input">
-          <label for="price" class="inputs-label">Price</label>
-          <label for="unit">Unit</label>
-          <div>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value="{{ old('price') }}"
-            placeholder="e.g. 750 (monthly) or 145000 (sale)"
-            inputmode="decimal"
-            min="0"
-            step="0.01"
-            required
-          >
-          <select name="unit" id="unit">
-            @foreach($units as $unit)
-            <option value="{{ $unit->id }}" {{ old('unit') == $unit->id ? 'selected' : '' }}>{{ $unit->code }}</option>
-            @endforeach
-          </select>
+          <div class="form-input">
+            <label for="price" class="inputs-label">Price</label>
+            <label for="unit">Unit</label>
+            <div class="row">
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value="{{ old('price') }}"
+                placeholder="e.g. 750 (monthly) or 145000 (sale)"
+                inputmode="decimal"
+                min="0"
+                step="0.01"
+                required
+              >
+              <select name="unit" id="unit">
+                @foreach($units as $unit)
+                <option value="{{ $unit->id }}" {{ old('unit') == $unit->id ? 'selected' : '' }}>{{ $unit->code }}</option>
+                @endforeach
+              </select>
+            </div>
+            <small>Enter a numeric value only (currency handled elsewhere).</small>
+            @error('price') <small class="text-danger">{{ $message }}</small> @enderror
           </div>
-          <small>Enter a numeric value only (currency handled elsewhere).</small>
-          @error('price') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
+          <div class="row">
+            <div class="form-input">
+              <label for="area_m3" class="inputs-label">Area (m²)</label>
+              <input
+                type="number"
+                id="area_m3"
+                name="area_m3"
+                value="{{ old('area_m3') }}"
+                placeholder="e.g. 95"
+                inputmode="decimal"
+                min="0"
+                step="0.1"
+                required
+              >
+              @error('area_m3') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
 
-        <div class="form-input">
-          <label for="area_m3" class="inputs-label">Area (m²)</label>
-          <input
-            type="number"
-            id="area_m3"
-            name="area_m3"
-            value="{{ old('area_m3') }}"
-            placeholder="e.g. 95"
-            inputmode="decimal"
-            min="0"
-            step="0.1"
-            required
-          >
-          @error('area_m3') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
+            <div class="form-input">
+              <label for="room_nb" class="inputs-label">Rooms</label>
+              <input
+                type="number"
+                id="room_nb"
+                name="room_nb"
+                value="{{ old('room_nb') }}"
+                placeholder="e.g. 4"
+                inputmode="numeric"
+                min="0"
+                required
+              >
+              @error('room_nb') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
+            <div class="form-input">
+              <label for="bathroom_nb" class="inputs-label">Bathrooms</label>
+              <input
+                type="number"
+                id="bathroom_nb"
+                name="bathroom_nb"
+                value="{{ old('bathroom_nb') }}"
+                placeholder="e.g. 2"
+                inputmode="numeric"
+                min="0"
+                required
+              >
+              @error('bathroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
 
-        <div class="form-input">
-          <label for="room_nb" class="inputs-label">Number of Rooms</label>
-          <input
-            type="number"
-            id="room_nb"
-            name="room_nb"
-            value="{{ old('room_nb') }}"
-            placeholder="e.g. 4"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          @error('room_nb') <small class="text-danger">{{ $message }}</small> @enderror
+            <div class="form-input">
+              <label for="bedroom_nb" class="inputs-label">Bedrooms</label>
+              <input
+                type="number"
+                id="bedroom_nb"
+                name="bedroom_nb"
+                value="{{ old('bedroom_nb') }}"
+                placeholder="e.g. 3"
+                inputmode="numeric"
+                min="0"
+                required
+              >
+              @error('bedroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
         </div>
-
-        <div class="form-input">
-          <label for="bathroom_nb" class="inputs-label">Number of Bathrooms</label>
-          <input
-            type="number"
-            id="bathroom_nb"
-            name="bathroom_nb"
-            value="{{ old('bathroom_nb') }}"
-            placeholder="e.g. 2"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          @error('bathroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
-
-        <div class="form-input">
-          <label for="bedroom_nb" class="inputs-label">Number of Bedrooms</label>
-          <input
-            type="number"
-            id="bedroom_nb"
-            name="bedroom_nb"
-            value="{{ old('bedroom_nb') }}"
-            placeholder="e.g. 3"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          @error('bedroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
 
         {{-- Amenities as pills (unchanged titles / structure) --}}

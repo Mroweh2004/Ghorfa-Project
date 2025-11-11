@@ -77,104 +77,51 @@
           @error('description') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
 
-        <div class="form-input">
-          <label for="property_type" class="inputs-label">Property Type</label>
-          @php
-            $propertyOptions = [
-              ['value' => 'apartment', 'label' => 'Apartment'],
-              ['value' => 'house', 'label' => 'House'],
-              ['value' => 'villa', 'label' => 'Villa'],
-              ['value' => 'dorm', 'label' => 'Dorm'],
-              ['value' => 'other', 'label' => 'Other'],
-            ];
-            $currentType = old('property_type', $property->property_type);
-          @endphp
-          <select id="property_type" name="property_type" required>
-            <option value="" disabled {{ $currentType ? '' : 'selected' }}>Choose a property type...</option>
-            @foreach($propertyOptions as $option)
-              <option
-                value="{{ $option['value'] }}"
-                {{ $currentType && strcasecmp($currentType, $option['value']) === 0 ? 'selected' : '' }}
-              >
-                {{ $option['label'] }}
-              </option>
-            @endforeach
-          </select>
-          <small>Select the closest fit.</small>
-          @error('property_type') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
+        <div class="row">
+          <div class="form-input">
+            <label for="property_type" class="inputs-label">Property Type</label>
+            @php
+              $propertyOptions = [
+                ['value' => 'apartment', 'label' => 'Apartment'],
+                ['value' => 'house', 'label' => 'House'],
+                ['value' => 'villa', 'label' => 'Villa'],
+                ['value' => 'dorm', 'label' => 'Dorm'],
+                ['value' => 'other', 'label' => 'Other'],
+              ];
+              $currentType = old('property_type', $property->property_type);
+            @endphp
+            <select id="property_type" name="property_type" required>
+              <option value="" disabled {{ $currentType ? '' : 'selected' }}>Choose a property type…</option>
+              @foreach($propertyOptions as $option)
+                <option
+                  value="{{ $option['value'] }}"
+                  {{ $currentType && strcasecmp($currentType, $option['value']) === 0 ? 'selected' : '' }}
+                >
+                  {{ $option['label'] }}
+                </option>
+              @endforeach
+            </select>
+            @error('property_type') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
 
-        <div class="form-input">
-          <label for="listing_type" class="inputs-label">Listing Type</label>
-          @php
-            $currentListing = old('listing_type', $property->listing_type);
-          @endphp
-          <select id="listing_type" name="listing_type" required>
-            <option value="" disabled {{ $currentListing ? '' : 'selected' }}>Is it for rent or for sale?</option>
-            <option value="rent" {{ $currentListing && strcasecmp($currentListing, 'rent') === 0 ? 'selected' : '' }}>For Rent</option>
-            <option value="sale" {{ $currentListing && strcasecmp($currentListing, 'sale') === 0 ? 'selected' : '' }}>For Sale</option>
-          </select>
-          @error('listing_type') <small class="text-danger">{{ $message }}</small> @enderror
+          <div class="form-input">
+            <label for="listing_type" class="inputs-label">Listing Type</label>
+            @php
+              $currentListing = old('listing_type', $property->listing_type);
+            @endphp
+            <select id="listing_type" name="listing_type" required>
+              <option value="" disabled {{ $currentListing ? '' : 'selected' }}>Is it for rent or for sale?</option>
+              <option value="rent" {{ $currentListing && strcasecmp($currentListing, 'rent') === 0 ? 'selected' : '' }}>For Rent</option>
+              <option value="sale" {{ $currentListing && strcasecmp($currentListing, 'sale') === 0 ? 'selected' : '' }}>For Sale</option>
+            </select>
+            @error('listing_type') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
         </div>
       </div>
 
       {{-- ================= LOCATION ================= --}}
       <div class="inside-form-section">
         <h1 class="form-section-title">Location</h1>
-
-        @php
-          $countryValue = old('country', $property->country);
-        @endphp
-        <div class="form-input">
-          <label for="country" class="inputs-label">Country</label>
-          <select
-            id="country"
-            name="country"
-            placeholder="Select country"
-            style="width: 100%;"
-            data-placeholder="Search or select a country..."
-            data-old-value="{{ $countryValue }}"
-            aria-label="Country"
-            required
-          >
-            <option value="">Select Country</option>
-            @if($countryValue)
-              <option value="{{ $countryValue }}" selected>{{ $countryValue }}</option>
-            @endif
-          </select>
-          <small>Start typing to search your country.</small>
-          @error('country') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
-
-        <div class="form-input">
-          <label for="city" class="inputs-label">City</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value="{{ old('city', $property->city) }}"
-            placeholder="e.g. Beirut"
-            autocomplete="address-level2"
-            required
-          >
-          @error('city') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
-
-        <div class="form-input">
-          <label for="address" class="inputs-label">Address</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value="{{ old('address', $property->address) }}"
-            placeholder="Street, building, floor, apartment number"
-            autocomplete="street-address"
-            required
-          >
-          <small>Do not include sensitive info you do not want public.</small>
-          @error('address') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
-
         {{-- Hidden fields for coordinates --}}
         <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $property->latitude) }}">
         <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $property->longitude) }}">
@@ -182,13 +129,13 @@
         {{-- Map for selecting location --}}
         <div class="form-input">
           <label class="inputs-label">Select Location on Map</label>
-          <div style="margin-bottom: 10px;">
-            <button type="button" id="enableMapClick" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+          <div class="map-controls">
+            <button type="button" id="enableMapClick">
               📍 Click on Map to Set Location
             </button>
-            <span id="coordinatesStatus" style="margin-left: 10px; font-size: 14px; color: #6b7280;"></span>
+            <span id="coordinatesStatus"></span>
           </div>
-          <div id="property-location-map" style="width: 100%; height: 400px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 10px;"></div>
+          <div id="property-location-map"></div>
           <small>Click on the map to set your property's exact location. This will automatically fill the coordinates.</small>
           @error('latitude') <small class="text-danger">{{ $message }}</small> @enderror
           @error('longitude') <small class="text-danger">{{ $message }}</small> @enderror
@@ -202,7 +149,7 @@
         <div class="form-input">
           <label for="price" class="inputs-label">Price</label>
           <label for="unit">Unit</label>
-          <div>
+          <div class="row">
             <input
               type="number"
               id="price"
@@ -230,65 +177,67 @@
           @error('unit') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
 
-        <div class="form-input">
-          <label for="area_m3" class="inputs-label">Area (m²)</label>
-          <input
-            type="number"
-            id="area_m3"
-            name="area_m3"
-            value="{{ old('area_m3', $property->area_m3) }}"
-            placeholder="e.g. 95"
-            inputmode="decimal"
-            min="0"
-            step="0.1"
-            required
-          >
-          @error('area_m3') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
+        <div class="row">
+          <div class="form-input">
+            <label for="area_m3" class="inputs-label">Area (m²)</label>
+            <input
+              type="number"
+              id="area_m3"
+              name="area_m3"
+              value="{{ old('area_m3', $property->area_m3) }}"
+              placeholder="e.g. 95"
+              inputmode="decimal"
+              min="0"
+              step="0.1"
+              required
+            >
+            @error('area_m3') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
 
-        <div class="form-input">
-          <label for="room_nb" class="inputs-label">Number of Rooms</label>
-          <input
-            type="number"
-            id="room_nb"
-            name="room_nb"
-            value="{{ old('room_nb', $property->room_nb) }}"
-            placeholder="e.g. 4"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          @error('room_nb') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
+          <div class="form-input">
+            <label for="room_nb" class="inputs-label">Rooms</label>
+            <input
+              type="number"
+              id="room_nb"
+              name="room_nb"
+              value="{{ old('room_nb', $property->room_nb) }}"
+              placeholder="e.g. 4"
+              inputmode="numeric"
+              min="0"
+              required
+            >
+            @error('room_nb') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
 
-        <div class="form-input">
-          <label for="bathroom_nb" class="inputs-label">Number of Bathrooms</label>
-          <input
-            type="number"
-            id="bathroom_nb"
-            name="bathroom_nb"
-            value="{{ old('bathroom_nb', $property->bathroom_nb) }}"
-            placeholder="e.g. 2"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          @error('bathroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
-        </div>
+          <div class="form-input">
+            <label for="bathroom_nb" class="inputs-label">Bathrooms</label>
+            <input
+              type="number"
+              id="bathroom_nb"
+              name="bathroom_nb"
+              value="{{ old('bathroom_nb', $property->bathroom_nb) }}"
+              placeholder="e.g. 2"
+              inputmode="numeric"
+              min="0"
+              required
+            >
+            @error('bathroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
 
-        <div class="form-input">
-          <label for="bedroom_nb" class="inputs-label">Number of Bedrooms</label>
-          <input
-            type="number"
-            id="bedroom_nb"
-            name="bedroom_nb"
-            value="{{ old('bedroom_nb', $property->bedroom_nb) }}"
-            placeholder="e.g. 3"
-            inputmode="numeric"
-            min="0"
-            required
-          >
-          @error('bedroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
+          <div class="form-input">
+            <label for="bedroom_nb" class="inputs-label">Bedrooms</label>
+            <input
+              type="number"
+              id="bedroom_nb"
+              name="bedroom_nb"
+              value="{{ old('bedroom_nb', $property->bedroom_nb) }}"
+              placeholder="e.g. 3"
+              inputmode="numeric"
+              min="0"
+              required
+            >
+            @error('bedroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
         </div>
 
         {{-- Amenities as pills --}}
@@ -486,12 +435,12 @@ function initEditPropertyLocationMap() {
                 editPropertyMapClickService.disable();
                 enableButton.textContent = '📍 Click on Map to Set Location';
                 enableButton.style.background = '#3b82f6';
-                coordsDisplay.style.display = 'none';
+                coordsDisplay.textContent = '';
             } else {
                 editPropertyMapClickService.enable();
                 enableButton.textContent = '✓ Click Mode Active - Click on Map';
                 enableButton.style.background = '#10b981';
-                coordsDisplay.style.display = 'block';
+                coordsDisplay.textContent = 'Click anywhere on the map to set location';
                 // Ensure cursor is pointer when enabled - set on map container
                 editPropertyLocationMap.setOptions({ cursor: 'pointer' });
                 const mapContainer = document.getElementById('property-location-map');
@@ -507,7 +456,7 @@ function initEditPropertyLocationMap() {
             editPropertyMapClickService.enable();
             enableButton.textContent = '✓ Click Mode Active - Click on Map';
             enableButton.style.background = '#10b981';
-            coordsDisplay.style.display = 'block';
+            coordsDisplay.textContent = 'Click anywhere on the map to set location';
             // Ensure cursor is pointer when enabled - set on map container
             editPropertyLocationMap.setOptions({ cursor: 'pointer' });
             const mapContainer = document.getElementById('property-location-map');
@@ -516,7 +465,6 @@ function initEditPropertyLocationMap() {
             }
         } else {
             // Show current coordinates status
-            coordsDisplay.style.display = 'block';
             updateCoordinatesStatus(oldLat, oldLng, true);
         }
     }

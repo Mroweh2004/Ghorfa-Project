@@ -40,7 +40,9 @@ function initMap() {
 
     console.log('Map initialized:', map);
 
-    infoWindow = new google.maps.InfoWindow();
+    infoWindow = new google.maps.InfoWindow({
+        disableAutoPan: false
+    });
 
     // Add markers for each property
     addPropertyMarkers();
@@ -139,6 +141,10 @@ function addPropertyMarkers() {
             const infoContent = createInfoWindowContent(property);
             
             marker.addListener('click', () => {
+                // Close any previously open InfoWindow
+                if (infoWindow) {
+                    infoWindow.close();
+                }
                 infoWindow.setContent(infoContent);
                 infoWindow.open(map, marker);
             });
@@ -161,27 +167,48 @@ function createInfoWindowContent(property) {
         : null;
     
     // Get storage URL and placeholder from window config (set by Blade template)
-    const storageUrl = window.mapConfig?.storageUrl || '';
-    const placeholderUrl = window.mapConfig?.placeholderUrl || '';
+    // Fallback to default values if not configured
+    const storageUrl = window.mapConfig?.storageUrl || '/storage';
+    const placeholderUrl = window.mapConfig?.placeholderUrl || '/img/background.jpg';
+    
+    // Log warnings if config is missing (for debugging)
+    if (!window.mapConfig) {
+        console.warn('mapConfig not found in window object. Using fallback values.');
+    } else {
+        if (!window.mapConfig.storageUrl) {
+            console.warn('storageUrl not found in mapConfig. Using fallback: /storage');
+        }
+        if (!window.mapConfig.placeholderUrl) {
+            console.warn('placeholderUrl not found in mapConfig. Using fallback: /img/background.jpg');
+        }
+    }
 
-    const imageUrl = primaryImage 
-        ? `${storageUrl}/${primaryImage.path}`
-        : placeholderUrl;
+    // Construct image URL - handle path properly (remove leading slash if storageUrl has trailing slash)
+    let imageUrl;
+    if (primaryImage && primaryImage.path) {
+        const cleanStorageUrl = storageUrl.endsWith('/') ? storageUrl.slice(0, -1) : storageUrl;
+        const cleanImagePath = primaryImage.path.startsWith('/') ? primaryImage.path.slice(1) : primaryImage.path;
+        imageUrl = `${cleanStorageUrl}/${cleanImagePath}`;
+    } else {
+        imageUrl = placeholderUrl;
+    }
 
     return `
         <div class="property-info">
-            ${primaryImage ? `<img src="${imageUrl}" alt="${property.title}">` : ''}
-            <div class="property-title">${property.title}</div>
-            <div class="property-price">$${property.price.toLocaleString()} ${property.unit ? property.unit.symbol : ''}</div>
-            <div class="property-location">${property.city}, ${property.country}</div>
-            <div class="property-details">
-                ${property.bedroom_nb ? property.bedroom_nb + ' bed' : ''} • 
-                ${property.bathroom_nb ? property.bathroom_nb + ' bath' : ''} • 
-                ${property.area_m3 ? property.area_m3 + ' m²' : ''}
-            </div>
-            <div class="property-actions">
-                <a href="/properties/${property.id}" class="btn-view">View Details</a>
-                <button class="btn-like" onclick="toggleLike(${property.id})">❤️ Like</button>
+            <img src="${imageUrl}" alt="${property.title || 'Property image'}">
+            <div class="property-info-content">
+                <div class="property-title">${property.title}</div>
+                <div class="property-price">$${property.price.toLocaleString()} ${property.unit ? property.unit.symbol : ''}</div>
+                <div class="property-location">${property.city}, ${property.country}</div>
+                <div class="property-details">
+                    ${property.bedroom_nb ? property.bedroom_nb + ' bed' : ''} • 
+                    ${property.bathroom_nb ? property.bathroom_nb + ' bath' : ''} • 
+                    ${property.area_m3 ? property.area_m3 + ' m²' : ''}
+                </div>
+                <div class="property-actions">
+                    <a href="/properties/${property.id}" class="btn-view">View Details</a>
+                    <button class="btn-like" onclick="toggleLike(${property.id}, this)">❤️ Like</button>
+                </div>
             </div>
         </div>
     `;
@@ -241,10 +268,66 @@ function clearFilters() {
     window.location.href = mapRoute;
 }
 
-function toggleLike(propertyId) {
-    // This would typically make an AJAX call to like/unlike the property
-    console.log('Toggle like for property:', propertyId);
-    // You can implement the actual like functionality here
+async function toggleLike(propertyId, buttonElement) {
+    if (!buttonElement) {
+        console.error('Button element not provided');
+        return;
+    }
+
+    // Check if user is authenticated
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        alert('Please log in to like properties');
+        return;
+    }
+
+    // Add loading state
+    buttonElement.disabled = true;
+    buttonElement.style.opacity = '0.6';
+    const originalText = buttonElement.textContent;
+    buttonElement.textContent = '...';
+
+    try {
+        const response = await fetch(`/properties/${propertyId}/like`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken.content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                alert('Please log in to like properties');
+                return;
+            }
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+
+        if (data.status === 'liked') {
+            buttonElement.textContent = '❤️ Liked';
+            buttonElement.style.background = '#dc2626';
+        } else {
+            buttonElement.textContent = '❤️ Like';
+            buttonElement.style.background = '#ef4444';
+        }
+
+        buttonElement.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            buttonElement.style.transform = 'scale(1)';
+        }, 200);
+
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        alert('Failed to like property. Please try again.');
+        buttonElement.textContent = originalText;
+    } finally {
+        buttonElement.disabled = false;
+        buttonElement.style.opacity = '1';
+    }
 }
 
 // Handle window resize

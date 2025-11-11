@@ -41,44 +41,139 @@
      Content + form container
   ========================= */
   .content-section{
-    width:80%; margin:15px auto; background:var(--white);
-    padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,.1);
+    width:90%; max-width:900px; margin:15px auto; background:var(--white);
+    padding:30px 40px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.08);
   }
-  .listing-form{ width:100%; margin:auto; padding:20px; background:var(--white); }
-  .inside-form-section + .inside-form-section{ margin-top:16px; }
+  .listing-form{ width:100%; margin:auto; padding:0; background:var(--white); }
+  .form-content{ max-width:100%; }
+  .inside-form-section + .inside-form-section{ margin-top:24px; }
   
   /* =========================
      Inputs
   ========================= */
+  .form-input{
+    margin-bottom:20px;
+  }
+  
+  /* Single full-width inputs (title, description, address) */
+  .form-input > input[type="text"],
+  .form-input > textarea,
+  .form-input > select{
+    max-width:100%; width:100%;
+  }
+  
+  /* Inputs in rows get constrained width */
+  .row .form-input > input,
+  .row .form-input > select{
+    max-width:100%; width:100%;
+  }
+  
   input, textarea, select{
-    padding:10px 12px; margin:6px 0 18px;
-    border:1.5px solid var(--border); border-radius:6px;
-    background:var(--input-bg); font-size:1rem;
-    transition:border-color .2s, box-shadow .2s, background .2s;
-    box-sizing:border-box; width:100%;
+    padding:12px 16px; margin:6px 0 12px;
+    border:1.5px solid var(--border); border-radius:8px;
+    background:var(--input-bg); font-size:0.95rem;
+    transition:all .2s ease;
+    box-sizing:border-box;
   }
+  
   input:focus, textarea:focus, select:focus{
-    border-color:#2196f3; box-shadow:var(--ring); outline:none; background:var(--white);
+    border-color:#2196f3; box-shadow:0 0 0 3px rgba(33,150,243,.1); outline:none; background:var(--white);
+    transform:translateY(-1px);
   }
-  textarea{ min-height:80px; resize:vertical; }
+  
+  textarea{ 
+    min-height:100px; resize:vertical; 
+    font-family:inherit; line-height:1.5;
+  }
+  
   #unit{
-    width:10% ;
+    max-width:120px; width:auto; min-width:100px;
   }
   
   .inputs-label{
-    display:block; margin-bottom:4px; font-weight:500;
-    color:var(--text-weak); letter-spacing:.5px;
+    display:block; margin-bottom:6px; font-weight:600;
+    color:var(--text-weak); letter-spacing:.3px; font-size:0.9rem;
   }
   
   .form-section-title{
-    margin:24px 0 12px; padding-left:10px;
-    font-size:1.4rem; font-weight:600; letter-spacing:.5px;
+    margin:28px 0 16px; padding:12px 16px;
+    font-size:1.3rem; font-weight:600; letter-spacing:.3px;
     color:var(--secondary); border-left:4px solid var(--secondary);
-    background:#e9f1f8; border-radius:4px;
+    background:#e9f1f8; border-radius:6px;
   }
-  .form-input{ margin-bottom:18px; }
   
-  small{ display:block; margin-top:2px; font-size:.95em; color:#888; }
+  .row{
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .row .form-input{
+    flex: 1 1 auto;
+    min-width: 200px;
+  }
+  
+  /* Price row - inputs directly in row */
+  .row > input[type="number"]{
+    flex: 2 1 auto;
+    min-width: 250px;
+    max-width: 100%;
+  }
+  
+  .row > select{
+    flex: 0 0 auto;
+    min-width: 120px;
+  }
+  
+  small{ 
+    display:block; margin-top:4px; font-size:0.85rem; color:#6b7280; 
+    line-height:1.4;
+  }
+  
+  /* =========================
+     Map controls
+  ========================= */
+  .map-controls{
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  #property-location-map{
+    width: 100% !important;
+    height: 400px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    margin-top: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+  
+  #enableMapClick{
+    padding: 10px 18px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all .2s ease;
+    box-shadow: 0 2px 4px rgba(59,130,246,.2);
+  }
+  
+  #enableMapClick:hover{
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59,130,246,.3);
+  }
+  
+  #coordinatesStatus{
+    font-size: 14px;
+    font-weight: 500;
+  }
   
   /* =========================
      File upload
@@ -242,6 +337,7 @@
   /* =========================
      Property details
   ========================= */
+
   .property-container{ max-width:1200px; margin:2rem auto; padding:0 1rem; }
   .property-information{ margin:2rem 0; line-height:1.6; }
   .property-images-grid{
@@ -324,18 +420,49 @@
      Responsive
   ========================= */
   @media (max-width:900px){
-    .content-section{ width:80%; padding:12px; }
+    .content-section{ 
+      width:95%; max-width:100%; 
+      padding:24px 20px; 
+    }
+    .row{
+      flex-direction: column;
+      gap: 0;
+    }
+    .row .form-input{
+      min-width: 100%;
+    }
   }
+  
   @media (max-width:600px){
-    .content-section{ width:98%; padding:6px; }
+    .content-section{ 
+      width:98%; 
+      padding:20px 16px; 
+    }
     .title-section h1{ font-size:2rem; }
-    .form-section-title{ font-size:1.1rem; }
-    .amenities-grid{ grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:8px; }
+    .form-section-title{ 
+      font-size:1.1rem; 
+      padding:10px 12px;
+      margin:20px 0 12px;
+    }
+    input, textarea, select{
+      padding:10px 14px;
+      font-size:0.9rem;
+    }
+    .amenities-grid{ 
+      grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); 
+      gap:8px; 
+    }
     .amenity{ padding:9px 11px; min-height:38px; }
     .amenity .amenity-text{ font-size:.93rem; }
-    .rule-grid{ grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:8px; }
+    .rule-grid{ 
+      grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); 
+      gap:8px; 
+    }
     .rule{ padding:9px 11px; min-height:38px; }
     .rule .rule-text{ font-size:.93rem; }
+    #unit{
+      max-width:100%; width:100%;
+    }
   }
   
   /* Optional: tiny keyframe you referenced */

@@ -22,6 +22,8 @@ return new class extends Migration
             $table->unsignedInteger('room_nb')->nullable();
             $table->unsignedInteger('bathroom_nb')->nullable();
             $table->unsignedInteger('bedroom_nb')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable(); // Coordinates - nullable for backward compatibility but required in validation
+            $table->decimal('longitude', 11, 8)->nullable(); // Coordinates - nullable for backward compatibility but required in validation
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

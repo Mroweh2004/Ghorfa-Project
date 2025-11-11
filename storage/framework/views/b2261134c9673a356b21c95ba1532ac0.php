@@ -58,7 +58,6 @@
         </form>
     </div>
 
-    <!-- Map Container -->
     <div class="map-container">
         <div id="map"></div>
     </div>
@@ -74,7 +73,7 @@
     window.mapConfig = {
         reverseGeocodeEndpoint: '<?php echo e(route("map.reverse-geocode")); ?>',
         storageUrl: '<?php echo e(asset("storage")); ?>',
-        placeholderUrl: '<?php echo e(asset("img/placeholder.jpg")); ?>',
+        placeholderUrl: '<?php echo e(asset("img/background.jpg")); ?>',
         mapRoute: '<?php echo e(route("map")); ?>'
     };
 

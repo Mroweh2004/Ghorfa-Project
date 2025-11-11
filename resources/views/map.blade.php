@@ -60,7 +60,6 @@
         </form>
     </div>
 
-    <!-- Map Container -->
     <div class="map-container">
         <div id="map"></div>
     </div>
@@ -76,7 +75,7 @@
     window.mapConfig = {
         reverseGeocodeEndpoint: '{{ route("map.reverse-geocode") }}',
         storageUrl: '{{ asset("storage") }}',
-        placeholderUrl: '{{ asset("img/placeholder.jpg") }}',
+        placeholderUrl: '{{ asset("img/background.jpg") }}',
         mapRoute: '{{ route("map") }}'
     };
 

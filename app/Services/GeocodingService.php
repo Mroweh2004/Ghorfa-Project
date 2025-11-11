@@ -37,10 +37,24 @@ class GeocodingService
 
             if ($data['status'] === 'OK' && !empty($data['results'])) {
                 $location = $data['results'][0]['geometry']['location'];
+                $result = $data['results'][0];
+                $addressComponents = $result['address_components'] ?? [];
+                
+                // Extract address components
+                $country = $this->extractAddressComponent($addressComponents, 'country');
+                $city = $this->extractAddressComponent($addressComponents, 'locality') 
+                     ?? $this->extractAddressComponent($addressComponents, 'administrative_area_level_1');
+                $streetNumber = $this->extractAddressComponent($addressComponents, 'street_number');
+                $route = $this->extractAddressComponent($addressComponents, 'route');
+                $address = trim(($streetNumber ?? '') . ' ' . ($route ?? ''));
+                
                 return [
                     'latitude' => $location['lat'],
                     'longitude' => $location['lng'],
-                    'formatted_address' => $data['results'][0]['formatted_address']
+                    'formatted_address' => $result['formatted_address'],
+                    'country' => $country,
+                    'city' => $city,
+                    'address' => $address ?: ($result['formatted_address'] ?? '')
                 ];
             }
 
@@ -114,5 +128,22 @@ class GeocodingService
             ]);
             return null;
         }
+    }
+
+    /**
+     * Extract a specific address component from address_components array
+     *
+     * @param array $addressComponents
+     * @param string $type
+     * @return string|null
+     */
+    private function extractAddressComponent(array $addressComponents, string $type): ?string
+    {
+        foreach ($addressComponents as $component) {
+            if (in_array($type, $component['types'] ?? [])) {
+                return $component['long_name'] ?? null;
+            }
+        }
+        return null;
     }
 }
