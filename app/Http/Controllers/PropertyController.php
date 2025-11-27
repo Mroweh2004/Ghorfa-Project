@@ -33,7 +33,6 @@ class PropertyController extends Controller
         $rules = Rule::all();
         $query = Property::query();
 
-        // Location
         if ($request->filled('location')) {
             $location = $request->input('location');
             $query->where(function($q) use ($location) {
@@ -43,7 +42,6 @@ class PropertyController extends Controller
             });
         }
 
-        // Price Range
         if ($request->filled('min-price')) {
             $query->where('price', '>=', $request->input('min-price'));
         }
@@ -51,33 +49,27 @@ class PropertyController extends Controller
             $query->where('price', '<=', $request->input('max-price'));
         }
 
-        // Property Type
         if ($request->has('property_type')) {
             $query->whereIn('property_type', (array)$request->input('property_type'));
         }
 
-        // Listing Type
         if ($request->has('listing_type')) {
             $query->whereIn('listing_type', (array)$request->input('listing_type'));
         }
 
-        // Amenities (expects amenities[] as array of amenity IDs)
         if ($request->has('amenities')) {
             $amenitiesInput = (array)$request->input('amenities');
-            // Extract IDs if input is array of objects (JSON strings)
             $amenityIds = array_map(function($item) {
                 if (is_array($item)) {
                     return $item['id'] ?? null;
                 }
-                // If item is a JSON string, decode it
                 if (is_string($item) && str_starts_with($item, '{')) {
                     $decoded = json_decode($item, true);
                     return $decoded['id'] ?? null;
                 }
-                // Otherwise, assume it's an ID
                 return $item;
             }, $amenitiesInput);
-            $amenityIds = array_filter($amenityIds); // Remove nulls
+            $amenityIds = array_filter($amenityIds);
             if (count($amenityIds) > 0) {
                 $query->whereHas('amenities', function($q) use ($amenityIds) {
                     $q->whereIn('amenities.id', $amenityIds);
@@ -85,27 +77,23 @@ class PropertyController extends Controller
             }
         }
 
-        // Rules (expects rules[] as array of rule titles)
         if ($request->has('rules')) {
             $rulesInput = (array)$request->input('rules');
-            // Extract titles if input is array of objects (JSON strings)
-            $ruleTitles = array_map(function($item) {
+            $ruleNames = array_map(function($item) {
                 if (is_array($item)) {
-                    return $item['title'] ?? null;
+                    return $item['name'] ?? $item['title'] ?? null;
                 }
-                // If item is a JSON string, decode it
                 if (is_string($item) && str_starts_with($item, '{')) {
                     $decoded = json_decode($item, true);
-                    return $decoded['title'] ?? null;
+                    return $decoded['name'] ?? $decoded['title'] ?? null;
                 }
-                // Otherwise, assume it's a title
                 return $item;
             }, $rulesInput);
-            $ruleTitles = array_filter($ruleTitles); // Remove nulls
-            if (count($ruleTitles) > 0) {
-                $query->whereHas('rules', function($q) use ($ruleTitles) {
-                    $q->whereIn('rules.title', $ruleTitles);
-                }, '=', count($ruleTitles)); // Only properties with ALL selected rules
+            $ruleNames = array_filter($ruleNames);
+            if (count($ruleNames) > 0) {
+                $query->whereHas('rules', function($q) use ($ruleNames) {
+                    $q->whereIn('rules.name', $ruleNames);
+                }, '=', count($ruleNames));
             }
         }
 
@@ -136,7 +124,6 @@ class PropertyController extends Controller
     {
         $property->load(['images', 'reviews.user']);
         
-        // Calculate review statistics
         $avgRating = $property->average_rating;
         $reviewsCount = $property->reviews_count;
         
@@ -148,7 +135,6 @@ class PropertyController extends Controller
      */
     public function edit(Property $property)
     {
-        // Allow admin users to edit any property
         if (Auth::check() && (Auth::user()->role === 'admin' || $property->user_id === Auth::id())) {
             $amenities = Amenity::all();
             $rules = Rule::all();
@@ -188,15 +174,12 @@ class PropertyController extends Controller
             'bathroom_nb'   => 'required|integer|min:0',
             'bedroom_nb'    => 'required|integer|min:0',
 
-            // coordinates (optional - will use if provided, otherwise geocode)
             'latitude'      => 'required|numeric|between:-90,90',
             'longitude'     => 'required|numeric|between:-180,180',
 
-            // optional images
             'images'        => 'nullable|array',
             'images.*'      => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
 
-            // pivots
             'amenities'     => 'nullable|array',
             'amenities.*'   => 'integer|exists:amenities,id',
             'rules'         => 'nullable|array',
@@ -211,20 +194,16 @@ class PropertyController extends Controller
             $validated['unit_id'] = $validated['unit'];
             unset($validated['unit'], $validated['images'], $validated['remove_images']);
 
-            // Use provided coordinates if available, otherwise geocode from address
             if (isset($validated['latitude']) && isset($validated['longitude']) 
                 && !empty($validated['latitude']) && !empty($validated['longitude'])) {
-                // Use coordinates provided by map click
                 $validated['latitude'] = (float) $validated['latitude'];
                 $validated['longitude'] = (float) $validated['longitude'];
             } else {
-                // Fallback to geocoding from address if location fields changed
                 if ($this->shouldGeocode($property, $validated)) {
                     $coordinates = $this->geocodeAddress($validated);
                     if ($coordinates) {
                         $validated['latitude'] = $coordinates['latitude'];
                         $validated['longitude'] = $coordinates['longitude'];
-                        // Extract country, city, and address from geocoding result
                         if (isset($coordinates['country']) && !isset($validated['country'])) {
                             $validated['country'] = $coordinates['country'];
                         }
@@ -238,10 +217,8 @@ class PropertyController extends Controller
                 }
             }
 
-            // update main fields
             $property->update($validated);
 
-            // sync amenities / rules (empty array clears selections)
             $property->amenities()->sync((array)$request->input('amenities', []));
             $property->rules()->sync((array)$request->input('rules', []));
 
@@ -269,7 +246,6 @@ class PropertyController extends Controller
                 }
             }
 
-            // new images (append)
             if ($request->hasFile('images')) {
                 $hasPrimary = $property->images()->where('is_primary', true)->exists();
                 foreach ($request->file('images') as $image) {
@@ -277,7 +253,7 @@ class PropertyController extends Controller
                     PropertyImage::create([
                         'property_id' => $property->id,
                         'path'        => $path,
-                        'is_primary'  => !$hasPrimary && !$property->images()->exists(), // if none exists, set first new as primary
+                        'is_primary'  => !$hasPrimary && !$property->images()->exists(),
                     ]);
                     $hasPrimary = $hasPrimary || true;
                 }
@@ -314,7 +290,6 @@ class PropertyController extends Controller
 
     public function submitListing(Request $request)
     {
-        // Check images first
         if (!$request->hasFile('images')) {
             Log::error('No images uploaded');
             return back()->withErrors(['images' => 'Please upload at least one image.'])->withInput();
@@ -326,7 +301,6 @@ class PropertyController extends Controller
             return back()->withErrors(['images' => 'Please upload at least one image.'])->withInput();
         }
 
-        // validate
         try {
             $validated = $request->validate([
                 'title'         => 'required|string|max:255',
@@ -366,7 +340,6 @@ class PropertyController extends Controller
             $amenityIds = (array)($request->input('amenities', []));
             $ruleIds    = (array)($request->input('rules', []));
 
-            // Use coordinates to reverse geocode and get address, city, country
             $latitude = (float) $validated['latitude'];
             $longitude = (float) $validated['longitude'];
             
@@ -376,7 +349,6 @@ class PropertyController extends Controller
             if ($reverseGeocodeResult) {
                 $addressComponents = $reverseGeocodeResult['address_components'] ?? [];
                 
-                // Extract address components
                 $validated['country'] = $this->extractAddressComponent($addressComponents, 'country') 
                     ?? $validated['country'] ?? 'Lebanon';
                 $validated['city'] = $this->extractAddressComponent($addressComponents, 'locality')
@@ -387,7 +359,6 @@ class PropertyController extends Controller
                 $address = trim(($streetNumber ?? '') . ' ' . ($route ?? ''));
                 $validated['address'] = $address ?: ($reverseGeocodeResult['formatted_address'] ?? $validated['address'] ?? 'Unknown');
             } else {
-                // If reverse geocoding fails, set defaults
                 $validated['country'] = $validated['country'] ?? 'Lebanon';
                 $validated['city'] = $validated['city'] ?? 'Unknown';
                 $validated['address'] = $validated['address'] ?? 'Unknown';
@@ -400,10 +371,8 @@ class PropertyController extends Controller
             $validated['latitude'] = $latitude;
             $validated['longitude'] = $longitude;
 
-            // create property
             $property = Property::create($validated);
 
-            // sync pivots
             if (!empty($amenityIds)) {
                 $property->amenities()->sync($amenityIds);
             }
@@ -411,14 +380,13 @@ class PropertyController extends Controller
                 $property->rules()->sync($ruleIds);
             }
 
-            // images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {
                     $path = $image->store('property-images', 'public');
                     PropertyImage::create([
                         'property_id' => $property->id,
                         'path'        => $path,
-                        'is_primary'  => $index === 0, // first image primary
+                        'is_primary'  => $index === 0,
                     ]);
                 }
             }
@@ -434,7 +402,6 @@ class PropertyController extends Controller
                 'request_data' => $request->except(['images', 'password'])
             ]);
 
-            // cleanup partially stored images (if any)
             if (isset($property) && $property->exists) {
                 foreach ($property->images as $img) {
                     Storage::disk('public')->delete($img->path);

@@ -2,7 +2,6 @@
 @section('title', 'Search')
 @section('content')
 <link rel="stylesheet" href="{{asset('css/search.css')}}">
-<script src="{{asset('js/search.js')}}"></script>
 <body>
     <main class="search-page">
         <!-- Mobile filter overlay -->
@@ -207,4 +206,5 @@
             </div>
         </section>
     </main>
+    <script src="{{asset('js/search.js')}}"></script>
 @endsection
