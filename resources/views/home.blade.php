@@ -90,9 +90,13 @@
                     <button onclick="location.href='{{ route('search') }}'" class="main-list-btn">
                         <i class="fas fa-search"></i> Find a Room
                     </button>
-                    <button onclick="location.href='{{ route('list-property') }}'" class="secondary-list-btn">
-                        <i class="fas fa-plus"></i> List Your Space
-                    </button>
+                    @auth
+                        @if(auth()->user()->isLandlord())
+                        <button onclick="location.href='{{ route('list-property') }}'" class="secondary-list-btn">
+                            <i class="fas fa-plus"></i> List Your Space
+                        </button>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </section>

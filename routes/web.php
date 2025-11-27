@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\MainController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\LandlordMiddleware;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\LandlordController;
 use App\Http\Controllers\AuthenticationController;
 
 //-----------Pages Routes-----------------
@@ -20,7 +22,7 @@ Route::prefix('profile')->group(function (): void {
 });
 Route::get('/profile', [MainController::class,"profilePage"])->name('profile');
 Route::get('/search', [PropertyController::class, 'index'])->name('search');
-Route::get('/list-property', [MainController::class, 'propertyPage'])->name('list-property');
+Route::get('/list-property', [MainController::class, 'propertyPage'])->name('list-property')->middleware(['auth', LandlordMiddleware::class]);
 //--------------Map Routes-------------------
 Route::get('/map', [MapController::class, 'index'])->name('map');
 Route::post('/map/geocode', [MapController::class, 'geocode']);
@@ -37,7 +39,7 @@ Route::post('/register', [AuthenticationController::class, 'submitRegister'])->n
 Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
 //---------------Properties Routes--------------
-Route::post('/submit-listing', [PropertyController::class, 'submitListing'])->name('submit-listing');
+Route::post('/submit-listing', [PropertyController::class, 'submitListing'])->name('submit-listing')->middleware(['auth', LandlordMiddleware::class]);
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::post('/properties/{property}/like', [PropertyController::class, 'like'])->name('property.like');
@@ -57,8 +59,21 @@ Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])-
 //----------------Search Routes--------------------------
 Route::get('/filter-search', [PropertyController::class, 'filterSearch'])->name('filter-search');
 
+//----------------Landlord Routes-------------------
+Route::middleware(['auth'])->prefix('landlord')->group(function () {
+    Route::get('/apply', [LandlordController::class, 'showApplyForm'])->name('landlord.apply');
+    Route::post('/apply', [LandlordController::class, 'submitApplication'])->name('landlord.submit-application');
+});
+
+Route::middleware(['auth', LandlordMiddleware::class])->prefix('landlord')->group(function () {
+    Route::get('/dashboard', [LandlordController::class, 'dashboard'])->name('landlord.dashboard');
+    Route::get('/properties', [LandlordController::class, 'properties'])->name('landlord.properties');
+});
+
 //----------------Admin Routes-------------------
 Route::middleware(['web', 'auth', AdminMiddleware::class])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::post('/landlord-applications/{application}/approve', [AdminController::class, 'approveLandlordApplication'])->name('admin.landlord.approve');
+    Route::post('/landlord-applications/{application}/reject', [AdminController::class, 'rejectLandlordApplication'])->name('admin.landlord.reject');
 });

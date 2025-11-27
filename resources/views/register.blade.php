@@ -158,14 +158,6 @@
             @error('address') <span class="text-danger">{{ $message }}</span> @enderror
           </div>
 
-          <div class="form-group landlord">
-            <label class="switch">
-              <input type="checkbox" id="is_landlord" name="is_landlord" value="1" @checked(old('is_landlord'))>
-              <span class="slider"></span>
-            </label>
-            <label for="is_landlord" class="switch-label">I am a landlord</label>
-            @error('is_landlord') <span class="text-danger">{{ $message }}</span> @enderror
-          </div>
 
           <button type="submit" class="register-btn">Create Account</button>
 

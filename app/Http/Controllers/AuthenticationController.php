@@ -52,7 +52,6 @@ class AuthenticationController extends Controller
             'phone_nb' => 'required|string|unique:users',
             'date_of_birth' => 'nullable|date|before:today',
             'address' => 'nullable|string',
-            'is_landlord' => 'boolean',
             'role' => 'nullable|in:client,admin',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);  
@@ -72,7 +71,6 @@ class AuthenticationController extends Controller
             'phone_nb' => $IncomingFields['phone_nb'],
             'date_of_birth' => $IncomingFields['date_of_birth'] ?? null,
             'address' => $IncomingFields['address'] ?? null,
-            'is_landlord' => $IncomingFields['is_landlord'] ?? false,
             'role' => $IncomingFields['role'] ?? 'client',
             'profile_image' => $IncomingFields['profile_image'] ?? null,
         ]);

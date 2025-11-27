@@ -20,12 +20,17 @@
                 <li><a href="<?php echo e(route('home')); ?>" class="<?php echo e(request()->routeIs('home') ? 'active' : ''); ?>"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="<?php echo e(route('search')); ?>" class="<?php echo e(request()->routeIs('search') ? 'active' : ''); ?>"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="<?php echo e(route('map')); ?>" class="<?php echo e(request()->routeIs('map') ? 'active' : ''); ?>"><i class="fas fa-map-marked-alt"></i> Map</a></li>                
+                <?php if(auth()->user()->isLandlord()): ?>
+                <li><a href="<?php echo e(route('landlord.dashboard')); ?>" class="<?php echo e(request()->routeIs('landlord.*') ? 'active' : ''); ?>"><i class="fas fa-building"></i> Landlord Dashboard</a></li>
+                <?php endif; ?>
                 <?php if(auth()->user()->role === 'admin'): ?>
                 <li><a href="<?php echo e(route('admin.dashboard')); ?>" class="<?php echo e(request()->routeIs('admin.dashboard') ? 'active' : ''); ?>"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 <?php endif; ?>
             </ul>
             <div class="nav-right">
+                <?php if(auth()->user()->isLandlord()): ?>
                 <a href="<?php echo e(route('list-property')); ?>" class="main-list-btn"><i class="fas fa-plus"></i> List Your Space</a>
+                <?php endif; ?>
                 <div id="profile-link">
                     <div class="nav-profile-image">
                         <?php if(Auth::user()->profile_image): ?>
@@ -44,6 +49,12 @@
                 <a href="<?php echo e(route('profileInfo')); ?>" class="profile-dropdown-option">Profile</a>
                 <a href="<?php echo e(route( 'profileProperties')); ?>" class="profile-dropdown-option">My Properties</a>
                 <a href="<?php echo e(route( 'profileFavorites')); ?>" class="profile-dropdown-option">My Favorites</a>
+                <?php if(auth()->user()->canBecomeLandlord()): ?>
+                <a href="<?php echo e(route('landlord.apply')); ?>" class="profile-dropdown-option"><i class="fas fa-building"></i> Become a Landlord</a>
+                <?php endif; ?>
+                <?php if(auth()->user()->isLandlord()): ?>
+                <a href="<?php echo e(route('landlord.dashboard')); ?>" class="profile-dropdown-option"><i class="fas fa-building"></i> Landlord Dashboard</a>
+                <?php endif; ?>
                 <button type="submit" class="profile-dropdown-option"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </form>
     </header>
