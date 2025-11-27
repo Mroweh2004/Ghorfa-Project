@@ -157,7 +157,7 @@
                         <h3>{{ $property->title }}</h3>
                         <p class="listing-location">
                             <i class="fas fa-map-marker-alt"></i> 
-                            {{ $property->address }}, {{ $property->city }}, {{ $property->country }}
+                            {{ $property->address }}
                         </p>
                         <div class="listing-features">
                             <span><i class="fas fa-home"></i> {{ $property->property_type }}</span>

@@ -158,7 +158,7 @@
                         <h3><?php echo e($property->title); ?></h3>
                         <p class="listing-location">
                             <i class="fas fa-map-marker-alt"></i> 
-                            <?php echo e($property->address); ?>, <?php echo e($property->city); ?>, <?php echo e($property->country); ?>
+                            <?php echo e($property->address); ?>
 
                         </p>
                         <div class="listing-features">

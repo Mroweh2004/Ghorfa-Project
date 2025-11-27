@@ -306,14 +306,13 @@
 }
 
 .listing-price {
-    color: var(--primary-color);
+    color: var(--text-light);
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 0.5rem;
     padding-left: 0.5rem;
 }
 .listing-price b {
-    color:  var(--accent-color);
 
     font-size: 1.3rem;
     font-weight: 1000;
