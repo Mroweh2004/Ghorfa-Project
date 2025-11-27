@@ -46,13 +46,21 @@ class MapClickService {
             this.handleMapClick(event.latLng);
         });
         
-        // Change cursor to indicate clickable - apply to both map options and map container
-        this.map.setOptions({ cursor: 'pointer' });
+        // Change cursor to crosshair to indicate precise clicking - apply to both map options and map container
+        this.map.setOptions({ cursor: 'crosshair' });
         
         // Also set cursor on map container element via CSS
         const mapContainer = this.map.getDiv();
         if (mapContainer) {
-            mapContainer.style.cursor = 'pointer';
+            mapContainer.style.cursor = 'crosshair';
+            mapContainer.classList.add('clickable');
+            // Set cursor on all child elements
+            setTimeout(() => {
+                const allElements = mapContainer.querySelectorAll('*');
+                allElements.forEach(el => {
+                    el.style.cursor = 'crosshair';
+                });
+            }, 50);
         }
     }
 
@@ -87,6 +95,12 @@ class MapClickService {
         const mapContainer = this.map.getDiv();
         if (mapContainer) {
             mapContainer.style.cursor = '';
+            mapContainer.classList.remove('clickable');
+            // Reset cursor on all child elements
+            const allElements = mapContainer.querySelectorAll('*');
+            allElements.forEach(el => {
+                el.style.cursor = '';
+            });
         }
         
         this.isEnabled = false;

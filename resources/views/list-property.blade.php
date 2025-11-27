@@ -95,13 +95,13 @@
         {{-- Map for selecting location --}}
         <div class="form-input">
           <label class="inputs-label">Select Location on Map</label>
-          <div class="map-controls">
-            <button type="button" id="enableMapClick">
-              📍 Click on Map to Set Location
+          <div style="position: relative;">
+            <div id="property-location-map"></div>
+            <button type="button" id="enableMapClick" class="map-control-button">
+              📍 Enable Map Click
             </button>
-            <span id="coordinatesStatus"></span>
+            <span id="coordinatesStatus" class="map-status-overlay"></span>
           </div>
-          <div id="property-location-map"></div>
           <small>Click on the map to set your property's exact location. This will automatically fill the coordinates.</small>
           @error('latitude') <small class="text-danger">{{ $message }}</small> @enderror
           @error('longitude') <small class="text-danger">{{ $message }}</small> @enderror
@@ -345,22 +345,45 @@ function initPropertyLocationMap() {
     const statusSpan = document.getElementById('coordinatesStatus');
     
     if (enableButton) {
-        enableButton.addEventListener('click', () => {
+        enableButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent map click when clicking button
             if (propertyMapClickService.isEnabled) {
                 propertyMapClickService.disable();
-                enableButton.textContent = '📍 Click on Map to Set Location';
+                enableButton.textContent = '📍 Map Click Enabled';
                 enableButton.style.background = '#3b82f6';
-                statusSpan.textContent = '';
-            } else {
-                propertyMapClickService.enable();
-                enableButton.textContent = '✓ Click Mode Active - Click on Map';
-                enableButton.style.background = '#10b981';
-                statusSpan.textContent = 'Click anywhere on the map to set location';
-                // Ensure cursor is pointer when enabled - set on map container
-                propertyLocationMap.setOptions({ cursor: 'pointer' });
+                enableButton.classList.remove('active');
+                if (statusSpan) statusSpan.textContent = '';
+                // Reset cursor when disabled
                 const mapContainer = document.getElementById('property-location-map');
                 if (mapContainer) {
-                    mapContainer.style.cursor = 'pointer';
+                    mapContainer.classList.remove('clickable');
+                    mapContainer.style.cursor = '';
+                    const mapDiv = propertyLocationMap.getDiv();
+                    if (mapDiv) {
+                        mapDiv.style.cursor = '';
+                    }
+                }
+            } else {
+                propertyMapClickService.enable();
+                enableButton.textContent = '✓ Click Mode Active';
+                enableButton.style.background = '#10b981';
+                enableButton.classList.add('active');
+                if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
+                // Ensure cursor is crosshair when enabled - set on map container and all child elements
+                propertyLocationMap.setOptions({ cursor: 'crosshair' });
+                const mapContainer = document.getElementById('property-location-map');
+                if (mapContainer) {
+                    mapContainer.classList.add('clickable');
+                    mapContainer.style.cursor = 'crosshair';
+                    // Also set cursor on all Google Maps elements
+                    const mapDiv = propertyLocationMap.getDiv();
+                    if (mapDiv) {
+                        mapDiv.style.cursor = 'crosshair';
+                        const allMapElements = mapDiv.querySelectorAll('*');
+                        allMapElements.forEach(el => {
+                            el.style.cursor = 'crosshair';
+                        });
+                    }
                 }
             }
         });
@@ -369,14 +392,27 @@ function initPropertyLocationMap() {
         if (!document.getElementById('latitude')?.value || !document.getElementById('longitude')?.value) {
             // Enable click mode by default
             propertyMapClickService.enable();
-            enableButton.textContent = '✓ Click Mode Active - Click on Map';
+            enableButton.textContent = '✓ Click Mode Active';
             enableButton.style.background = '#10b981';
-            statusSpan.textContent = 'Click anywhere on the map to set location';
-            // Ensure cursor is pointer when enabled - set on map container
-            propertyLocationMap.setOptions({ cursor: 'pointer' });
+            enableButton.classList.add('active');
+            if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
+            // Ensure cursor is crosshair when enabled - set on map container
+            propertyLocationMap.setOptions({ cursor: 'crosshair' });
             const mapContainer = document.getElementById('property-location-map');
             if (mapContainer) {
-                mapContainer.style.cursor = 'pointer';
+                mapContainer.classList.add('clickable');
+                mapContainer.style.cursor = 'crosshair';
+                // Also set cursor on all Google Maps elements
+                setTimeout(() => {
+                    const mapDiv = propertyLocationMap.getDiv();
+                    if (mapDiv) {
+                        mapDiv.style.cursor = 'crosshair';
+                        const allMapElements = mapDiv.querySelectorAll('*');
+                        allMapElements.forEach(el => {
+                            el.style.cursor = 'crosshair';
+                        });
+                    }
+                }, 100);
             }
         }
     }
@@ -387,14 +423,14 @@ function initPropertyLocationMap() {
 
 function updateCoordinatesStatus(lat, lng, isSet) {
     const statusSpan = document.getElementById('coordinatesStatus');
-    if (statusSpan) {
-        if (isSet) {
-            statusSpan.textContent = `✓ Location set: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            statusSpan.style.color = '#10b981';
-        } else {
-            statusSpan.textContent = 'Location not set';
-            statusSpan.style.color = '#6b7280';
-        }
+    if (!statusSpan) return;
+    
+    if (isSet) {
+        statusSpan.textContent = `✓ Location set: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        statusSpan.style.color = '#10b981';
+    } else {
+        statusSpan.textContent = 'Location not set';
+        statusSpan.style.color = '#6b7280';
     }
 }
 
@@ -439,7 +475,6 @@ function addAddressSearchBox() {
     });
 }
 
-// Handle form validation - ensure coordinates are set before submit
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('.listing-form');
     if (form) {
@@ -455,13 +490,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     enableButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     if (!propertyMapClickService || !propertyMapClickService.isEnabled) {
                         enableButton.click();
-                    }
-                    // Ensure cursor is set to pointer when enabled
-                    if (propertyMapClickService && propertyMapClickService.isEnabled) {
-                        propertyLocationMap.setOptions({ cursor: 'pointer' });
+                        // Wait a bit for the click handler to execute, then set cursor
+                        setTimeout(() => {
+                            if (propertyMapClickService && propertyMapClickService.isEnabled) {
+                                propertyLocationMap.setOptions({ cursor: 'crosshair' });
+                                const mapContainer = document.getElementById('property-location-map');
+                                if (mapContainer) {
+                                    mapContainer.classList.add('clickable');
+                                    mapContainer.style.cursor = 'crosshair';
+                                    const mapDiv = propertyLocationMap.getDiv();
+                                    if (mapDiv) {
+                                        mapDiv.style.cursor = 'crosshair';
+                                    }
+                                }
+                            }
+                        }, 50);
+                    } else {
+                        // Ensure cursor is set to crosshair when enabled
+                        propertyLocationMap.setOptions({ cursor: 'crosshair' });
                         const mapContainer = document.getElementById('property-location-map');
                         if (mapContainer) {
-                            mapContainer.style.cursor = 'pointer';
+                            mapContainer.classList.add('clickable');
+                            mapContainer.style.cursor = 'crosshair';
+                            const mapDiv = propertyLocationMap.getDiv();
+                            if (mapDiv) {
+                                mapDiv.style.cursor = 'crosshair';
+                            }
                         }
                     }
                 }
