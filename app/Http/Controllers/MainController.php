@@ -31,15 +31,12 @@ class MainController extends Controller
             'phone_nb' => ['required','string','max:30', Rule::unique('users')->ignore($user->id)],
             'date_of_birth' => ['nullable','date','before:today'],
             'address' => ['nullable','string'],
-            'is_landlord' => ['boolean'],
         ]);
         if ($request->filled('dob_day') && $request->filled('dob_month') && $request->filled('dob_year')) {
             $validated['date_of_birth'] = $request->dob_year . '-' . 
                                         str_pad($request->dob_month, 2, '0', STR_PAD_LEFT) . '-' . 
                                         str_pad($request->dob_day, 2, '0', STR_PAD_LEFT);
         }
-
-        $validated['is_landlord'] = $request->has('is_landlord');
 
         if ($request->hasFile('profile_image')) {
             if (!empty($user->profile_image) && Storage::disk('public')->exists($user->profile_image)) {
@@ -89,6 +86,11 @@ class MainController extends Controller
     }
 
     function propertyPage(){
+        if (!auth()->check() || (!auth()->user()->isLandlord())) {
+            return redirect()->route('home')
+                ->with('error', 'Only landlords and admins can list properties. <a href="' . route('landlord.apply') . '">Become a Landlord</a>');
+        }
+
         $amenities = Amenity::all();
         $rules = Rule::all();
         $units= Unit::all();

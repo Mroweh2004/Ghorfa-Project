@@ -13,4 +13,9 @@ trait HasAdminRole
     {
         return $this->role === $role;
     }
+
+    public function isLandlord()
+    {
+        return $this->role === 'landlord' || $this->isAdmin();
+    }
 } 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Review;
+use App\Models\LandlordApplication;
 use App\Traits\HasAdminRole;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
@@ -30,7 +31,6 @@ class User extends Authenticatable
         'profile_image',
         'date_of_birth',
         'address',
-        'is_landlord',
         'last_login_at'
     ];
 
@@ -55,7 +55,6 @@ class User extends Authenticatable
         'phone_nb' => 'string',
         'role' => 'string',
         'date_of_birth' => 'date',
-        'is_landlord' => 'boolean',
         'last_login_at' => 'datetime',
     ];
 
@@ -93,7 +92,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
-    // app/Models/User.php
+
     public function propertyReviews()
     {
         return $this->hasManyThrough(
@@ -106,4 +105,30 @@ class User extends Authenticatable
         );
     }
 
+    public function landlordApplication()
+    {
+        return $this->hasOne(LandlordApplication::class);
+    }
+
+    public function isLandlord(): bool
+    {
+        return $this->role === 'landlord' || $this->isAdmin();
+    }
+
+    public function isClient(): bool
+    {
+        return $this->role === 'client';
+    }
+
+    public function canBecomeLandlord(): bool
+    {
+        return $this->isClient() && !$this->hasPendingLandlordApplication();
+    }
+
+    public function hasPendingLandlordApplication(): bool
+    {
+        return $this->landlordApplication()
+            ->where('status', 'pending')
+            ->exists();
+    }
 }

@@ -290,6 +290,11 @@ class PropertyController extends Controller
 
     public function submitListing(Request $request)
     {
+        if (!Auth::check() || !Auth::user()->isLandlord()) {
+            return redirect()->route('home')
+                ->with('error', 'Only landlords and admins can list properties. <a href="' . route('landlord.apply') . '">Become a Landlord</a>');
+        }
+
         if (!$request->hasFile('images')) {
             Log::error('No images uploaded');
             return back()->withErrors(['images' => 'Please upload at least one image.'])->withInput();

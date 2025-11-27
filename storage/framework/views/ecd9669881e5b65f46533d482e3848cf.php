@@ -89,9 +89,13 @@
                     <button onclick="location.href='<?php echo e(route('search')); ?>'" class="main-list-btn">
                         <i class="fas fa-search"></i> Find a Room
                     </button>
-                    <button onclick="location.href='<?php echo e(route('list-property')); ?>'" class="secondary-list-btn">
-                        <i class="fas fa-plus"></i> List Your Space
-                    </button>
+                    <?php if(auth()->guard()->check()): ?>
+                        <?php if(auth()->user()->isLandlord()): ?>
+                        <button onclick="location.href='<?php echo e(route('list-property')); ?>'" class="secondary-list-btn">
+                            <i class="fas fa-plus"></i> List Your Space
+                        </button>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>

@@ -20,12 +20,17 @@
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'active' : '' }}"><i class="fas fa-map-marked-alt"></i> Map</a></li>                
+                @if(auth()->user()->isLandlord())
+                <li><a href="{{ route('landlord.dashboard') }}" class="{{ request()->routeIs('landlord.*') ? 'active' : '' }}"><i class="fas fa-building"></i> Landlord Dashboard</a></li>
+                @endif
                 @if(auth()->user()->role === 'admin')
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 @endif
             </ul>
             <div class="nav-right">
+                @if(auth()->user()->isLandlord())
                 <a href="{{ route('list-property') }}" class="main-list-btn"><i class="fas fa-plus"></i> List Your Space</a>
+                @endif
                 <div id="profile-link">
                     <div class="nav-profile-image">
                         @if(Auth::user()->profile_image)
@@ -44,6 +49,12 @@
                 <a href="{{ route('profileInfo') }}" class="profile-dropdown-option">Profile</a>
                 <a href="{{ route( 'profileProperties') }}" class="profile-dropdown-option">My Properties</a>
                 <a href="{{ route( 'profileFavorites') }}" class="profile-dropdown-option">My Favorites</a>
+                @if(auth()->user()->canBecomeLandlord())
+                <a href="{{ route('landlord.apply') }}" class="profile-dropdown-option"><i class="fas fa-building"></i> Become a Landlord</a>
+                @endif
+                @if(auth()->user()->isLandlord())
+                <a href="{{ route('landlord.dashboard') }}" class="profile-dropdown-option"><i class="fas fa-building"></i> Landlord Dashboard</a>
+                @endif
                 <button type="submit" class="profile-dropdown-option"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </form>
     </header>

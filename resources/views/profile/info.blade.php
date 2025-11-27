@@ -75,7 +75,7 @@
                                 {{ Auth::user()->address }}
                             </p>
                         @endif
-                        @if(Auth::user()->is_landlord)
+                        @if(Auth::user()->isLandlord())
                             <p><span class="profile-icon-landlord">🏠</span>Landlord</p>
                         @endif
                         <p>
@@ -264,15 +264,6 @@
                             @error('address') <div class="error">{{ $message }}</div> @enderror
                         </div>
 
-                        {{-- Landlord toggle --}}
-                        <div class="form-group landlord">
-                            <label class="switch">
-                                <input type="checkbox" id="is_landlord" name="is_landlord" value="1" @checked($user->is_landlord)>
-                                <span class="slider"></span>
-                            </label>
-                            <label for="is_landlord" class="switch-label">I am a landlord</label>
-                            @error('is_landlord') <div class="error">{{ $message }}</div> @enderror
-                        </div>
                     </div>
 
                     {{-- Actions --}}
