@@ -1,7 +1,6 @@
 <?php $__env->startSection('title', 'list-space'); ?>
 <?php $__env->startSection('content'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/list-property.css')); ?>">
-<script src="<?php echo e(asset('js/list-property.js')); ?>"></script>
 <script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
 <section class="title-section">
   <div class="content-title">
@@ -370,6 +369,7 @@ unset($__errorArgs, $__bag); ?>
 
 
 <script async src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_browser_key')); ?>&callback=initPropertyLocationMap&libraries=places"></script>
+<script src="<?php echo e(asset('js/list-property.js')); ?>"></script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/list-property.blade.php ENDPATH**/ ?>

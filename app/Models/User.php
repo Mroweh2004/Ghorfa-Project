@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Review;
 use App\Models\LandlordApplication;
+use App\Models\Notification;
 use App\Traits\HasAdminRole;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
@@ -108,6 +109,11 @@ class User extends Authenticatable
     public function landlordApplication()
     {
         return $this->hasOne(LandlordApplication::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 
     public function isLandlord(): bool

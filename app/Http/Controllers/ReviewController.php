@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Property;
 use App\Models\Review;
+use App\Models\Property;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\CreatesNotifications;
 
 class ReviewController extends Controller
 {
+    use CreatesNotifications;
     // GET /properties/{property}/reviews
     public function index(Property $property)
     {
@@ -41,17 +44,29 @@ class ReviewController extends Controller
             'comment.max' => 'Your review cannot exceed 1000 characters.',
         ]);
 
-        Review::create(attributes: [
+        $review = Review::create(attributes: [
             'property_id' => $property->id,
             'user_id'     => $request->user()->id,
             'rating'      => $data['rating'],
             'comment'     => $data['comment'],
         ]);
 
+        $reviewer = $request->user();
+        $propertyOwner = $property->user;
+        
+        if ($propertyOwner->id !== $reviewer->id) {
+            $this->createNotification(
+                $propertyOwner,
+                'review',
+                'New Review on Your Property',
+                $reviewer->name . ' reviewed your property "' . $property->title . '" with ' . $data['rating'] . ' star' . ($data['rating'] > 1 ? 's' : '') . '.',
+                $property
+            );
+        }
+
         return back()->with('success', 'Thank you for your review! Your feedback helps other users make informed decisions.');
     }
 
-    // PUT /reviews/{review}
     public function update(Request $request, Review $review)
     {
         // Check if user owns this review or is admin

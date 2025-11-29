@@ -8,8 +8,7 @@
         <h1>Admin Dashboard</h1>
     </div>
 
-    <div class="dashboard-content">
-        @if($pendingApplications->count() > 0)
+    <div class="dashboard-content" data-pending-applications-route="{{ route('admin.pending-applications') }}">
         <div class="applications-section" style="margin-bottom: 2rem;">
             <h2>Pending Landlord Applications ({{ $pendingApplications->count() }})</h2>
             <div class="applications-table">
@@ -24,29 +23,44 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($pendingApplications as $application)
-                        <tr>
-                            <td>{{ $application->user->name }}</td>
-                            <td>{{ $application->user->email }}</td>
-                            <td>{{ $application->phone ?? $application->user->phone_nb }}</td>
-                            <td>{{ $application->created_at->diffForHumans() }}</td>
-                            <td style="display: flex; gap: 0.5rem;">
-                                <form action="{{ route('admin.landlord.approve', $application->id) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-success" onclick="return confirm('Approve this landlord application?')">Approve</button>
-                                </form>
-                                <form action="{{ route('admin.landlord.reject', $application->id) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this landlord application?')">Reject</button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endforeach
+                        @if($pendingApplications->count() > 0)
+                            @foreach($pendingApplications as $application)
+                            <tr data-application-id="{{ $application->id }}">
+                                <td>{{ $application->user->name }}</td>
+                                <td>{{ $application->user->email }}</td>
+                                <td>{{ $application->phone ?? $application->user->phone_nb }}</td>
+                                <td>{{ $application->created_at->diffForHumans() }}</td>
+                                <td style="display: flex; gap: 0.5rem;">
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-success approve-btn" 
+                                        data-application-id="{{ $application->id }}"
+                                        onclick="handleApprove({{ $application->id }})"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-danger reject-btn" 
+                                        data-application-id="{{ $application->id }}"
+                                        onclick="handleReject({{ $application->id }})"
+                                    >
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+                                    No pending applications
+                                </td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
             </div>
         </div>
-        @endif
 
         <div class="users-section">
             <h2>User Management</h2>
@@ -89,4 +103,6 @@
         </div>
     </div>
 </div>
+
+<script src="{{ asset('js/admin.js') }}"></script>
 @endsection 

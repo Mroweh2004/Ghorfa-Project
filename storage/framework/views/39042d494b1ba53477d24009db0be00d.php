@@ -6,8 +6,7 @@
         <h1>Admin Dashboard</h1>
     </div>
 
-    <div class="dashboard-content">
-        <?php if($pendingApplications->count() > 0): ?>
+    <div class="dashboard-content" data-pending-applications-route="<?php echo e(route('admin.pending-applications')); ?>">
         <div class="applications-section" style="margin-bottom: 2rem;">
             <h2>Pending Landlord Applications (<?php echo e($pendingApplications->count()); ?>)</h2>
             <div class="applications-table">
@@ -22,29 +21,44 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php $__currentLoopData = $pendingApplications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $application): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <tr>
-                            <td><?php echo e($application->user->name); ?></td>
-                            <td><?php echo e($application->user->email); ?></td>
-                            <td><?php echo e($application->phone ?? $application->user->phone_nb); ?></td>
-                            <td><?php echo e($application->created_at->diffForHumans()); ?></td>
-                            <td style="display: flex; gap: 0.5rem;">
-                                <form action="<?php echo e(route('admin.landlord.approve', $application->id)); ?>" method="POST" style="display: inline;">
-                                    <?php echo csrf_field(); ?>
-                                    <button type="submit" class="btn btn-success" onclick="return confirm('Approve this landlord application?')">Approve</button>
-                                </form>
-                                <form action="<?php echo e(route('admin.landlord.reject', $application->id)); ?>" method="POST" style="display: inline;">
-                                    <?php echo csrf_field(); ?>
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this landlord application?')">Reject</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php if($pendingApplications->count() > 0): ?>
+                            <?php $__currentLoopData = $pendingApplications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $application): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <tr data-application-id="<?php echo e($application->id); ?>">
+                                <td><?php echo e($application->user->name); ?></td>
+                                <td><?php echo e($application->user->email); ?></td>
+                                <td><?php echo e($application->phone ?? $application->user->phone_nb); ?></td>
+                                <td><?php echo e($application->created_at->diffForHumans()); ?></td>
+                                <td style="display: flex; gap: 0.5rem;">
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-success approve-btn" 
+                                        data-application-id="<?php echo e($application->id); ?>"
+                                        onclick="handleApprove(<?php echo e($application->id); ?>)"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-danger reject-btn" 
+                                        data-application-id="<?php echo e($application->id); ?>"
+                                        onclick="handleReject(<?php echo e($application->id); ?>)"
+                                    >
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+                                    No pending applications
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
-        <?php endif; ?>
 
         <div class="users-section">
             <h2>User Management</h2>
@@ -88,5 +102,7 @@
         </div>
     </div>
 </div>
+
+<script src="<?php echo e(asset('js/admin.js')); ?>"></script>
 <?php $__env->stopSection(); ?> 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/admin/dashboard.blade.php ENDPATH**/ ?>

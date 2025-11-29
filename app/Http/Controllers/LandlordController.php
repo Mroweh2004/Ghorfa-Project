@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\LandlordApplication;
 use App\Models\Property;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Traits\CreatesNotifications;
 
 class LandlordController extends Controller
 {
+    use CreatesNotifications;
     public function dashboard()
     {
         $user = Auth::user();
@@ -81,7 +84,19 @@ class LandlordController extends Controller
         $validated['user_id'] = $user->id;
         $validated['status'] = 'pending';
 
-        LandlordApplication::create($validated);
+        $application = LandlordApplication::create($validated);
+        
+        // Create notification for all admins about new pending application
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $this->createNotification(
+                $admin,
+                'pending',
+                'New Landlord Application',
+                $user->name . ' has submitted a landlord application. Please review it.',
+                $application
+            );
+        }
 
         return redirect()->route('landlord.dashboard')
             ->with('success', 'Your landlord application has been submitted successfully! We will review it and get back to you soon.');

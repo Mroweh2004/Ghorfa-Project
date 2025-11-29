@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GeocodingService;
+use App\Traits\CreatesNotifications;
 
 class PropertyController extends Controller
 {
+    use CreatesNotifications;
     /**
      * Display a listing of the resource.
      */
@@ -435,6 +437,16 @@ class PropertyController extends Controller
         } else {
             $property->likedBy()->attach($user->id);
             $status = 'liked';
+            
+            if ($property->user_id !== $user->id) {
+                $this->createNotification(
+                    $property->user,
+                    'like',
+                    'New Like on Your Property',
+                    $user->name . ' liked your property: ' . $property->title,
+                    $property
+                );
+            }
         }
         
         return response()->json([

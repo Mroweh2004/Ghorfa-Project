@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title', 'Become a Landlord'); ?>
 <?php $__env->startSection('content'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">

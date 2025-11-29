@@ -28,7 +28,25 @@
                 <?php endif; ?>
             </ul>
             <div class="nav-right">
-                <?php if(auth()->user()->isLandlord()): ?>
+                <div class="notification-bell-container" id="notificationContainer">
+                    <button class="notification-bell" id="notificationBell" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read-btn" id="markAllReadBtn">Mark all as read</button>
+                        </div>
+                        <div class="notification-list" id="notificationList">
+                            <div class="notification-loading">Loading notifications...</div>
+                        </div>
+                        <div class="notification-footer">
+                            <a href="#" id="viewAllNotifications">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <?php if(auth()->user()->isLandlord() || auth()->user()->isAdmin()): ?>
                 <a href="<?php echo e(route('list-property')); ?>" class="main-list-btn"><i class="fas fa-plus"></i> List Your Space</a>
                 <?php endif; ?>
                 <div id="profile-link">

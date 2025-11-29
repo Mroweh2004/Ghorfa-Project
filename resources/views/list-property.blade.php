@@ -2,7 +2,6 @@
 @section('title', 'list-space')
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/list-property.css') }}">
-<script src="{{ asset('js/list-property.js') }}"></script>
 <script src="{{ asset('js/MapClickService.js') }}"></script>
 <section class="title-section">
   <div class="content-title">
@@ -285,4 +284,5 @@
 
 {{-- Google Maps API and Map Initialization --}}
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_browser_key') }}&callback=initPropertyLocationMap&libraries=places"></script>
+<script src="{{ asset('js/list-property.js') }}"></script>
 @endsection

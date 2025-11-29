@@ -3,7 +3,18 @@
 function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
     const input = document.getElementById(inputId);
     const container = document.getElementById(containerId);
-    if (!input || !container) return;
+    
+    if (!input) {
+        console.error('Image input not found:', inputId);
+        return;
+    }
+    
+    if (!container) {
+        console.error('Image preview container not found:', containerId);
+        return;
+    }
+    
+    console.log('Setting up image preview:', { inputId, containerId });
 
     const form = input.form || container.closest('form');
 
@@ -377,9 +388,15 @@ function validatePropertyLocation() {
 }
 
   /* ============================ Init ============================ */
-  document.addEventListener('DOMContentLoaded', () => {
-    loadCountries();
+  function initListProperty() {
+    console.log('Initializing list property page...');
     setupImagePreview('images', 'image-previews');
     validatePropertyLocation();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListProperty);
+  } else {
+    initListProperty();
+  }
   

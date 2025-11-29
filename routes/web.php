@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\LandlordController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\NotificationController;
 
 //-----------Pages Routes-----------------
 Route::get( '/', [MainController::class,"homePage"])->name(name: 'home');
@@ -74,6 +75,15 @@ Route::middleware(['auth', LandlordMiddleware::class])->prefix('landlord')->grou
 Route::middleware(['web', 'auth', AdminMiddleware::class])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::get('/pending-applications', [AdminController::class, 'getPendingApplications'])->name('admin.pending-applications');
     Route::post('/landlord-applications/{application}/approve', [AdminController::class, 'approveLandlordApplication'])->name('admin.landlord.approve');
     Route::post('/landlord-applications/{application}/reject', [AdminController::class, 'rejectLandlordApplication'])->name('admin.landlord.reject');
+});
+
+//----------------Notification Routes-------------------
+Route::middleware(['auth'])->prefix('notifications')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
 });
