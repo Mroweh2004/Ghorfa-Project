@@ -1,40 +1,3 @@
-/* ======================= Countries (Select2) ======================= */
-function loadCountries() {
-    const selectDrop = document.querySelector('#country');
-    if (!selectDrop) return;
-  
-    fetch('https://countriesnow.space/api/v0.1/countries')
-      .then(res => res.json())
-      .then(data => {
-        let options = '<option value="">Select Country</option>';
-        if (data && data.data && Array.isArray(data.data)) {
-          data.data.forEach(country => {
-            options += `<option value="${country.country}">${country.country}</option>`;
-          });
-        }
-        selectDrop.innerHTML = options;
-  
-        // Initialize Select2 (requires jQuery + select2 script/css already on page)
-        if (window.$ && typeof $('#country').select2 === 'function') {
-          $('#country').select2({
-            placeholder: "Select Country",
-            allowClear: true,
-            width: "100%"
-          });
-          
-          // Set old value if it exists
-          const oldValue = selectDrop.getAttribute('data-old-value');
-          if (oldValue) {
-            $('#country').val(oldValue).trigger('change');
-          }
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        selectDrop.innerHTML = '<option value="">Country list unavailable</option>';
-      });
-  }
-  
   /* =================== Image previews with remove (X) =================== */
   
 function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
@@ -256,9 +219,167 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
     renderPreviews();
   }
   
+  /* =================== Property Location Map =================== */
+let propertyLocationMap;
+let propertyMapClickService;
+
+function initPropertyLocationMap() {
+    const mapElement = document.getElementById('property-location-map');
+    
+    if (!mapElement) {
+        console.error('Property location map element not found');
+        return;
+    }
+
+    const mapContainer = mapElement.closest('[data-reverse-geocode-endpoint]');
+    const reverseGeocodeEndpoint = mapContainer?.dataset.reverseGeocodeEndpoint || '/map/reverse-geocode';
+
+    const oldLat = parseFloat(document.getElementById('latitude')?.value) || 33.894917;
+    const oldLng = parseFloat(document.getElementById('longitude')?.value) || 35.503083;
+
+    propertyLocationMap = new google.maps.Map(mapElement, {
+        center: { lat: oldLat, lng: oldLng },
+        zoom: 13,
+        mapTypeId: 'roadmap'
+    });
+
+    if (document.getElementById('latitude')?.value && document.getElementById('longitude')?.value) {
+        new google.maps.Marker({
+            position: { lat: oldLat, lng: oldLng },
+            map: propertyLocationMap,
+            title: 'Selected Location'
+        });
+        updateCoordinatesStatus(oldLat, oldLng, true);
+    }
+
+    propertyMapClickService = new MapClickService(propertyLocationMap, {
+        showMarker: true,
+        showInfoWindow: true,
+        enableReverseGeocoding: true,
+        reverseGeocodeEndpoint: reverseGeocodeEndpoint
+    });
+
+    propertyMapClickService.onClick((coordinates) => {
+        document.getElementById('latitude').value = coordinates.latitude;
+        document.getElementById('longitude').value = coordinates.longitude;
+        updateCoordinatesStatus(coordinates.latitude, coordinates.longitude, true);
+    });
+
+    const enableButton = document.getElementById('enableMapClick');
+    const statusSpan = document.getElementById('coordinatesStatus');
+    
+    if (enableButton) {
+        enableButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (propertyMapClickService.isEnabled) {
+                propertyMapClickService.disable();
+                enableButton.textContent = '📍 Enable Map Click';
+                enableButton.style.background = '#3b82f6';
+                enableButton.classList.remove('active');
+                if (statusSpan) statusSpan.textContent = '';
+            } else {
+                propertyMapClickService.enable();
+                enableButton.textContent = '✓ Click Mode Active';
+                enableButton.style.background = '#10b981';
+                enableButton.classList.add('active');
+                if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
+            }
+        });
+
+        if (!document.getElementById('latitude')?.value || !document.getElementById('longitude')?.value) {
+            propertyMapClickService.enable();
+            enableButton.textContent = '✓ Click Mode Active';
+            enableButton.style.background = '#10b981';
+            enableButton.classList.add('active');
+            if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
+        }
+    }
+
+    addAddressSearchBox();
+}
+
+function updateCoordinatesStatus(lat, lng, isSet) {
+    const statusSpan = document.getElementById('coordinatesStatus');
+    if (!statusSpan) return;
+    
+    if (isSet) {
+        statusSpan.textContent = `✓ Location set: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        statusSpan.style.color = '#10b981';
+    } else {
+        statusSpan.textContent = 'Location not set';
+        statusSpan.style.color = '#6b7280';
+    }
+}
+
+function addAddressSearchBox() {
+    if (!propertyLocationMap) return;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Search for address...';
+    input.style.cssText = `
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 15px;
+        padding: 10px;
+        text-overflow: ellipsis;
+        width: 300px;
+        margin: 10px;
+    `;
+
+    const searchBox = new google.maps.places.SearchBox(input);
+    propertyLocationMap.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    searchBox.addListener('places_changed', () => {
+        const places = searchBox.getPlaces();
+        if (places.length === 0) return;
+
+        const place = places[0];
+        if (!place.geometry || !place.geometry.location) return;
+
+        propertyLocationMap.setCenter(place.geometry.location);
+        propertyLocationMap.setZoom(16);
+
+        if (propertyMapClickService) {
+            propertyMapClickService.handleMapClick(place.geometry.location);
+        }
+
+        const addressField = document.getElementById('address');
+        if (addressField && !addressField.value) {
+            addressField.value = place.formatted_address || place.name;
+        }
+    });
+}
+
+function validatePropertyLocation() {
+    const form = document.querySelector('.listing-form');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        const lat = document.getElementById('latitude')?.value;
+        const lng = document.getElementById('longitude')?.value;
+        
+        if (!lat || !lng) {
+            e.preventDefault();
+            alert('Please set the property location by clicking on the map.');
+            const enableButton = document.getElementById('enableMapClick');
+            if (enableButton) {
+                enableButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (!propertyMapClickService || !propertyMapClickService.isEnabled) {
+                    enableButton.click();
+                }
+            }
+            return false;
+        }
+    });
+}
+
   /* ============================ Init ============================ */
   document.addEventListener('DOMContentLoaded', () => {
     loadCountries();
     setupImagePreview('images', 'image-previews');
+    validatePropertyLocation();
   });
   

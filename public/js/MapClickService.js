@@ -77,17 +77,6 @@ class MapClickService {
             this.clickListener = null;
         }
 
-        // Remove marker if exists
-        if (this.marker) {
-            this.marker.setMap(null);
-            this.marker = null;
-        }
-
-        // Close info window
-        if (this.infoWindow) {
-            this.infoWindow.close();
-        }
-
         // Reset cursor - both map options and map container
         this.map.setOptions({ cursor: '' });
         

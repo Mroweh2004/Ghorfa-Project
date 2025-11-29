@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('content'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/admin.css')); ?>">
 
