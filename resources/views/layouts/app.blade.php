@@ -7,10 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{asset('css/home.css')}}">
     <link rel="stylesheet" href="{{asset('css/notifications.css')}}">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link rel="icon" href="{{ asset('img/logo.png') }}">   
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />    
+    <link rel="icon" href="{{ asset('img/logo.png') }}">
+    @stack('styles')
     <title>@yield('title')</title>
     <style>
       #app-loader {
@@ -120,9 +119,19 @@
   
     @include('partials.footer')
     @include('partials.mobile-nav')
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    {{-- Page-specific scripts pushed via @push('scripts') --}}
+    @stack('scripts')
+    
+    {{-- Auth-specific scripts --}}
     @auth
     <script src="{{ asset('js/notifications.js') }}"></script>
     @endauth
+    
+    {{-- App loader script --}}
     <script>
       window.addEventListener('load', function () {
         const el = document.getElementById('app-loader');

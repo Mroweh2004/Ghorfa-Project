@@ -1,11 +1,18 @@
 @extends('layouts/app')
 @section('title', 'SignUp Page')
 
-@section('content')
+@push('styles')
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+@endpush
 
+@push('scripts')
+<script src="https://kit.fontawesome.com/a2c0d5f0d1.js" crossorigin="anonymous"></script>
+<script src="{{ asset('js/register.js') }}"></script>
+@endpush
+
+@section('content')
 <div class="auth-wrapper">
   <div class="auth-shell">
     {{-- Left panel --}}
@@ -167,7 +174,4 @@
     </div>
   </div>
 </div>
-
-<script src="https://kit.fontawesome.com/a2c0d5f0d1.js" crossorigin="anonymous"></script>
-<script src="{{ asset('js/register.js') }}"></script>
 @endsection
