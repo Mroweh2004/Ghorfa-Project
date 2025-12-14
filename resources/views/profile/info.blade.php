@@ -1,14 +1,18 @@
 {{-- resources/views/profile.blade.php --}}
 @extends('layouts/app')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/profile.js') }}" defer></script>
+@endpush
+
 @section('content')
 @auth
-    {{-- Assets --}}
-    <script src="{{ asset('js/profile.js') }}" defer></script>
-    <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <main>
         <div class="profile-container">
             <div class="profile-card profile-card-shadow" role="region" aria-label="User profile">

@@ -1,11 +1,13 @@
-﻿@extends('layouts/app')
+@extends('layouts/app')
 @section('title', 'Login Page')
 
-@section('content')
+@push('styles')
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+@endpush
 
+@section('content')
 @auth
 <div class="auth-wrapper">
     <div class="auth-shell single-panel">

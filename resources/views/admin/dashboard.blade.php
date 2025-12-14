@@ -1,8 +1,10 @@
 @extends('layouts.app')
 
-@section('content')
+@push('styles')
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+@endpush
 
+@section('content')
 <div class="admin-dashboard">
     <div class="dashboard-header">
         <h1>Admin Dashboard</h1>
@@ -103,6 +105,8 @@
         </div>
     </div>
 </div>
+@endsection
 
+@push('scripts')
 <script src="{{ asset('js/admin.js') }}"></script>
-@endsection 
+@endpush 

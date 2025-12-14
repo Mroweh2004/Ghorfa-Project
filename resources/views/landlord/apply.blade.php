@@ -1,8 +1,11 @@
 @extends('layouts.app')
 @section('title', 'Become a Landlord')
-@section('content')
-<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@endpush
+
+@section('content')
 <main>
     <div class="profile-container">
         <div class="profile-card profile-card-shadow">

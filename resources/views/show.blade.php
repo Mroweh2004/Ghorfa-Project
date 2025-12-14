@@ -1,11 +1,17 @@
 @extends('layouts.app')
 @section('title', $property->title)
-@section('content')
+
+@push('styles')
 <link rel="stylesheet" href="{{ asset('css/show.css') }}">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="{{ asset('js/show.js') }}" defer></script>
+@endpush
 
+@push('scripts')
+<script src="{{ asset('js/show.js') }}" defer></script>
+@endpush
+
+@section('content')
 <main class="property-show-page">
     <!-- Hero Section with Main Image -->
     <section class="property-hero">

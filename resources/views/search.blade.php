@@ -1,9 +1,16 @@
 @extends('layouts.app')
 @section('title', 'Search')
-@section('content')
+
+@push('styles')
 <link rel="stylesheet" href="{{asset('css/search.css')}}">
-<body>
-    <main class="search-page">
+@endpush
+
+@push('scripts')
+<script src="{{asset('js/search.js')}}"></script>
+@endpush
+
+@section('content')
+<main class="search-page">
         <!-- Mobile filter overlay -->
         <div class="filter-overlay"></div>
         
@@ -206,5 +213,4 @@
             </div>
         </section>
     </main>
-    <script src="{{asset('js/search.js')}}"></script>
 @endsection

@@ -1,8 +1,11 @@
 @extends('layouts.app')
 @section('title', 'list-space')
-@section('content')
+
+@push('styles')
 <link rel="stylesheet" href="{{ asset('css/list-property.css') }}">
-<script src="{{ asset('js/MapClickService.js') }}"></script>
+@endpush
+
+@section('content')
 <section class="title-section">
   <div class="content-title">
     <h1>List Your Space</h1>
@@ -281,8 +284,11 @@
     </div>
   </form>
 </section>
+@endsection
 
+@push('scripts')
 {{-- Google Maps API and Map Initialization --}}
+<script src="{{ asset('js/MapClickService.js') }}"></script>
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_browser_key') }}&callback=initPropertyLocationMap&libraries=places"></script>
 <script src="{{ asset('js/list-property.js') }}"></script>
-@endsection
+@endpush
