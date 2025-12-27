@@ -47,9 +47,6 @@ class MapController extends Controller
         $amenities = Amenity::all();
         $rules = Rule::all();
 
-        // Debug: Log properties count
-        \Log::info('MapController: Found ' . $properties->count() . ' properties with coordinates');
-        
         return view('map', compact('properties', 'amenities', 'rules', 'request'));
     }
 

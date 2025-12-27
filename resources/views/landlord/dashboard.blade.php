@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Landlord Dashboard')
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/landlord-dashboard.css') }}">
+@endpush
 
 <main>
     <div class="profile-container">

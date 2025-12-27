@@ -20,9 +20,6 @@
                 <li><a href="<?php echo e(route('home')); ?>" class="<?php echo e(request()->routeIs('home') ? 'active' : ''); ?>"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="<?php echo e(route('search')); ?>" class="<?php echo e(request()->routeIs('search') ? 'active' : ''); ?>"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="<?php echo e(route('map')); ?>" class="<?php echo e(request()->routeIs('map') ? 'active' : ''); ?>"><i class="fas fa-map-marked-alt"></i> Map</a></li>                
-                <?php if(auth()->user()->isLandlord()): ?>
-                <li><a href="<?php echo e(route('landlord.dashboard')); ?>" class="<?php echo e(request()->routeIs('landlord.*') ? 'active' : ''); ?>"><i class="fas fa-building"></i> Landlord Dashboard</a></li>
-                <?php endif; ?>
                 <?php if(auth()->user()->role === 'admin'): ?>
                 <li><a href="<?php echo e(route('admin.dashboard')); ?>" class="<?php echo e(request()->routeIs('admin.dashboard') ? 'active' : ''); ?>"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 <?php endif; ?>

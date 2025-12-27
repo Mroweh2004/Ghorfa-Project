@@ -1,13 +1,12 @@
 .admin-dashboard {
    
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 2rem;
+    margin-bottom: 2rem ;
+    padding-bottom: 2rem;
 }
 
 .dashboard-header {
-    margin-top: 50px;
-    margin-bottom: 2rem;
+    margin:2rem auto;
     text-align: center;
 }
 

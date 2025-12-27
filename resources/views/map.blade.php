@@ -3,7 +3,7 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/map.css') }}">
 
-<div class="container mx-auto px-4 py-6">
+<div class="container ">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Property Map</h1>
         <p class="text-gray-600">Explore properties on an interactive map</p>
@@ -15,10 +15,11 @@
         <div class="stats-label">Properties Found</div>
     </div>
 
-    <!-- Search Filters -->
+    <!-- Map Layout: Filters on Left, Map on Right -->
+    <div class="map-layout">
+        <!-- Search Filters - Left Side -->
     <div class="map-filters">
         <form method="GET" action="{{ route('map') }}" id="filterForm">
-            <div class="filter-row">
                 <div class="filter-group">
                     <label for="location">Location</label>
                     <input type="text" id="location" name="location" value="{{ $request->input('location') }}" placeholder="City, Country, or Address">
@@ -50,18 +51,19 @@
                         <option value="sale" {{ in_array('sale', (array)$request->input('listing_type', [])) ? 'selected' : '' }}>For Sale</option>
                         <option value="rent" {{ in_array('rent', (array)$request->input('listing_type', [])) ? 'selected' : '' }}>For Rent</option>
                     </select>
-                </div>
             </div>
             
-            <div class="filter-row">
+                <div class="filter-actions">
                 <button type="submit" class="btn-filter">Apply Filters</button>
                 <button type="button" class="btn-clear" onclick="clearFilters()">Clear All</button>
             </div>
         </form>
     </div>
 
+        <!-- Map Container - Right Side -->
     <div class="map-container">
         <div id="map"></div>
+        </div>
     </div>
 </div>
 

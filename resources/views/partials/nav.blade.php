@@ -20,9 +20,6 @@
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'active' : '' }}"><i class="fas fa-map-marked-alt"></i> Map</a></li>                
-                @if(auth()->user()->isLandlord())
-                <li><a href="{{ route('landlord.dashboard') }}" class="{{ request()->routeIs('landlord.*') ? 'active' : '' }}"><i class="fas fa-building"></i> Landlord Dashboard</a></li>
-                @endif
                 @if(auth()->user()->role === 'admin')
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-cog"></i> Admin Dashboard</a></li>
                 @endif
