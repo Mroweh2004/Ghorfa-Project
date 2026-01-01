@@ -28,7 +28,7 @@
                                 <td><?php echo e($application->user->email); ?></td>
                                 <td><?php echo e($application->phone ?? $application->user->phone_nb); ?></td>
                                 <td><?php echo e($application->created_at->diffForHumans()); ?></td>
-                                <td style="display: flex; gap: 0.5rem;">
+                                <td>
                                     <button 
                                         type="button" 
                                         class="btn btn-success approve-btn" 

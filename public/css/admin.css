@@ -1,8 +1,9 @@
 .admin-dashboard {
-   
+    margin: auto;
     max-width: 1200px;
     margin-bottom: 2rem ;
     padding-bottom: 2rem;
+
 }
 
 .dashboard-header {
@@ -71,6 +72,73 @@ tr:hover {
     background-color: #c0392b;
 }
 
+/* Action Buttons in Table */
+td {
+    position: relative;
+}
+
+.btn {
+    border: none;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    line-height: 1.5;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-success:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-danger:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+/* Button container in table cell */
+td:last-child {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.approve-btn,
+.reject-btn {
+    min-width: 80px;
+    white-space: nowrap;
+}
+
 .alert {
     padding: 1rem;
     margin-bottom: 1rem;
@@ -106,5 +174,21 @@ tr:hover {
 
     th, td {
         padding: 0.75rem;
+    }
+
+    /* Stack buttons vertically on mobile */
+    td:last-child {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 0.625rem 1rem;
+    }
+
+    .approve-btn,
+    .reject-btn {
+        min-width: auto;
     }
 }

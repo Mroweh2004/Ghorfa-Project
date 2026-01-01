@@ -16,8 +16,8 @@
     <!-- Map Layout: Filters on Left, Map on Right -->
     <div class="map-layout">
         <!-- Search Filters - Left Side -->
-        <div class="map-filters">
-            <form method="GET" action="<?php echo e(route('map')); ?>" id="filterForm">
+    <div class="map-filters">
+        <form method="GET" action="<?php echo e(route('map')); ?>" id="filterForm">
                 <div class="filter-group">
                     <label for="location">Location</label>
                     <input type="text" id="location" name="location" value="<?php echo e($request->input('location')); ?>" placeholder="City, Country, or Address">
@@ -49,20 +49,20 @@
                         <option value="sale" <?php echo e(in_array('sale', (array)$request->input('listing_type', [])) ? 'selected' : ''); ?>>For Sale</option>
                         <option value="rent" <?php echo e(in_array('rent', (array)$request->input('listing_type', [])) ? 'selected' : ''); ?>>For Rent</option>
                     </select>
-                </div>
-                
+            </div>
+            
                 <div class="filter-actions">
-                    <button type="submit" class="btn-filter">Apply Filters</button>
-                    <button type="button" class="btn-clear" onclick="clearFilters()">Clear All</button>
-                </div>
-            </form>
-        </div>
+                <button type="submit" class="btn-filter">Apply Filters</button>
+                <button type="button" class="btn-clear" onclick="clearFilters()">Clear All</button>
+            </div>
+        </form>
+    </div>
 
         <!-- Map Container - Right Side -->
-        <div class="map-container">
-            <div id="map"></div>
+    <div class="map-container">
+        <div id="map"></div>
         </div>
-    </div>  
+    </div>
 </div>
 
 <script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
