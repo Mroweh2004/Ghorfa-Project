@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\LandlordApplication;
+use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,12 +15,40 @@ class AdminController extends Controller
     use CreatesNotifications;
     public function dashboard()
     {
-        $users = User::where('role', '!=', 'admin')->get();
+        // Statistics
+        $stats = [
+            'total_users' => User::where('role', '!=', 'admin')->count(),
+            'total_landlords' => User::where('role', 'landlord')->count(),
+            'total_properties' => Property::count(),
+            'pending_applications' => LandlordApplication::where('status', 'pending')->count(),
+            'approved_applications' => LandlordApplication::where('status', 'approved')->count(),
+            'rejected_applications' => LandlordApplication::where('status', 'rejected')->count(),
+            'total_likes' => DB::table('property_likes')->count(),
+            'total_reviews' => DB::table('reviews')->count(),
+        ];
+
+        // Data
+        $users = User::where('role', '!=', 'admin')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+        
         $pendingApplications = LandlordApplication::with(['user', 'reviewer'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
-        return view('admin.dashboard', compact('users', 'pendingApplications'));
+
+        // Recent activity
+        $recentUsers = User::where('role', '!=', 'admin')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $recentProperties = Property::with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('admin.dashboard', compact('users', 'pendingApplications', 'stats', 'recentUsers', 'recentProperties'));
     }
 
     public function deleteUser(User $user)
