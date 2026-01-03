@@ -4,6 +4,7 @@
 
 @section('content')
 
+@section('content')
 <div class="admin-dashboard">
     <!-- Statistics Cards -->
     <div class="stats-grid">
@@ -242,6 +243,8 @@
         </div>
     </div>
 </div>
+@endsection
 
+@push('scripts')
 <script src="{{ asset('js/admin.js') }}"></script>
-@endsection 
+@endpush 

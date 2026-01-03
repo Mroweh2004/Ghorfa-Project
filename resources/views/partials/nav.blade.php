@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Ghorfa</title>
-    <script src="{{ asset('js/profile.js') }}"></script>
 </head>
 <body>
 
@@ -95,5 +94,6 @@
     </header>
     @endguest
 
+<script src="{{ asset('js/profile.js') }}"></script>
 </body>
 </html>

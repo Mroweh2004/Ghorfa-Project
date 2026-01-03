@@ -1,13 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Edit Property')
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/list-property.css') }}">
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/list-property.js') }}"></script>
+<script src="{{ asset('js/MapClickService.js') }}"></script>
+@endpush
+
 @section('content')
 @php
   $backgroundImage = \App\Services\PropertyImageService::getImageAssetUrl($property);
 @endphp
-<link rel="stylesheet" href="{{ asset('css/list-property.css') }}">
-<script src="{{ asset('js/list-property.js') }}"></script>
-<script src="{{ asset('js/MapClickService.js') }}"></script>
 <section class="title-section" style="background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url('{{ $backgroundImage }}') center/cover;">
   <div class="content-title">
     <h1>Edit Property</h1>
