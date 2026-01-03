@@ -12,7 +12,6 @@ use App\Traits\CreatesNotifications;
 class ReviewController extends Controller
 {
     use CreatesNotifications;
-    // GET /properties/{property}/reviews
     public function index(Property $property)
     {
         $reviews = $property->reviews()
@@ -90,7 +89,6 @@ class ReviewController extends Controller
         return back()->with('success', 'Your review has been updated successfully.');
     }
 
-    // DELETE /reviews/{review}
     public function destroy(Request $request, Review $review)
     {
         // Check if user owns this review, is the property owner, or is admin

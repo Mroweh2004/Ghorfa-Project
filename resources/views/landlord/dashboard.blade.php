@@ -3,6 +3,9 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@section('content')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/landlord-dashboard.css') }}">
 @endpush
 
 @section('content')

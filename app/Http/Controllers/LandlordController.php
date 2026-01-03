@@ -17,7 +17,7 @@ class LandlordController extends Controller
     {
         $user = Auth::user();
         $properties = Property::where('user_id', $user->id)
-            ->with(['images', 'amenities', 'rules'])
+            ->with(['images', 'amenities', 'rules', 'reviews', 'likedBy'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

@@ -1,6 +1,8 @@
 <?php $__env->startSection('title', 'Landlord Dashboard'); ?>
 <?php $__env->startSection('content'); ?>
-<link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
+<?php $__env->startPush('styles'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('css/landlord-dashboard.css')); ?>">
+<?php $__env->stopPush(); ?>
 
 <main>
     <div class="profile-container">
