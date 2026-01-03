@@ -1,8 +1,14 @@
 @extends('layouts/app')
 
-@section('content')
-<script src="{{asset('js/search.js')}}"></script>
+@push('styles')
 <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@endpush
+
+@push('scripts')
+<script src="{{asset('js/search.js')}}"></script>
+@endpush
+
+@section('content')
 <main>
 @auth
 <div class="results-header">

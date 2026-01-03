@@ -1,8 +1,11 @@
 @extends('layouts.app')
 
-@section('content')
+@push('styles')
 <link rel="stylesheet" href="{{ asset('css/map.css') }}">
+@endpush
 
+@section('content')
+<div class="container mx-auto px-4 py-6">
 <div class="container ">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Property Map</h1>
@@ -66,7 +69,9 @@
         </div>
     </div>
 </div>
+@endsection
 
+@push('scripts')
 <script src="{{ asset('js/MapClickService.js') }}"></script>
 <script src="{{ asset('js/map.js') }}"></script>
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_browser_key') }}&callback=initMap&libraries=places"></script>
@@ -91,4 +96,4 @@
         }
     }, 5000);
 </script>
-@endsection
+@endpush
