@@ -78,6 +78,8 @@ Route::middleware(['web', 'auth', AdminMiddleware::class])->prefix('admin')->gro
     Route::get('/pending-applications', [AdminController::class, 'getPendingApplications'])->name('admin.pending-applications');
     Route::post('/landlord-applications/{application}/approve', [AdminController::class, 'approveLandlordApplication'])->name('admin.landlord.approve');
     Route::post('/landlord-applications/{application}/reject', [AdminController::class, 'rejectLandlordApplication'])->name('admin.landlord.reject');
+    Route::post('/properties/{property}/approve', [AdminController::class, 'approveProperty'])->name('admin.properties.approve');
+    Route::post('/properties/{property}/reject', [AdminController::class, 'rejectProperty'])->name('admin.properties.reject');
 });
 
 //----------------Notification Routes-------------------

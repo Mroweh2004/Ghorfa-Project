@@ -1,7 +1,14 @@
 <?php $__env->startSection('title', 'Search'); ?>
-<?php $__env->startSection('content'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/search.css')); ?>">
-<body>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script src="<?php echo e(asset('js/search.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('content'); ?>
     <main class="search-page">
         <!-- Mobile filter overlay -->
         <div class="filter-overlay"></div>
@@ -208,6 +215,5 @@
             </div>
         </section>
     </main>
-    <script src="<?php echo e(asset('js/search.js')); ?>"></script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/search.blade.php ENDPATH**/ ?>

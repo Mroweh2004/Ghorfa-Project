@@ -356,3 +356,156 @@
     }
 })();
 
+/* =========================
+   Property Approval Functions
+========================= */
+
+async function handleApproveProperty(propertyId) {
+    const button = document.querySelector(`.approve-property-btn[data-property-id="${propertyId}"]`);
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = 'Approving...';
+    }
+
+    try {
+        const response = await fetch(`/admin/properties/${propertyId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to approve property');
+        }
+
+        if (data.success) {
+            showNotification(data.message || 'Property approved successfully!', 'success');
+            // Remove the row from the table
+            const row = document.querySelector(`tr[data-property-id="${propertyId}"]`);
+            if (row) {
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity = '0';
+                setTimeout(() => row.remove(), 300);
+            }
+            // Update pending count badge
+            updatePendingCount();
+        } else {
+            throw new Error(data.message || 'Failed to approve property');
+        }
+    } catch (error) {
+        console.error('Error approving property:', error);
+        showNotification(error.message || 'Failed to approve property. Please try again.', 'error');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Approve';
+        }
+    }
+}
+
+async function handleRejectProperty(propertyId) {
+    const adminNotes = prompt('Please provide a reason for rejection (optional):');
+    
+    const button = document.querySelector(`.reject-property-btn[data-property-id="${propertyId}"]`);
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = 'Rejecting...';
+    }
+
+    try {
+        const response = await fetch(`/admin/properties/${propertyId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                admin_notes: adminNotes || null
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to reject property');
+        }
+
+        if (data.success) {
+            showNotification(data.message || 'Property rejected.', 'success');
+            // Remove the row from the table
+            const row = document.querySelector(`tr[data-property-id="${propertyId}"]`);
+            if (row) {
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity = '0';
+                setTimeout(() => row.remove(), 300);
+            }
+            // Update pending count badge
+            updatePendingCount();
+        } else {
+            throw new Error(data.message || 'Failed to reject property');
+        }
+    } catch (error) {
+        console.error('Error rejecting property:', error);
+        showNotification(error.message || 'Failed to reject property. Please try again.', 'error');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Reject';
+        }
+    }
+}
+
+function updatePendingCount() {
+    const rows = document.querySelectorAll('.properties-table tbody tr:not(.empty-state-cell)');
+    const count = Array.from(rows).filter(row => !row.querySelector('.empty-state-cell')).length;
+    const badge = document.querySelector('#properties-section .badge');
+    if (badge) {
+        if (count > 0) {
+            badge.textContent = count;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'error' ? '#fee2e2' : '#d1fae5'};
+        color: ${type === 'error' ? '#991b1b' : '#065f46'};
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        max-width: 400px;
+        border: 1px solid ${type === 'error' ? '#fca5a5' : '#a7f3d0'};
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+window.handleApproveProperty = handleApproveProperty;
+window.handleRejectProperty = handleRejectProperty;
+

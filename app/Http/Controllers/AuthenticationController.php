@@ -75,6 +75,18 @@ class AuthenticationController extends Controller
             'profile_image' => $IncomingFields['profile_image'] ?? null,
         ]);
 
+        // Log activity
+        if (class_exists(\App\Models\Activity::class)) {
+            \App\Models\Activity::create([
+                'type' => 'user_registered',
+                'description' => "New user '{$user->name}' registered",
+                'subject_type' => \App\Models\User::class,
+                'subject_id' => $user->id,
+                'user_id' => $user->id,
+                'properties' => ['user_id' => $user->id, 'user_name' => $user->name, 'user_email' => $user->email, 'role' => $user->role],
+            ]);
+        }
+
         Auth::login($user);
         return redirect()->route('home');
     }

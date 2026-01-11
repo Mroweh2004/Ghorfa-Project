@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Ghorfa</title>
-    <script src="<?php echo e(asset('js/profile.js')); ?>"></script>
 </head>
 <body>
 
@@ -61,9 +60,8 @@
         </nav>
             <form method="post" class="profile-dropdown" action="<?php echo e(route('logout')); ?>">
             <?php echo csrf_field(); ?>
-                <a href="<?php echo e(route('profileInfo')); ?>" class="profile-dropdown-option">Profile</a>
-                <a href="<?php echo e(route( 'profileProperties')); ?>" class="profile-dropdown-option">My Properties</a>
-                <a href="<?php echo e(route( 'profileFavorites')); ?>" class="profile-dropdown-option">My Favorites</a>
+                <a href="<?php echo e(route('profileInfo')); ?>" class="profile-dropdown-option"><i class="fas fa-user"></i> Profile</a>
+                <a href="<?php echo e(route( 'profileFavorites')); ?>" class="profile-dropdown-option"><i class="fas fa-heart"></i> My Favorites</a>
                 <?php if(auth()->user()->canBecomeLandlord()): ?>
                 <a href="<?php echo e(route('landlord.apply')); ?>" class="profile-dropdown-option"><i class="fas fa-building"></i> Become a Landlord</a>
                 <?php endif; ?>
@@ -95,6 +93,7 @@
     </header>
     <?php endif; ?>
 
+<script src="<?php echo e(asset('js/profile.js')); ?>"></script>
 </body>
 </html>
 <?php /**PATH C:\Ghorfa-Project\resources\views/partials/nav.blade.php ENDPATH**/ ?>

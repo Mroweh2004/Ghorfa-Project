@@ -60,9 +60,8 @@
         </nav>
             <form method="post" class="profile-dropdown" action="{{ route('logout') }}">
             @csrf
-                <a href="{{ route('profileInfo') }}" class="profile-dropdown-option">Profile</a>
-                <a href="{{ route( 'profileProperties') }}" class="profile-dropdown-option">My Properties</a>
-                <a href="{{ route( 'profileFavorites') }}" class="profile-dropdown-option">My Favorites</a>
+                <a href="{{ route('profileInfo') }}" class="profile-dropdown-option"><i class="fas fa-user"></i> Profile</a>
+                <a href="{{ route( 'profileFavorites') }}" class="profile-dropdown-option"><i class="fas fa-heart"></i> My Favorites</a>
                 @if(auth()->user()->canBecomeLandlord())
                 <a href="{{ route('landlord.apply') }}" class="profile-dropdown-option"><i class="fas fa-building"></i> Become a Landlord</a>
                 @endif

@@ -1,7 +1,6 @@
 <?php $__env->startSection('title', 'Admin Dashboard'); ?>
 
 <?php $__env->startSection('content'); ?>
-
 <div class="admin-dashboard">
     <!-- Statistics Cards -->
     <div class="stats-grid">
@@ -43,25 +42,6 @@
                 <h3><?php echo e($stats['pending_applications']); ?></h3>
                 <p>Pending Applications</p>
             </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="actions-grid">
-            <a href="#applications-section" class="action-card">
-                <i class="fas fa-file-alt"></i>
-                <span>Review Applications</span>
-            </a>
-            <a href="#users-section" class="action-card">
-                <i class="fas fa-user-cog"></i>
-                <span>Manage Users</span>
-            </a>
-            <a href="#recent-activity" class="action-card">
-                <i class="fas fa-history"></i>
-                <span>Recent Activity</span>
-            </a>
         </div>
     </div>
 
@@ -191,58 +171,157 @@
             </div>
         </div>
 
-        <!-- Recent Activity Section -->
+        <!-- Pending Properties Section -->
+        <div id="properties-section" class="content-section">
+            <div class="section-header">
+                <h2>
+                    <i class="fas fa-building"></i>
+                    Pending Properties for Approval
+                    <?php if($stats['pending_properties'] > 0): ?>
+                        <span class="badge badge-warning"><?php echo e($stats['pending_properties']); ?></span>
+                    <?php endif; ?>
+                </h2>
+            </div>
+            <div class="properties-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Landlord</th>
+                            <th>Location</th>
+                            <th>Price</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if($pendingProperties->count() > 0): ?>
+                            <?php $__currentLoopData = $pendingProperties; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $property): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <tr data-property-id="<?php echo e($property->id); ?>">
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <?php if($property->images->first()): ?>
+                                            <img src="<?php echo e(asset('storage/' . $property->images->first()->path)); ?>" alt="<?php echo e($property->title); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                                        <?php else: ?>
+                                            <div style="width: 50px; height: 50px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-home" style="color: #94a3b8;"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div>
+                                            <strong><?php echo e($property->title); ?></strong>
+                                            <div style="font-size: 0.875rem; color: #64748b;"><?php echo e($property->property_type); ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><?php echo e($property->user->name); ?></td>
+                                <td><?php echo e($property->city); ?>, <?php echo e($property->country); ?></td>
+                                <td>$<?php echo e(number_format($property->price)); ?>/month</td>
+                                <td><?php echo e($property->created_at->diffForHumans()); ?></td>
+                                <td>
+                                    <a 
+                                        href="<?php echo e(route('properties.show', $property->id)); ?>" 
+                                        target="_blank"
+                                        class="btn btn-info"
+                                        style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;"
+                                    >
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-success approve-property-btn" 
+                                        data-property-id="<?php echo e($property->id); ?>"
+                                        onclick="handleApproveProperty(<?php echo e($property->id); ?>)"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-danger reject-property-btn" 
+                                        data-property-id="<?php echo e($property->id); ?>"
+                                        onclick="handleRejectProperty(<?php echo e($property->id); ?>)"
+                                    >
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="6" class="empty-state-cell">
+                                    <i class="fas fa-check-circle"></i>
+                                    No pending properties
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Activities Section -->
         <div id="recent-activity" class="content-section">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-history"></i>
-                    Recent Activity
+                    Recent Activities
                 </h2>
             </div>
-            <div class="activity-grid">
-                <div class="activity-card">
-                    <h3><i class="fas fa-user-plus"></i> Recent Users</h3>
-                    <ul class="activity-list">
-                        <?php $__empty_1 = true; $__currentLoopData = $recentUsers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <ul class="activity-list">
+                <?php if($recentActivities->count() > 0): ?>
+                    <?php $__currentLoopData = $recentActivities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <li>
-                            <span class="activity-icon">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <div class="activity-content">
-                                <strong><?php echo e($user->name); ?></strong>
-                                <span class="activity-meta"><?php echo e($user->created_at->diffForHumans()); ?></span>
+                            <div class="activity-icon">
+                                <?php if($activity->type === 'property_created'): ?>
+                                    <i class="fas fa-plus-circle text-success"></i>
+                                <?php elseif($activity->type === 'property_updated'): ?>
+                                    <i class="fas fa-edit text-info"></i>
+                                <?php elseif($activity->type === 'property_deleted'): ?>
+                                    <i class="fas fa-trash text-danger"></i>
+                                <?php elseif($activity->type === 'property_approved'): ?>
+                                    <i class="fas fa-check-circle text-success"></i>
+                                <?php elseif($activity->type === 'property_rejected'): ?>
+                                    <i class="fas fa-times-circle text-danger"></i>
+                                <?php elseif($activity->type === 'application_approved'): ?>
+                                    <i class="fas fa-user-check text-success"></i>
+                                <?php elseif($activity->type === 'application_rejected'): ?>
+                                    <i class="fas fa-user-times text-danger"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-circle text-primary"></i>
+                                <?php endif; ?>
                             </div>
-                            <span class="role-badge role-<?php echo e($user->role); ?>"><?php echo e(ucfirst($user->role)); ?></span>
-                        </li>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <li class="empty-activity">No recent users</li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
+                            <div class="activity-content">
+                                <div class="activity-description">
+                                    <?php echo e($activity->description); ?>
 
-                <div class="activity-card">
-                    <h3><i class="fas fa-building"></i> Recent Properties</h3>
-                    <ul class="activity-list">
-                        <?php $__empty_1 = true; $__currentLoopData = $recentProperties; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $property): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <li>
-                            <span class="activity-icon">
-                                <i class="fas fa-home"></i>
-                            </span>
-                            <div class="activity-content">
-                                <strong><?php echo e($property->title); ?></strong>
-                                <span class="activity-meta">by <?php echo e($property->user->name); ?> • <?php echo e($property->created_at->diffForHumans()); ?></span>
+                                </div>
+                                <div class="activity-meta">
+                                    <?php if($activity->user): ?>
+                                        <span class="activity-user">
+                                            <i class="fas fa-user"></i> <?php echo e($activity->user->name); ?>
+
+                                        </span>
+                                    <?php endif; ?>
+                                    <span class="activity-time">
+                                        <i class="fas fa-clock"></i> <?php echo e($activity->created_at->diffForHumans()); ?>
+
+                                    </span>
+                                </div>
                             </div>
                         </li>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <li class="empty-activity">No recent properties</li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-            </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php else: ?>
+                    <li class="empty-activity">
+                        <i class="fas fa-history"></i>
+                        <span>No activities yet</span>
+                    </li>
+                <?php endif; ?>
+            </ul>
         </div>
     </div>
 </div>
+<?php $__env->stopSection(); ?>
 
+<?php $__env->startPush('scripts'); ?>
 <script src="<?php echo e(asset('js/admin.js')); ?>"></script>
-<?php $__env->stopSection(); ?> 
+<?php $__env->stopPush(); ?> 
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/admin/dashboard.blade.php ENDPATH**/ ?>

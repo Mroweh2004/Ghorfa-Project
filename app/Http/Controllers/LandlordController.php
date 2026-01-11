@@ -16,14 +16,36 @@ class LandlordController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        $properties = Property::where('user_id', $user->id)
-            ->with(['images', 'amenities', 'rules', 'reviews', 'likedBy'])
+        
+        // Get properties grouped by status
+        $approvedProperties = Property::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->with(['images' => function($query) {
+                $query->orderBy('is_primary', 'desc')->limit(1);
+            }])
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
+
+        $pendingProperties = Property::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->with(['images' => function($query) {
+                $query->orderBy('is_primary', 'desc')->limit(1);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $rejectedProperties = Property::where('user_id', $user->id)
+            ->where('status', 'rejected')
+            ->with(['images' => function($query) {
+                $query->orderBy('is_primary', 'desc')->limit(1);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $stats = [
             'total_properties' => Property::where('user_id', $user->id)->count(),
-            'active_listings' => Property::where('user_id', $user->id)->count(),
+            'active_listings' => Property::where('user_id', $user->id)->where('status', 'approved')->count(),
+            'pending_properties' => $pendingProperties->count(),
             'total_views' => 0,
             'total_likes' => DB::table('property_likes')
                 ->join('properties', 'property_likes.property_id', '=', 'properties.id')
@@ -31,7 +53,7 @@ class LandlordController extends Controller
                 ->count(),
         ];
 
-        return view('landlord.dashboard', compact('properties', 'stats'));
+        return view('landlord.dashboard', compact('approvedProperties', 'pendingProperties', 'rejectedProperties', 'stats'));
     }
 
     public function showApplyForm()

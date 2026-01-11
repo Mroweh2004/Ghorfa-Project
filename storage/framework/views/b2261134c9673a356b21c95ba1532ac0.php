@@ -1,6 +1,9 @@
-<?php $__env->startSection('content'); ?>
+<?php $__env->startPush('styles'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/map.css')); ?>">
+<?php $__env->stopPush(); ?>
 
+<?php $__env->startSection('content'); ?>
+<div class="container mx-auto px-4 py-6">
 <div class="container ">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Property Map</h1>
@@ -64,7 +67,9 @@
         </div>
     </div>
 </div>
+<?php $__env->stopSection(); ?>
 
+<?php $__env->startPush('scripts'); ?>
 <script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
 <script src="<?php echo e(asset('js/map.js')); ?>"></script>
 <script async src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_browser_key')); ?>&callback=initMap&libraries=places"></script>
@@ -89,5 +94,5 @@
         }
     }, 5000);
 </script>
-<?php $__env->stopSection(); ?>
+<?php $__env->stopPush(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/map.blade.php ENDPATH**/ ?>
