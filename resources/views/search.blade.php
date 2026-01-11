@@ -10,7 +10,7 @@
 @endpush
 
 @section('content')
-<main class="search-page">
+    <main class="search-page">
         <!-- Mobile filter overlay -->
         <div class="filter-overlay"></div>
         

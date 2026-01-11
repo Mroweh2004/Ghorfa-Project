@@ -51,6 +51,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="#properties-section" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Pending</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="#recent-activity" class="nav-link">
                                 <i class="fas fa-history"></i>
                                 <span>Activity</span>

@@ -179,7 +179,8 @@ main {
     font-weight: 500;
     transition: background 0.3s;
     display: flex;
-    align-items: left;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .profile-dropdown-option:hover {

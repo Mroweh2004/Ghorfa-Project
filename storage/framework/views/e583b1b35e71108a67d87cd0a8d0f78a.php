@@ -1,11 +1,15 @@
+<?php $__env->startPush('styles'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script src="<?php echo e(asset('js/profile.js')); ?>" defer></script>
+<?php $__env->stopPush(); ?>
+
 <?php $__env->startSection('content'); ?>
 <?php if(auth()->guard()->check()): ?>
-    
-    <script src="<?php echo e(asset('js/profile.js')); ?>" defer></script>
-    <link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <main>
         <div class="profile-container">
             <div class="profile-card profile-card-shadow" role="region" aria-label="User profile">

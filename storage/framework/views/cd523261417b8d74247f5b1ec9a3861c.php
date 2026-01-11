@@ -7,10 +7,9 @@
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/app.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/notifications.css')); ?>">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link rel="icon" href="<?php echo e(asset('img/logo.png')); ?>">   
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />    
+    <link rel="icon" href="<?php echo e(asset('img/logo.png')); ?>">
+    <?php echo $__env->yieldPushContent('styles'); ?>
     <title><?php echo $__env->yieldContent('title'); ?></title>
     <style>
       #app-loader {
@@ -120,9 +119,19 @@
   
     <?php echo $__env->make('partials.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <?php echo $__env->make('partials.mobile-nav', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+    
+    
     <?php if(auth()->guard()->check()): ?>
     <script src="<?php echo e(asset('js/notifications.js')); ?>"></script>
     <?php endif; ?>
+    
+    
     <script>
       window.addEventListener('load', function () {
         const el = document.getElementById('app-loader');

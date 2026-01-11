@@ -14,6 +14,7 @@ class MapController extends Controller
     public function index(Request $request)
     {
         $query = Property::with(['images', 'unit', 'amenities', 'reviews'])
+            ->where('status', 'approved')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude');
 

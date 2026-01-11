@@ -1,11 +1,12 @@
-﻿
 <?php $__env->startSection('title', 'Login Page'); ?>
 
-<?php $__env->startSection('content'); ?>
+<?php $__env->startPush('styles'); ?>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo e(asset('css/login.css')); ?>">
+<?php $__env->stopPush(); ?>
 
+<?php $__env->startSection('content'); ?>
 <?php if(auth()->guard()->check()): ?>
 <div class="auth-wrapper">
     <div class="auth-shell single-panel">

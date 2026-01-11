@@ -3,8 +3,6 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-
-@section('content')
 <div class="admin-dashboard">
     <!-- Statistics Cards -->
     <div class="stats-grid">
@@ -46,25 +44,6 @@
                 <h3>{{ $stats['pending_applications'] }}</h3>
                 <p>Pending Applications</p>
             </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="actions-grid">
-            <a href="#applications-section" class="action-card">
-                <i class="fas fa-file-alt"></i>
-                <span>Review Applications</span>
-            </a>
-            <a href="#users-section" class="action-card">
-                <i class="fas fa-user-cog"></i>
-                <span>Manage Users</span>
-            </a>
-            <a href="#recent-activity" class="action-card">
-                <i class="fas fa-history"></i>
-                <span>Recent Activity</span>
-            </a>
         </div>
     </div>
 
@@ -192,54 +171,148 @@
             </div>
         </div>
 
-        <!-- Recent Activity Section -->
+        <!-- Pending Properties Section -->
+        <div id="properties-section" class="content-section">
+            <div class="section-header">
+                <h2>
+                    <i class="fas fa-building"></i>
+                    Pending Properties for Approval
+                    @if($stats['pending_properties'] > 0)
+                        <span class="badge badge-warning">{{ $stats['pending_properties'] }}</span>
+                    @endif
+                </h2>
+            </div>
+            <div class="properties-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Landlord</th>
+                            <th>Location</th>
+                            <th>Price</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($pendingProperties->count() > 0)
+                            @foreach($pendingProperties as $property)
+                            <tr data-property-id="{{ $property->id }}">
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        @if($property->images->first())
+                                            <img src="{{ asset('storage/' . $property->images->first()->path) }}" alt="{{ $property->title }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                                        @else
+                                            <div style="width: 50px; height: 50px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-home" style="color: #94a3b8;"></i>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <strong>{{ $property->title }}</strong>
+                                            <div style="font-size: 0.875rem; color: #64748b;">{{ $property->property_type }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ $property->user->name }}</td>
+                                <td>{{ $property->city }}, {{ $property->country }}</td>
+                                <td>${{ number_format($property->price) }}/month</td>
+                                <td>{{ $property->created_at->diffForHumans() }}</td>
+                                <td>
+                                    <a 
+                                        href="{{ route('properties.show', $property->id) }}" 
+                                        target="_blank"
+                                        class="btn btn-info"
+                                        style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;"
+                                    >
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-success approve-property-btn" 
+                                        data-property-id="{{ $property->id }}"
+                                        onclick="handleApproveProperty({{ $property->id }})"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-danger reject-property-btn" 
+                                        data-property-id="{{ $property->id }}"
+                                        onclick="handleRejectProperty({{ $property->id }})"
+                                    >
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="6" class="empty-state-cell">
+                                    <i class="fas fa-check-circle"></i>
+                                    No pending properties
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Activities Section -->
         <div id="recent-activity" class="content-section">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-history"></i>
-                    Recent Activity
+                    Recent Activities
                 </h2>
             </div>
-            <div class="activity-grid">
-                <div class="activity-card">
-                    <h3><i class="fas fa-user-plus"></i> Recent Users</h3>
-                    <ul class="activity-list">
-                        @forelse($recentUsers as $user)
+            <ul class="activity-list">
+                @if($recentActivities->count() > 0)
+                    @foreach($recentActivities as $activity)
                         <li>
-                            <span class="activity-icon">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <div class="activity-content">
-                                <strong>{{ $user->name }}</strong>
-                                <span class="activity-meta">{{ $user->created_at->diffForHumans() }}</span>
+                            <div class="activity-icon">
+                                @if($activity->type === 'property_created')
+                                    <i class="fas fa-plus-circle text-success"></i>
+                                @elseif($activity->type === 'property_updated')
+                                    <i class="fas fa-edit text-info"></i>
+                                @elseif($activity->type === 'property_deleted')
+                                    <i class="fas fa-trash text-danger"></i>
+                                @elseif($activity->type === 'property_approved')
+                                    <i class="fas fa-check-circle text-success"></i>
+                                @elseif($activity->type === 'property_rejected')
+                                    <i class="fas fa-times-circle text-danger"></i>
+                                @elseif($activity->type === 'application_approved')
+                                    <i class="fas fa-user-check text-success"></i>
+                                @elseif($activity->type === 'application_rejected')
+                                    <i class="fas fa-user-times text-danger"></i>
+                                @else
+                                    <i class="fas fa-circle text-primary"></i>
+                                @endif
                             </div>
-                            <span class="role-badge role-{{ $user->role }}">{{ ucfirst($user->role) }}</span>
-                        </li>
-                        @empty
-                        <li class="empty-activity">No recent users</li>
-                        @endforelse
-                    </ul>
-                </div>
-
-                <div class="activity-card">
-                    <h3><i class="fas fa-building"></i> Recent Properties</h3>
-                    <ul class="activity-list">
-                        @forelse($recentProperties as $property)
-                        <li>
-                            <span class="activity-icon">
-                                <i class="fas fa-home"></i>
-                            </span>
                             <div class="activity-content">
-                                <strong>{{ $property->title }}</strong>
-                                <span class="activity-meta">by {{ $property->user->name }} • {{ $property->created_at->diffForHumans() }}</span>
+                                <div class="activity-description">
+                                    {{ $activity->description }}
+                                </div>
+                                <div class="activity-meta">
+                                    @if($activity->user)
+                                        <span class="activity-user">
+                                            <i class="fas fa-user"></i> {{ $activity->user->name }}
+                                        </span>
+                                    @endif
+                                    <span class="activity-time">
+                                        <i class="fas fa-clock"></i> {{ $activity->created_at->diffForHumans() }}
+                                    </span>
+                                </div>
                             </div>
                         </li>
-                        @empty
-                        <li class="empty-activity">No recent properties</li>
-                        @endforelse
-                    </ul>
-                </div>
-            </div>
+                    @endforeach
+                @else
+                    <li class="empty-activity">
+                        <i class="fas fa-history"></i>
+                        <span>No activities yet</span>
+                    </li>
+                @endif
+            </ul>
         </div>
     </div>
 </div>

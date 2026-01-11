@@ -1,11 +1,18 @@
 <?php $__env->startSection('title', 'Edit Property'); ?>
+
+<?php $__env->startPush('styles'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('css/list-property.css')); ?>">
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script src="<?php echo e(asset('js/list-property.js')); ?>"></script>
+<script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
+
 <?php $__env->startSection('content'); ?>
 <?php
   $backgroundImage = \App\Services\PropertyImageService::getImageAssetUrl($property);
 ?>
-<link rel="stylesheet" href="<?php echo e(asset('css/list-property.css')); ?>">
-<script src="<?php echo e(asset('js/list-property.js')); ?>"></script>
-<script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
 <section class="title-section" style="background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url('<?php echo e($backgroundImage); ?>') center/cover;">
   <div class="content-title">
     <h1>Edit Property</h1>

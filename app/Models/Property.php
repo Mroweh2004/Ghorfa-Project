@@ -25,7 +25,10 @@ class Property extends Model
         'room_nb',
         'bathroom_nb',
         'bedroom_nb',
-        'user_id'
+        'user_id',
+        'status',
+        'approved_at',
+        'approved_by'
     ];
 
     public function amenities()

@@ -14,16 +14,19 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GeocodingService;
 use App\Traits\CreatesNotifications;
+use App\Traits\LogsActivity;
 
 class PropertyController extends Controller
 {
-    use CreatesNotifications;
+    use CreatesNotifications, LogsActivity;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $properties = Property::orderBy('created_at', 'desc')->paginate(12);
+        $properties = Property::where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
         $amenities = Amenity::all();
         $rules = Rule::all();
         return view('search', compact('properties', 'amenities', 'rules'));
@@ -33,7 +36,7 @@ class PropertyController extends Controller
     {   
         $amenities = Amenity::all();
         $rules = Rule::all();
-        $query = Property::query();
+        $query = Property::where('status', 'approved');
 
         if ($request->filled('location')) {
             $location = $request->input('location');
@@ -124,6 +127,14 @@ class PropertyController extends Controller
      */
     public function show(Property $property)
     {
+        // Only show approved properties, unless user is admin or property owner
+        if ($property->status !== 'approved') {
+            $user = Auth::user();
+            if (!$user || ($user->role !== 'admin' && $user->id !== $property->user_id)) {
+                abort(404, 'Property not found or pending approval');
+            }
+        }
+        
         $property->load(['images', 'reviews.user']);
         
         $avgRating = $property->average_rating;
@@ -224,6 +235,14 @@ class PropertyController extends Controller
             $property->amenities()->sync((array)$request->input('amenities', []));
             $property->rules()->sync((array)$request->input('rules', []));
 
+            // Log activity
+            $this->logActivity(
+                'property_updated',
+                "Property '{$property->title}' was updated",
+                $property,
+                ['property_id' => $property->id, 'property_title' => $property->title]
+            );
+
             $removeImageIds = collect($request->input('remove_images', []))
                 ->map(fn ($id) => (int) $id)
                 ->filter()
@@ -277,11 +296,22 @@ class PropertyController extends Controller
     {
     
             if (Auth::check() && (Auth::user()->role === 'admin' || $property->user_id === Auth::id())) {
+                $propertyTitle = $property->title;
+                $propertyId = $property->id;
+                
                 foreach ($property->images as $image) {
                     Storage::disk('public')->delete($image->path);
                 }
 
                 $property->delete();
+
+                // Log activity
+                $this->logActivity(
+                    'property_deleted',
+                    "Property '{$propertyTitle}' was deleted",
+                    null,
+                    ['property_id' => $propertyId, 'property_title' => $propertyTitle]
+                );
 
                 return redirect()->route('search')->with('success', 'Property deleted successfully!');
             }
@@ -343,6 +373,7 @@ class PropertyController extends Controller
         try {
             $validated['user_id'] = Auth::id();
             $validated['unit_id'] = $validated['unit'] ?? null;
+            $validated['status'] = 'pending'; // New properties require admin approval
             unset($validated['unit']);
             $amenityIds = (array)($request->input('amenities', []));
             $ruleIds    = (array)($request->input('rules', []));
@@ -386,6 +417,14 @@ class PropertyController extends Controller
             if (!empty($ruleIds)) {
                 $property->rules()->sync($ruleIds);
             }
+
+            // Log activity
+            $this->logActivity(
+                'property_created',
+                "New property '{$property->title}' was created",
+                $property,
+                ['property_id' => $property->id, 'property_title' => $property->title, 'status' => 'pending']
+            );
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {

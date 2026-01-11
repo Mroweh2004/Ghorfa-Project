@@ -1,7 +1,10 @@
 <?php $__env->startSection('title', 'list-space'); ?>
-<?php $__env->startSection('content'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/list-property.css')); ?>">
-<script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('content'); ?>
 <section class="title-section">
   <div class="content-title">
     <h1>List Your Space</h1>
@@ -366,10 +369,13 @@ unset($__errorArgs, $__bag); ?>
     </div>
   </form>
 </section>
+<?php $__env->stopSection(); ?>
 
+<?php $__env->startPush('scripts'); ?>
 
+<script src="<?php echo e(asset('js/MapClickService.js')); ?>"></script>
 <script async src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_browser_key')); ?>&callback=initPropertyLocationMap&libraries=places"></script>
 <script src="<?php echo e(asset('js/list-property.js')); ?>"></script>
-<?php $__env->stopSection(); ?>
+<?php $__env->stopPush(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/list-property.blade.php ENDPATH**/ ?>
