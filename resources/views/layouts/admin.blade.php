@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{asset('css/app.css')}}">
-    <link rel="stylesheet" href="{{asset('css/admin.css')}}">
+    <link rel="stylesheet" href="{{asset('css/admin/admin.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="{{ asset('img/logo.png') }}">   
     <title>@yield('title', 'Admin Dashboard')</title>
@@ -138,7 +138,7 @@
     </div>
 
     @stack('scripts')
-    <script src="{{ asset('js/admin.js') }}"></script>
+    <script src="{{ asset('js/admin/admin.js') }}"></script>
     <script>
         // Sidebar toggle
         document.getElementById('sidebarToggle')?.addEventListener('click', function() {

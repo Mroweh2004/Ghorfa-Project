@@ -2,7 +2,14 @@
 @section('title', 'Landlord Dashboard')
 
 @push('styles')
+<<<<<<< HEAD
 <link rel="stylesheet" href="{{ asset('css/landlord-dashboard.css') }}">
+=======
+<link rel="stylesheet" href="{{ asset('css/profile/profile.css') }}">
+@section('content')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/landlord/dashboard.css') }}">
+>>>>>>> 945dfea (Fix dashboard and profile UI changes)
 @endpush
 
 @section('content')

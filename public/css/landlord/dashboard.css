@@ -1,0 +1,948 @@
+/* Landlord Dashboard Styles - Modern Design */
+
+/* Variables */
+:root {
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --muted: #6b7280;
+    --brand: #4a90e2;
+    --brand-2: #357abd;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard Wrapper */
+.landlord-dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-left: 2rem;
+}
+
+.dashboard-header h1 {
+    color: #1e293b;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    margin-top: 0;
+}
+
+.stat-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    color: white;
+}
+
+.stat-card-primary .stat-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.stat-card-success .stat-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-card-warning .stat-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.stat-card-info .stat-icon {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+.stat-content h3 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin: 0;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.stat-content p {
+    margin: 0.25rem 0 0 0;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Sidebar Navigation */
+.landlord-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: sticky;
+    top: 2rem;
+    z-index: 10;
+    display: block;
+    visibility: visible;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: 44px; /* Minimum touch target size */
+}
+
+.nav-item:hover {
+    background: #f1f5f9;
+    color: #3b82f6;
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.nav-item i {
+    font-size: 1.125rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.nav-item span:not(.nav-badge) {
+    flex: 1;
+}
+
+.nav-badge {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.nav-badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.nav-item.active .nav-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Main Content Area */
+.dashboard-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.content-section {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.section-header h2 {
+    color: #1e293b;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-header h2 i {
+    color: #3b82f6;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Properties Table - Desktop View */
+.properties-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    display: block;
+}
+
+.properties-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.properties-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.properties-table-wrapper::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.properties-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Mobile Card View - Hidden by default */
+.properties-cards-wrapper {
+    display: none;
+}
+
+.properties-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.properties-table thead {
+    background-color: #f8fafc;
+}
+
+.properties-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border);
+}
+
+.properties-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.properties-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.properties-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.table-row-pending {
+    background-color: #fffbeb;
+    border-left: 4px solid #f59e0b;
+}
+
+.table-row-rejected {
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+}
+
+.property-table-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.property-table-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: #f1f5f9;
+}
+
+.property-table-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.property-table-info strong {
+    color: #1e293b;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.property-table-details {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #64748b;
+    font-size: 0.8125rem;
+}
+
+.property-table-details i {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.properties-table td i.fa-map-marker-alt {
+    color: #94a3b8;
+    margin-right: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.property-price-cell {
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.9375rem;
+}
+
+.btn-icon:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Mobile Property Cards - Hidden on desktop */
+@media (min-width: 769px) {
+    .properties-cards-wrapper {
+        display: none !important;
+    }
+    
+    .properties-table-wrapper {
+        display: block !important;
+    }
+}
+
+/* Mobile Property Cards */
+.property-card-mobile {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.property-card-mobile:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.property-card-mobile-pending {
+    border-left: 4px solid #f59e0b;
+    background: #fffbeb;
+}
+
+.property-card-mobile-rejected {
+    border-left: 4px solid #ef4444;
+    background: #fef2f2;
+}
+
+.property-card-mobile-header {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+.property-card-mobile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.property-card-mobile-header .status-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    margin: 0;
+}
+
+.property-card-mobile-body {
+    padding: 1rem;
+}
+
+.property-card-mobile-body h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.property-card-mobile-location {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.property-card-mobile-location i {
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.property-card-mobile-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.property-card-mobile-details span {
+    color: #64748b;
+    font-size: 0.8125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.property-card-mobile-details i {
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.property-card-mobile-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.property-card-mobile-price {
+    color: #3b82f6;
+    font-weight: 700;
+    font-size: 1.125rem;
+    flex: 1;
+}
+
+.property-card-mobile-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: #f1f5f9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 2rem;
+}
+
+.empty-state h3 {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+    color: #64748b;
+    font-size: 1rem;
+    margin: 0 0 1.5rem 0;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.9375rem;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: 44px; /* Minimum touch target size */
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+    transform: translateY(-1px);
+    color: white;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .landlord-dashboard-wrapper {
+        padding: 1.5rem;
+    }
+
+    .dashboard-layout {
+        gap: 1.5rem;
+    }
+
+    .landlord-sidebar {
+        width: 220px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .landlord-dashboard-wrapper {
+        padding: 1rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .dashboard-header p {
+        font-size: 0.9375rem;
+    }
+
+    .dashboard-layout {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .landlord-sidebar {
+        width: 100%;
+        position: static;
+        top: auto;
+        padding: 1rem;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .nav-item {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+        justify-content: flex-start;
+        text-align: left;
+        flex-direction: row;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .nav-item i {
+        font-size: 1rem;
+        width: 18px;
+    }
+
+    .nav-item span:not(.nav-badge) {
+        font-size: 0.8125rem;
+    }
+
+    .nav-badge {
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+        margin-left: 0;
+        font-size: 0.6875rem;
+        padding: 0.125rem 0.375rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+        flex-direction: row;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.125rem;
+    }
+
+    .stat-content h3 {
+        font-size: 1.375rem;
+    }
+
+    .stat-content p {
+        font-size: 0.8125rem;
+    }
+
+    .content-section {
+        padding: 1rem;
+    }
+
+    .section-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.125rem;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        font-size: 0.6875rem;
+        padding: 0.125rem 0.5rem;
+    }
+
+    /* Hide table, show cards on tablet and mobile */
+    .properties-table-wrapper {
+        display: none;
+    }
+
+    .properties-cards-wrapper {
+        display: block;
+    }
+
+    .property-card-mobile-header {
+        height: 200px;
+    }
+
+    .property-card-mobile-body {
+        padding: 1.25rem;
+    }
+
+    .property-card-mobile-body h3 {
+        font-size: 1.25rem;
+    }
+
+    .property-card-mobile-price {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .landlord-dashboard-wrapper {
+        padding: 0.75rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-header p {
+        font-size: 0.875rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        flex-direction: row;
+        padding: 0.875rem;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .stat-content h3 {
+        font-size: 1.25rem;
+    }
+
+    .stat-content p {
+        font-size: 0.75rem;
+    }
+
+    .landlord-sidebar {
+        padding: 0.875rem;
+    }
+
+    .sidebar-nav {
+        gap: 0.375rem;
+    }
+
+    .nav-item {
+        min-width: 100%;
+        padding: 0.625rem;
+    }
+
+    .content-section {
+        padding: 0.875rem;
+    }
+
+    .section-header h2 {
+        font-size: 1rem;
+    }
+
+    /* Cards remain visible on small mobile */
+    .property-card-mobile-header {
+        height: 180px;
+    }
+
+    .property-card-mobile-body {
+        padding: 1rem;
+    }
+
+    .property-card-mobile-body h3 {
+        font-size: 1.125rem;
+    }
+
+    .property-card-mobile-price {
+        font-size: 1.125rem;
+    }
+
+    .property-card-mobile-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .property-card-mobile-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+    }
+
+    .empty-state p {
+        font-size: 0.9375rem;
+    }
+
+    .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .landlord-dashboard-wrapper {
+        padding: 0.5rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.375rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem;
+    }
+
+    .stat-content h3 {
+        font-size: 1.125rem;
+    }
+
+    .property-card-mobile-header {
+        height: 160px;
+    }
+
+    .property-card-mobile-body h3 {
+        font-size: 1rem;
+    }
+
+    .property-card-mobile-price {
+        font-size: 1rem;
+    }
+}

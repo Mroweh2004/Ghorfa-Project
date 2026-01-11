@@ -1,280 +1,211 @@
 <?php $__env->startPush('styles'); ?>
+<<<<<<< HEAD
 <link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
+=======
+<link rel="stylesheet" href="<?php echo e(asset('css/profile/profile.css')); ?>">
+>>>>>>> 945dfea (Fix dashboard and profile UI changes)
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('scripts'); ?>
+<<<<<<< HEAD
 <script src="<?php echo e(asset('js/profile.js')); ?>" defer></script>
+=======
+<script src="<?php echo e(asset('js/profile/profile.js')); ?>" defer></script>
+>>>>>>> 945dfea (Fix dashboard and profile UI changes)
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
 <?php if(auth()->guard()->check()): ?>
+<<<<<<< HEAD
     <main>
         <div class="profile-container">
             <div class="profile-card profile-card-shadow" role="region" aria-label="User profile">
+=======
+<div class="profile-info-wrapper">
+    
+    <div class="profile-top-header">
+        <div class="header-left">
+            <div class="welcome-section">
+                <h1 class="welcome-text">Welcome, <?php echo e(Auth::user()->first_name); ?></h1>
+                <p class="welcome-date"><?php echo e(now()->format('D, d M Y')); ?></p>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search" class="search-input">
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-icon-btn" id="notificationBtn" title="Notifications">
+                <i class="fas fa-bell"></i>
+            </button>
+            <div class="header-profile-img">
+                <?php if(Auth::user()->profile_image): ?>
+                    <img src="<?php echo e(asset('storage/' . Auth::user()->profile_image)); ?>" alt="Profile">
+                <?php else: ?>
+                    <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode(Auth::user()->name)); ?>&background=random&color=fff" alt="Profile">
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-layout-container">
+        
+        <aside class="profile-sidebar">
+            <nav class="sidebar-nav">
+                <a href="<?php echo e(route('profileInfo')); ?>" class="nav-item active" title="Profile Info">
+                    <i class="fas fa-th-large"></i>
+                </a>
+                <a href="<?php echo e(route('profileFavorites')); ?>" class="nav-item" title="Favorites">
+                    <i class="far fa-heart"></i>
+                </a>
+                <a href="<?php echo e(route('profileProperties')); ?>" class="nav-item" title="Properties">
+                    <i class="fas fa-map-marker-alt"></i>
+                </a>
+                <a href="<?php echo e(route('profileInfo')); ?>" class="nav-item" title="Profile">
+                    <i class="fas fa-user"></i>
+                </a>
+                <a href="#" class="nav-item" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </a>
+            </nav>
+        </aside>
+
+        
+        <main class="profile-main-content">
+            <div class="profile-card-modern">
+                
+                <div class="profile-banner"></div>
+>>>>>>> 945dfea (Fix dashboard and profile UI changes)
 
                 
-                <div class="profile-header">
-                    <div class="avatar-wrapper">
-                        <div
-                            class="profile-image profile-image-margin profile-image-wrapper"
-                            id="avatarClickTarget"
-                            role="button"
-                            tabindex="0"
-                            aria-label="View profile photo"
-                        >
+                <div class="profile-header-section">
+                    <div class="profile-avatar-section">
+                        <div class="profile-avatar-large">
                             <?php if(Auth::user()->profile_image): ?>
-                                <img
-                                    src="<?php echo e(asset('storage/' . Auth::user()->profile_image)); ?>"
-                                    alt="<?php echo e(Auth::user()->name); ?> profile image"
-                                    onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<?php echo e(urlencode(Auth::user()->name)); ?>&background=random&color=fff';"
-                                >
+                                <img src="<?php echo e(asset('storage/' . Auth::user()->profile_image)); ?>" alt="<?php echo e(Auth::user()->name); ?>">
                             <?php else: ?>
-                                <img
-                                    src="https://ui-avatars.com/api/?name=<?php echo e(urlencode(Auth::user()->name)); ?>&background=random&color=fff"
-                                    alt="Default profile avatar for <?php echo e(Auth::user()->name); ?>"
-                                >
+                                <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode(Auth::user()->name)); ?>&background=random&color=fff" alt="<?php echo e(Auth::user()->name); ?>">
                             <?php endif; ?>
                         </div>
-
-                        
-                        <form method="POST" action="<?php echo e(route('profile.update.photo')); ?>" enctype="multipart/form-data" class="avatar-inline-form" title="Change photo">
+                        <form method="POST" action="<?php echo e(route('profile.update.photo')); ?>" enctype="multipart/form-data" class="avatar-upload-form">
                             <?php echo csrf_field(); ?>
                             <?php echo method_field('PUT'); ?>
-                            <input type="file" name="profile_image" id="avatarFile" accept="image/*" class="avatar-file-input" hidden>
-                            <label for="avatarFile" class="avatar-edit-btn" aria-label="Change profile photo">
-                                <i class="fa-duotone fa-regular fa-pen-to-square"></i>
+                            <input type="file" name="profile_image" id="avatarFile" accept="image/*" hidden>
+                            <label for="avatarFile" class="avatar-edit-icon">
+                                <i class="fas fa-camera"></i>
                             </label>
                         </form>
                     </div>
-
-                    <h2 class="profile-name" aria-live="polite"><?php echo e(Auth::user()->name); ?></h2>
-
-                    <div class="profile-info profile-info-margin">
-                        <p>
-                            <span class="profile-icon-email">📧</span>
-                            <a href="mailto:<?php echo e(Auth::user()->email); ?>"><?php echo e(Auth::user()->email); ?></a>
-                        </p>
-                        <p>
-                            <span class="profile-icon-phone">📞</span>
-                            <?php if(!empty(Auth::user()->phone_nb)): ?>
-                                +961 <?php echo e(Auth::user()->phone_nb); ?>
-
-                            <?php else: ?>
-                                N/A
-                            <?php endif; ?>
-                        </p>
-                        <?php if(!empty(Auth::user()->date_of_birth)): ?>
-                            <p>
-                                <span class="profile-icon-dob">🎂</span>
-                                <?php echo e(\Carbon\Carbon::parse(Auth::user()->date_of_birth)->format('F j, Y')); ?>
-
-                            </p>
-                        <?php endif; ?>
-                        <?php if(!empty(Auth::user()->address)): ?>
-                            <p>
-                                <span class="profile-icon-address">📍</span>
-                                <?php echo e(Auth::user()->address); ?>
-
-                            </p>
-                        <?php endif; ?>
-                        <?php if(Auth::user()->isLandlord()): ?>
-                            <p><span class="profile-icon-landlord">🏠</span>Landlord</p>
-                        <?php endif; ?>
-                        <p>
-                            <span class="profile-icon-joined">📅</span>
-                            Joined <?php echo e(Auth::user()->created_at->format('F Y')); ?>
-
-                        </p>
-                        <?php if(Auth::user()->last_login_at): ?>
-                            <p>
-                                <span class="profile-icon-last-login">🕒</span>
-                                Last login: <?php echo e(\Carbon\Carbon::parse(Auth::user()->last_login_at)->diffForHumans()); ?>
-
-                            </p>
-                        <?php endif; ?>
+                    <div class="profile-name-section">
+                        <h2 class="profile-full-name"><?php echo e(Auth::user()->first_name); ?> <?php echo e(Auth::user()->last_name); ?></h2>
+                        <p class="profile-email-display"><?php echo e(Auth::user()->email); ?></p>
                     </div>
-
-                    <div class="profile-actions-inline">
-                        <button type="button" class="edit-profile-btn" id="toggleEditBtn">Edit profile</button>
-                    </div>
-                </div>
-
-                
-                <div id="avatarModal" class="avatar-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Profile photo">
-                    <div class="avatar-modal-backdrop" data-close="avatarModal"></div>
-                    <div class="avatar-modal-dialog" role="document">
-                        <button type="button" class="avatar-modal-close" data-close="avatarModal" aria-label="Close">×</button>
-                        <div class="avatar-modal-body">
-                            <?php if(Auth::user()->profile_image): ?>
-                                <img id="avatarModalImg" src="<?php echo e(asset('storage/' . Auth::user()->profile_image)); ?>" alt="<?php echo e(Auth::user()->name); ?> profile image large">
-                            <?php else: ?>
-                                <img id="avatarModalImg" src="https://ui-avatars.com/api/?name=<?php echo e(urlencode(Auth::user()->name)); ?>&background=random&color=fff" alt="Default profile avatar for <?php echo e(Auth::user()->name); ?>">
-                            <?php endif; ?>
-                        </div>
-                        <form method="POST" action="<?php echo e(route('profile.update.photo')); ?>" enctype="multipart/form-data" class="avatar-modal-actions">
-                            <?php echo csrf_field(); ?>
-                            <?php echo method_field('PUT'); ?>
-                            <input type="file" name="profile_image" id="avatarFileModal" accept="image/*" class="avatar-file-input" hidden>
-                            <label for="avatarFileModal" class="btn-secondary avatar-change-btn">Edit photo</label>
-                        </form>
+                    <div class="profile-header-actions">
+                        <button type="button" class="edit-profile-btn-modern" id="toggleEditBtn">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
                     </div>
                 </div>
 
                 
                 <?php if(session('success')): ?>
-                    <div class="alert-success" role="status"><?php echo e(session('success')); ?></div>
+                    <div class="alert-success-modern" role="status"><?php echo e(session('success')); ?></div>
                 <?php endif; ?>
 
                 
                 <?php
-                    /** @var \App\Models\User $user */
                     $user = Auth::user();
                     $dob = $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth) : null;
                     $showEdit = $errors->any();
                 ?>
 
                 
-                <form method="POST" action="<?php echo e(route('profile.update')); ?>" enctype="multipart/form-data" id="editProfileSection"
-                    <?php if(!$showEdit): ?> 
-                    style="display:none" 
-                    <?php endif; ?>
-                    >
+                <form method="POST" action="<?php echo e(route('profile.update')); ?>" enctype="multipart/form-data" id="editProfileSection" class="profile-form-modern" <?php if(!$showEdit): ?> style="display:none" <?php endif; ?>>
                     <?php echo csrf_field(); ?>
                     <?php echo method_field('PUT'); ?>
 
-                    
-                    <button type="button" class="exit-edit-btn" id="exitEditBtn" style="display:none;">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" fill="none"/>
-                        </svg>
-                        <span>Exit</span>
-                    </button>
-
-                        <div class="profile-form">
-
-                        <div class="grid two">
-                            
-                            <div class="form-group">
-                                <label for="first_name">First Name</label>
-                                <div class="input-wrap">
-                                    <input
-                                        id="first_name"
-                                        name="first_name"
-                                        type="text"
-                                        value="<?php echo e(old('first_name', $user->first_name)); ?>"
-                                        placeholder="e.g. Ali"
-                                        required
-                                        spellcheck="false"
-                                        autocomplete="given-name">
-                                </div>
-                                <?php $__errorArgs = ['first_name'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="error"><?php echo e($message); ?></div> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                            </div>
-
-                            
-                            <div class="form-group">
-                                <label for="last_name">Last Name</label>
-                                <div class="input-wrap">                    
-                                    <input
-                                        id="last_name"
-                                        name="last_name"
-                                        type="text"
-                                        value="<?php echo e(old('last_name', $user->last_name)); ?>"
-                                        placeholder="e.g. Ahmad"
-                                        required
-                                        spellcheck="false"
-                                        autocomplete="family-name"
-                                    >
-                                </div>
-                                <?php $__errorArgs = ['last_name'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="error"><?php echo e($message); ?></div> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                    <div class="form-grid-two">
+                        
+                        <div class="form-field-group">
+                            <label for="full_name">Full Name</label>
+                            <div class="input-field-modern">
+                                <input type="text" id="full_name" value="<?php echo e($user->first_name); ?> <?php echo e($user->last_name); ?>" placeholder="Your Full Name" readonly>
                             </div>
                         </div>
 
                         
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <div class="input-wrap">
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    value="<?php echo e(old('email', $user->email)); ?>"
-                                    placeholder="you@example.com"
-                                    required
-                                    inputmode="email"
-                                    autocomplete="email"
-                                >
-                            </div>
-                            <?php $__errorArgs = ['email'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="error"><?php echo e($message); ?></div> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-
-                        
-                        <div class="form-group">
+                        <div class="form-field-group">
                             <label for="phone_nb">Phone Number</label>
-                            <div class="input-inline">
-                                <span class="dial">+961</span>
-                                <input
-                                    id="phone_nb"
-                                    name="phone_nb"
-                                    type="tel"
-                                    inputmode="numeric"
-                                    pattern="[0-9 ]*"
-                                    value="<?php echo e(old('phone_nb', $user->phone_nb)); ?>"
-                                    placeholder="70 123 456"
-                                    required
-                                    autocomplete="tel-national"
-                                >
+                            <div class="input-field-modern">
+                                <span class="input-prefix">+961</span>
+                                <input type="tel" id="phone_nb" name="phone_nb" value="<?php echo e(old('phone_nb', $user->phone_nb)); ?>" placeholder="70 123 456" required>
                             </div>
                             <?php $__errorArgs = ['phone_nb'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="error"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> <div class="error-message"><?php echo e($message); ?></div> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-two">
+                        
+                        <div class="form-field-group">
+                            <label for="first_name">First Name</label>
+                            <div class="input-field-modern">
+                                <input type="text" id="first_name" name="first_name" value="<?php echo e(old('first_name', $user->first_name)); ?>" placeholder="Your First Name" required>
+                            </div>
+                            <?php $__errorArgs = ['first_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <div class="error-message"><?php echo e($message); ?></div> <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
 
                         
-                        <div class="form-group">
+                        <div class="form-field-group">
+                            <label for="last_name">Last Name</label>
+                            <div class="input-field-modern">
+                                <input type="text" id="last_name" name="last_name" value="<?php echo e(old('last_name', $user->last_name)); ?>" placeholder="Your Last Name" required>
+                            </div>
+                            <?php $__errorArgs = ['last_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <div class="error-message"><?php echo e($message); ?></div> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-two">
+                        
+                        <div class="form-field-group">
                             <label>Date of Birth</label>
-                            <div class="dob-grid">
+                            <div class="dob-selectors">
                                 <select name="dob_day" id="dob_day" aria-label="Day">
                                     <option value="">DD</option>
                                     <?php for($d = 1; $d <= 31; $d++): ?>
                                         <option value="<?php echo e($d); ?>" <?php if($dob && $dob->day == $d): echo 'selected'; endif; ?>><?php echo e(sprintf('%02d',$d)); ?></option>
                                     <?php endfor; ?>
                                 </select>
-
                                 <select name="dob_month" id="dob_month" aria-label="Month">
                                     <option value="">MM</option>
                                     <?php for($m = 1; $m <= 12; $m++): ?>
                                         <option value="<?php echo e($m); ?>" <?php if($dob && $dob->month == $m): echo 'selected'; endif; ?>><?php echo e(sprintf('%02d',$m)); ?></option>
                                     <?php endfor; ?>
                                 </select>
-
                                 <select name="dob_year" id="dob_year" aria-label="Year">
                                     <option value="">YYYY</option>
                                     <?php for($y = date('Y'); $y >= 1900; $y--): ?>
@@ -286,42 +217,85 @@ unset($__errorArgs, $__bag); ?>
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="error"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> <div class="error-message"><?php echo e($message); ?></div> <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
 
                         
-                        <div class="form-group">
+                        <div class="form-field-group">
                             <label for="address">Address</label>
-                            <textarea
-                                id="address"
-                                name="address"
-                                rows="3"
-                                placeholder="Street, City, Country"
-                                autocomplete="street-address"
-                            ><?php echo e(old('address', $user->address)); ?></textarea>
+                            <div class="input-field-modern">
+                                <input type="text" id="address" name="address" value="<?php echo e(old('address', $user->address)); ?>" placeholder="Street, City, Country">
+                            </div>
                             <?php $__errorArgs = ['address'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="error"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> <div class="error-message"><?php echo e($message); ?></div> <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
-
                     </div>
 
                     
-                    <div class="form-actions profile-actions">
-                        <button type="submit" class="btn-secondary">Save changes</button>
+                    <div class="email-section-modern">
+                        <div class="email-section-header">
+                            <h3 class="email-section-title">
+                                <i class="fas fa-envelope"></i> My email Address
+                            </h3>
+                        </div>
+                        <div class="email-display-item">
+                            <div class="email-info">
+                                <i class="fas fa-envelope email-icon"></i>
+                                <div>
+                                    <span class="email-value"><?php echo e($user->email); ?></span>
+                                    <span class="email-meta"><?php echo e($user->email_verified_at ? 'Verified' : 'Not verified'); ?> • <?php echo e($user->created_at->diffForHumans()); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="form-actions-modern">
+                        <button type="button" class="btn-cancel" id="exitEditBtn" style="display:none;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save changes
+                        </button>
                     </div>
                 </form>
+
+                
+                <div id="viewMode" class="profile-view-mode" <?php if($showEdit): ?> style="display:none" <?php endif; ?>>
+                    <div class="form-grid-two">
+                        <div class="info-display-group">
+                            <label>Full Name</label>
+                            <div class="info-value"><?php echo e($user->first_name); ?> <?php echo e($user->last_name); ?></div>
+                        </div>
+                        <div class="info-display-group">
+                            <label>Phone Number</label>
+                            <div class="info-value">+961 <?php echo e($user->phone_nb ?? 'N/A'); ?></div>
+                        </div>
+                    </div>
+                    <div class="form-grid-two">
+                        <div class="info-display-group">
+                            <label>Date of Birth</label>
+                            <div class="info-value"><?php echo e($dob ? $dob->format('F j, Y') : 'Not set'); ?></div>
+                        </div>
+                        <div class="info-display-group">
+                            <label>Address</label>
+                            <div class="info-value"><?php echo e($user->address ?? 'Not set'); ?></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
+</div>
 <?php endif; ?>
 <?php $__env->stopSection(); ?>
 

@@ -93,7 +93,11 @@
     </header>
     <?php endif; ?>
 
+<<<<<<< HEAD
 <script src="<?php echo e(asset('js/profile.js')); ?>"></script>
+=======
+<script src="<?php echo e(asset('js/profile/profile.js')); ?>"></script>
+>>>>>>> 945dfea (Fix dashboard and profile UI changes)
 </body>
 </html>
 <?php /**PATH C:\Ghorfa-Project\resources\views/partials/nav.blade.php ENDPATH**/ ?>
