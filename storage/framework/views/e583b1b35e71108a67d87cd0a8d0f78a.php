@@ -1,56 +1,16 @@
 <?php $__env->startPush('styles'); ?>
-<<<<<<< HEAD
-<link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
-=======
 <link rel="stylesheet" href="<?php echo e(asset('css/profile/profile.css')); ?>">
->>>>>>> 945dfea (Fix dashboard and profile UI changes)
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('scripts'); ?>
-<<<<<<< HEAD
-<script src="<?php echo e(asset('js/profile.js')); ?>" defer></script>
-=======
 <script src="<?php echo e(asset('js/profile/profile.js')); ?>" defer></script>
->>>>>>> 945dfea (Fix dashboard and profile UI changes)
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
 <?php if(auth()->guard()->check()): ?>
-<<<<<<< HEAD
-    <main>
-        <div class="profile-container">
-            <div class="profile-card profile-card-shadow" role="region" aria-label="User profile">
-=======
 <div class="profile-info-wrapper">
-    
-    <div class="profile-top-header">
-        <div class="header-left">
-            <div class="welcome-section">
-                <h1 class="welcome-text">Welcome, <?php echo e(Auth::user()->first_name); ?></h1>
-                <p class="welcome-date"><?php echo e(now()->format('D, d M Y')); ?></p>
-            </div>
-        </div>
-        <div class="header-center">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search" class="search-input">
-            </div>
-        </div>
-        <div class="header-right">
-            <button class="header-icon-btn" id="notificationBtn" title="Notifications">
-                <i class="fas fa-bell"></i>
-            </button>
-            <div class="header-profile-img">
-                <?php if(Auth::user()->profile_image): ?>
-                    <img src="<?php echo e(asset('storage/' . Auth::user()->profile_image)); ?>" alt="Profile">
-                <?php else: ?>
-                    <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode(Auth::user()->name)); ?>&background=random&color=fff" alt="Profile">
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
 
     <div class="profile-layout-container">
         
@@ -79,7 +39,6 @@
             <div class="profile-card-modern">
                 
                 <div class="profile-banner"></div>
->>>>>>> 945dfea (Fix dashboard and profile UI changes)
 
                 
                 <div class="profile-header-section">

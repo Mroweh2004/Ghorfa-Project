@@ -1,9 +1,5 @@
 <?php $__env->startPush('styles'); ?>
-<<<<<<< HEAD
-<link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
-=======
 <link rel="stylesheet" href="<?php echo e(asset('css/profile/profile.css')); ?>">
->>>>>>> 945dfea (Fix dashboard and profile UI changes)
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('scripts'); ?>

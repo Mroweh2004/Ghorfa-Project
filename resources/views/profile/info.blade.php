@@ -14,33 +14,6 @@
 @section('content')
 @auth
 <div class="profile-info-wrapper">
-    {{-- Top Header Bar --}}
-    <div class="profile-top-header">
-        <div class="header-left">
-            <div class="welcome-section">
-                <h1 class="welcome-text">Welcome, {{ Auth::user()->first_name }}</h1>
-                <p class="welcome-date">{{ now()->format('D, d M Y') }}</p>
-            </div>
-        </div>
-        <div class="header-center">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search" class="search-input">
-            </div>
-        </div>
-        <div class="header-right">
-            <button class="header-icon-btn" id="notificationBtn" title="Notifications">
-                <i class="fas fa-bell"></i>
-            </button>
-            <div class="header-profile-img">
-                @if(Auth::user()->profile_image)
-                    <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="Profile">
-                @else
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=random&color=fff" alt="Profile">
-                @endif
-            </div>
-        </div>
-    </div>
 
     <div class="profile-layout-container">
         {{-- Left Sidebar --}}

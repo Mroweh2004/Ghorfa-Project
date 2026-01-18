@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/app.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/admin.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/admin/admin.css')); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="<?php echo e(asset('img/logo.png')); ?>">   
     <title><?php echo $__env->yieldContent('title', 'Admin Dashboard'); ?></title>
@@ -138,7 +138,7 @@
     </div>
 
     <?php echo $__env->yieldPushContent('scripts'); ?>
-    <script src="<?php echo e(asset('js/admin.js')); ?>"></script>
+    <script src="<?php echo e(asset('js/admin/admin.js')); ?>"></script>
     <script>
         // Sidebar toggle
         document.getElementById('sidebarToggle')?.addEventListener('click', function() {

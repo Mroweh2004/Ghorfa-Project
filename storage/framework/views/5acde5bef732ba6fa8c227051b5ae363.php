@@ -1,7 +1,10 @@
 <?php $__env->startSection('title', 'Landlord Dashboard'); ?>
 
 <?php $__env->startPush('styles'); ?>
-<link rel="stylesheet" href="<?php echo e(asset('css/landlord-dashboard.css')); ?>">
+<link rel="stylesheet" href="<?php echo e(asset('css/profile/profile.css')); ?>">
+<?php $__env->startSection('content'); ?>
+<?php $__env->startPush('styles'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('css/landlord/dashboard.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
