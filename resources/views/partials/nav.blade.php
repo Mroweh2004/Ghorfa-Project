@@ -93,6 +93,6 @@
     </header>
     @endguest
 
-<script src="{{ asset('js/profile.js') }}"></script>
+<script src="{{ asset('js/profile/profile.js') }}"></script>
 </body>
 </html>

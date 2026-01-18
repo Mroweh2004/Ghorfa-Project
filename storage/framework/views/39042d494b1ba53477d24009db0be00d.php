@@ -322,6 +322,6 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>
-<script src="<?php echo e(asset('js/admin.js')); ?>"></script>
+<script src="<?php echo e(asset('js/admin/admin.js')); ?>"></script>
 <?php $__env->stopPush(); ?> 
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/admin/dashboard.blade.php ENDPATH**/ ?>

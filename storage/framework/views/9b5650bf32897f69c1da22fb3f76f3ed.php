@@ -1,5 +1,5 @@
 <?php $__env->startPush('styles'); ?>
-<link rel="stylesheet" href="<?php echo e(asset('css/profile.css')); ?>">
+<link rel="stylesheet" href="<?php echo e(asset('css/profile/profile.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('scripts'); ?>

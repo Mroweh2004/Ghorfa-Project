@@ -1,10 +1,17 @@
 <?php $__env->startSection('title', 'SignUp Page'); ?>
 
-<?php $__env->startSection('content'); ?>
+<?php $__env->startPush('styles'); ?>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo e(asset('css/register.css')); ?>">
+<?php $__env->stopPush(); ?>
 
+<?php $__env->startPush('scripts'); ?>
+<script src="https://kit.fontawesome.com/a2c0d5f0d1.js" crossorigin="anonymous"></script>
+<script src="<?php echo e(asset('js/register.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="auth-wrapper">
   <div class="auth-shell">
     
@@ -229,9 +236,6 @@ unset($__errorArgs, $__bag); ?>
     </div>
   </div>
 </div>
-
-<script src="https://kit.fontawesome.com/a2c0d5f0d1.js" crossorigin="anonymous"></script>
-<script src="<?php echo e(asset('js/register.js')); ?>"></script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts/app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Ghorfa-Project\resources\views/register.blade.php ENDPATH**/ ?>

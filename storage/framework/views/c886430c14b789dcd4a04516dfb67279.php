@@ -93,7 +93,7 @@
     </header>
     <?php endif; ?>
 
-<script src="<?php echo e(asset('js/profile.js')); ?>"></script>
+<script src="<?php echo e(asset('js/profile/profile.js')); ?>"></script>
 </body>
 </html>
 <?php /**PATH C:\Ghorfa-Project\resources\views/partials/nav.blade.php ENDPATH**/ ?>

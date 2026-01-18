@@ -2,7 +2,10 @@
 @section('title', 'Landlord Dashboard')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/landlord-dashboard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/profile/profile.css') }}">
+@section('content')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/landlord/dashboard.css') }}">
 @endpush
 
 @section('content')

@@ -2,7 +2,7 @@
 @section('title', 'Become a Landlord')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+<link rel="stylesheet" href="{{ asset('css/profile/profile.css') }}">
 @endpush
 
 @section('content')
