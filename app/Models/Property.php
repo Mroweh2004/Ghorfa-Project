@@ -119,4 +119,12 @@ class Property extends Model
         return $this->reviews()->where('user_id', $userId)->first();
     }
 
+    /**
+     * Get all transactions for this property
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
 }
