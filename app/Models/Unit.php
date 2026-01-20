@@ -29,6 +29,14 @@ class Unit extends Model
     }
 
     /**
+     * A currency unit can be used by many transactions.
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'unit_id');
+    }
+
+    /**
      * Accessor: a convenient display label like "US Dollar ($)".
      */
     public function getDisplayNameAttribute(): string
