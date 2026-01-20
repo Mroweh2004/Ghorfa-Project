@@ -10,6 +10,9 @@
 @push('scripts')
 <script src="https://kit.fontawesome.com/a2c0d5f0d1.js" crossorigin="anonymous"></script>
 <script src="{{ asset('js/register.js') }}"></script>
+<script>
+    window.reverseGeocodeEndpoint = '{{ route("map.reverse-geocode") }}';
+</script>
 @endpush
 
 @section('content')
@@ -159,12 +162,8 @@
             @error('date_of_birth') <span class="text-danger">{{ $message }}</span> @enderror
           </div>
 
-          <div class="form-group">
-            <label for="address">Address</label>
-            <textarea id="address" name="address" rows="3" placeholder="Street, City, Country">{{ old('address') }}</textarea>
-            @error('address') <span class="text-danger">{{ $message }}</span> @enderror
-          </div>
-
+          {{-- Hidden address field --}}
+          <input type="hidden" id="address" name="address" value="{{ old('address') }}">
 
           <button type="submit" class="register-btn">Create Account</button>
 
