@@ -505,7 +505,84 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
+function MoveBetweenSections(){
+    // Hide all sections by default
+    const sections = document.querySelectorAll('.content-section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Get all navigation links that point to sections
+    const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
+    
+    // Function to show a specific section and hide others
+    function showSection(sectionId) {
+        // Hide all sections
+        sections.forEach(section => {
+            section.style.display = 'none';
+            section.classList.remove('active');
+        });
+        
+        // Show the target section
+        const targetSection = document.querySelector(sectionId);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+            targetSection.classList.add('active');
+        }
+        
+        // Update active nav link
+        navLinks.forEach(link => {
+            link.parentElement.classList.remove('active');
+        });
+        const activeLink = document.querySelector(`.nav-link[href="${sectionId}"]`);
+        if (activeLink) {
+            activeLink.parentElement.classList.add('active');
+        }
+    }
+    
+    // Add click event listeners to nav links
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if (targetId && targetId.startsWith('#')) {
+                showSection(targetId);
+                // Smooth scroll to section
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    });
+    
+    // Show the first section or dashboard section by default
+    // Check if there's a hash in the URL
+    if (window.location.hash) {
+        showSection(window.location.hash);
+    } else {
+        // Show the first section by default, or applications section
+        const firstSection = sections[0];
+        if (firstSection) {
+            showSection('#' + firstSection.id);
+        }
+    }
+    
+    // Handle browser back/forward buttons
+    window.addEventListener('hashchange', function() {
+        if (window.location.hash) {
+            showSection(window.location.hash);
+        }
+    });
+}
 
 window.handleApproveProperty = handleApproveProperty;
 window.handleRejectProperty = handleRejectProperty;
+
+// Initialize section navigation when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', MoveBetweenSections);
+} else {
+    MoveBetweenSections();
+}
 

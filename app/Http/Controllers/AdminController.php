@@ -33,9 +33,15 @@ class AdminController extends Controller
 
         // Data
         $users = User::where('role', '!=', 'admin')
+            ->where('role', 'client')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         
+        $landlords = User::where('role', '!=', 'admin')
+            ->where('role', 'landlord')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
         $pendingApplications = LandlordApplication::with(['user', 'reviewer'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
@@ -49,6 +55,7 @@ class AdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        
         // Recent activity
         $recentUsers = User::where('role', '!=', 'admin')
             ->orderBy('created_at', 'desc')
@@ -67,7 +74,7 @@ class AdminController extends Controller
             ->limit(50)
             ->get();
 
-        return view('admin.dashboard', compact('users', 'pendingApplications', 'stats', 'recentUsers', 'recentProperties', 'pendingProperties', 'recentActivities'));
+        return view('admin.dashboard', compact('users', 'landlords', 'pendingApplications', 'stats', 'recentUsers', 'recentProperties', 'pendingProperties', 'recentActivities'));
     }
 
     public function deleteUser(User $user)
