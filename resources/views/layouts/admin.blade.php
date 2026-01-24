@@ -51,6 +51,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="#landlords-section" class="nav-link">
+                                <i class="fas fa-users"></i>
+                                <span>Landlords</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="#properties-section" class="nav-link">
                             <i class="fas fa-building"></i>
                             <span>Pending</span>

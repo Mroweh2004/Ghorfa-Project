@@ -113,15 +113,15 @@
             </div>
         </div>
 
-        <!-- User Management Section -->
-        <div id="users-section" class="content-section">
+        <!-- Landlord Management Section -->
+        <div id="landlords-section" class="content-section">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-user-cog"></i>
-                    User Management
+                    Landlord Management
                 </h2>
             </div>
-            <div class="users-table">
+            <div class="landlords-table">
                 <table>
                     <thead>
                         <tr>
@@ -134,19 +134,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($users as $user)
+                        @forelse($landlords as $landlord)
                         <tr>
-                            <td>{{ $user->id }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
+                            <td>{{ $landlord->id }}</td>
+                            <td>{{ $landlord->name }}</td>
+                            <td>{{ $landlord->email }}</td>
                             <td>
-                                <span class="role-badge role-{{ $user->role }}">
-                                    {{ ucfirst($user->role) }}
+                                <span class="role-badge role-{{ $landlord->role }}">
+                                    {{ ucfirst($landlord->role) }}
                                 </span>
                             </td>
-                            <td>{{ $user->created_at->format('M d, Y') }}</td>
+                            <td>{{ $landlord->created_at->format('M d, Y') }}</td>
                             <td>
-                                <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display: inline;">
+                                <form action="{{ route('admin.users.delete', $landlord->id) }}" method="POST" style="display: inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">
@@ -166,10 +166,67 @@
                     </tbody>
                 </table>
                 <div class="pagination-wrapper">
-                    {{ $users->links() }}
+                    {{ $landlords->links() }}
                 </div>
             </div>
         </div>
+    <!-- User Management Section -->
+    <div id="users-section" class="content-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-user-cog"></i>
+                        User Management
+                    </h2>
+                </div>
+                <div class="users-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($users as $user)
+                            <tr>
+                                <td>{{ $user->id }}</td>
+                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>
+                                    <span class="role-badge role-{{ $user->role }}">
+                                        {{ ucfirst($user->role) }}
+                                    </span>
+                                </td>
+                                <td>{{ $user->created_at->format('M d, Y') }}</td>
+                                <td>
+                                    <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="empty-state-cell">
+                                    <i class="fas fa-users"></i>
+                                    No users found
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                    <div class="pagination-wrapper">
+                        {{ $users->links() }}
+                    </div>
+                </div>
+            </div>
 
         <!-- Pending Properties Section -->
         <div id="properties-section" class="content-section">
