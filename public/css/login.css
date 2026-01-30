@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     --bg: #f7f9fc;
     --card: #ffffff;
     --border: #e5e7eb;
@@ -261,23 +261,24 @@ body {
     justify-content: center;
     gap: 8px;
     padding: 14px 18px;
-    border-radius: 12px;
+    border-radius: 6px;
     border: none;
-    font-weight: 700;
-    letter-spacing: 0.2px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     cursor: pointer;
-    background: linear-gradient(90deg, var(--brand), var(--brand-2));
+    background-color: #1a1a1a;
     color: #fff;
-    box-shadow: 0 10px 24px rgba(110, 168, 255, 0.25);
-    transition: transform 0.04s ease, filter 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .login-btn:hover {
-    filter: brightness(1.06);
+    background-color: #2d2d2d;
+    transform: translateY(-1px);
 }
 
 .login-btn:active {
-    transform: translateY(1px);
+    transform: translateY(0);
 }
 
 .login-btn.btn-link {

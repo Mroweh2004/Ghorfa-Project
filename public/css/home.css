@@ -2,15 +2,15 @@
 
 /* CSS Variables */
 :root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --accent-color: #e74c3c;
-    --background-color: #F8F9FA;
-    --text-color: #2D3436;
-    --text-light: #636E72;
+    --primary-color: #1a1a1a;
+    --secondary-color: #2563eb;
+    --accent-color: #2563eb;
+    --background-color: #fafafa;
+    --text-color: #1a1a1a;
+    --text-light: #6b7280;
     --white: #FFFFFF;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --gradient: linear-gradient(135deg, #2c3e50, #3498db);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --gradient: linear-gradient(135deg, #1a1a1a, #2d2d2d);
 }
 
 /* --------------------Main-Container section----------------------- */
@@ -46,9 +46,10 @@
 
 .search-container {
     background: var(--white);
-    border-radius: 15px;
+    border-radius: 8px;
     padding: 2rem;
     box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     animation: fadeInUp 1s ease 0.4s;
     opacity: 0;
     animation-fill-mode: forwards;
@@ -63,11 +64,17 @@
 
 .search-input {
     position: relative;
-    background: var(--background-color);
-    border-radius: 10px;
-    border-color: var(--primary-color);
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
     overflow: hidden;
     text-align: center;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .search-input i {
@@ -89,18 +96,20 @@
 
 .search-btn {
     grid-column: 1 / -1;
-    background: var(--gradient);
+    background-color: #1a1a1a;
     color: var(--white);
     padding: 1rem;
     border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .search-btn:hover {
-    transform: translateY(-2px);
+    background-color: #2d2d2d;
+    transform: translateY(-1px);
 }
 
 .popular-searches {
@@ -110,14 +119,16 @@
 }
 
 .popular-searches a {
-    color: var(--primary-color);
+    color: #2563eb;
     text-decoration: none;
     margin: 0 0.5rem;
-    transition: color 0.3s;
+    transition: color 0.2s ease;
+    font-weight: 500;
 }
 
 .popular-searches a:hover {
-    color: var(--accent-color);
+    color: #1a1a1a;
+    text-decoration: underline;
 }
 
 /*---------------------------Features section--------------------------*/
@@ -145,38 +156,22 @@
 .card {
     background: var(--white);
     padding: 2rem;
-    border-radius: 15px;
+    border-radius: 8px;
     box-shadow: var(--shadow);
-    transition: transform 0.3s;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     position: relative;
     overflow: hidden;
 }
 
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: var(--gradient);
-    transform: scaleX(0);
-    transition: transform 0.3s;
-}
-
 .card:hover {
-    transform: translateY(-10px);
-}
-
-.card:hover::before {
-    transform: scaleX(1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .card i {
     font-size: 2.5rem;
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #1a1a1a;
     margin-bottom: 1.5rem;
 }
 
@@ -204,19 +199,19 @@
 .step-number {
     width: 40px;
     height: 40px;
-    background: var(--gradient);
+    background-color: #1a1a1a;
     color: var(--white);
-    border-radius: 50%;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 600;
     margin: 0 auto 1rem;
 }
 
 /*---------------------------------additional-section section----------------------------*/
 .additional-section {
-    background: linear-gradient(135deg, #2c3e50, #3498db);
+    background-color: #1a1a1a;
     padding: 4rem 2rem;
     color: white;
     text-align: center;
@@ -257,11 +252,11 @@
 
 .additional-section .main-list-btn,
 .additional-section .secondary-list-btn {
-    padding: 1rem 2rem;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    padding: 0.875rem 1.75rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -269,27 +264,27 @@
 }
 
 .additional-section .main-list-btn {
-    background-color: #e74c3c;
-    color: white;
+    background-color: #ffffff;
+    color: #1a1a1a;
     border: none;
 }
 
 .additional-section .main-list-btn:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    background-color: #f9fafb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .additional-section .secondary-list-btn {
     background-color: transparent;
     color: white;
-    border: 2px solid white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .additional-section .secondary-list-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
 }
 
 /*------------------------------------Animations-------------------------------------*/
