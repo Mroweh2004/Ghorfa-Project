@@ -20,6 +20,9 @@
             </button>
             <div class="filter-container">
                 <form action="{{ route('filter-search') }}" method="GET">
+                @if(request('sort'))
+                    <input type="hidden" name="sort" value="{{ request('sort') }}">
+                @endif
                 <div class="filter-group">
                     <h3>Location</h3>
                     <div class="search-input">
@@ -110,14 +113,14 @@
                 </div>
                 <div class="results-sort">
                     <button class="filter-toggle-btn">
-                        <i class="fas fa-filter"></i> Filters
+                        <i class="fas fa-filter"></i> Toggle
                     </button>
-                    <select id="sort-options">
-                        <option value="recommended">Recommended</option>
-                        <option value="price-low">Price: Low to High</option>
-                        <option value="price-high">Price: High to Low</option>
-                        <option value="newest">Newest</option>
-                        <option value="latest">Latest</option>
+                    <select id="sort-options" name="sort">
+                        <option value="recommended" {{ request('sort') == 'recommended' || !request('sort') ? 'selected' : '' }}>Recommended</option>
+                        <option value="price-low" {{ request('sort') == 'price-low' ? 'selected' : '' }}>Price: Low to High</option>
+                        <option value="price-high" {{ request('sort') == 'price-high' ? 'selected' : '' }}>Price: High to Low</option>
+                        <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
+                        <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
                     </select>
                 </div>
             </div>

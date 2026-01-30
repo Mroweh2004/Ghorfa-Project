@@ -22,14 +22,18 @@ class PropertyController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $properties = Property::where('status', 'approved')
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+        $query = Property::where('status', 'approved');
+        
+        // Apply sorting (default to 'recommended' to match UI)
+        $sort = $request->input('sort', 'recommended');
+        $query = $this->applySorting($query, $sort);
+        
+        $properties = $query->paginate(12)->withQueryString();
         $amenities = Amenity::all();
         $rules = Rule::all();
-        return view('search', compact('properties', 'amenities', 'rules'));
+        return view('search', compact('properties', 'amenities', 'rules', 'request'));
     }
 
     public function filterSearch(Request $request)
@@ -102,7 +106,11 @@ class PropertyController extends Controller
             }
         }
 
-        $properties = $query->paginate(12);
+        // Apply sorting (default to 'recommended' to match UI)
+        $sort = $request->input('sort', 'recommended');
+        $query = $this->applySorting($query, $sort);
+
+        $properties = $query->paginate(12)->withQueryString();
         return view('search', compact('properties', 'request', 'amenities', 'rules'));
     }
 
@@ -547,6 +555,37 @@ class PropertyController extends Controller
             }
         }
         return null;
+    }
+
+    /**
+     * Apply sorting to the query based on sort parameter
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $sort
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private function applySorting($query, $sort)
+    {
+        switch ($sort) {
+            case 'price-low':
+                return $query->orderBy('price', 'asc');
+            
+            case 'price-high':
+                return $query->orderBy('price', 'desc');
+            
+            case 'newest':
+                return $query->orderBy('created_at', 'desc');
+            
+            case 'latest':
+                return $query->orderBy('created_at', 'asc');
+            
+            case 'recommended':
+            default:
+                // Sort by number of likes (most liked first)
+                return $query->withCount('likedBy')
+                    ->orderBy('liked_by_count', 'desc')
+                    ->orderBy('created_at', 'desc'); // Secondary sort by newest
+        }
     }
 }
 

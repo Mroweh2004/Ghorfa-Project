@@ -66,10 +66,11 @@ main {
 
 .listing-card {
     background: var(--white);
-    border-radius: 15px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     /* Added */
     display: flex;
@@ -78,7 +79,8 @@ main {
 }
 
 .listing-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .listing-image {
@@ -104,11 +106,12 @@ main {
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background: var(--accent-color);
+    background-color: #1a1a1a;
     color: var(--white);
     padding: 0.3rem 0.8rem;
-    border-radius: 50px;
+    border-radius: 4px;
     font-size: 0.8rem;
+    font-weight: 500;
 }
 .setting-btn {
     position: absolute;
@@ -274,18 +277,22 @@ main {
 
 .view-btn {
     text-decoration: none;
-    background: linear-gradient(135deg,#2c3e50 0%, #3498db 100%);
+    background-color: #1a1a1a;
     color: white;
-    font-weight: bold;
+    font-weight: 500;
     padding: 0.5rem 1rem;
     border: none;
-    border-radius: 50px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.view-btn:hover {
+    background-color: #2d2d2d;
+    transform: translateY(-1px);
 }
 
 .available-from {
@@ -480,22 +487,22 @@ main {
 }
 
 .edit-profile-btn {
-    background: var(--brand);
+    background-color: #1a1a1a;
     color: var(--white);
     border: none;
     padding: 12px 24px;
     font-size: 14px;
-    font-weight: 600;
-    border-radius: 12px;
+    font-weight: 500;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.25);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .edit-profile-btn:hover {
-    background: var(--brand-2);
+    background-color: #2d2d2d;
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(74, 144, 226, 0.35);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .alert-success {
@@ -760,7 +767,7 @@ main {
 }
 
 .switch input:checked + .slider {
-    background: linear-gradient(90deg, var(--brand), var(--brand-2));
+    background-color: #1a1a1a;
 }
 
 .switch input:checked + .slider:before {
@@ -1192,7 +1199,7 @@ main {
 .avatar-edit-icon {
     width: 36px;
     height: 36px;
-    background: #4a90e2;
+    background-color: #1a1a1a;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1204,8 +1211,8 @@ main {
 }
 
 .avatar-edit-icon:hover {
-    background: #357abd;
-    transform: scale(1.1);
+    background-color: #2d2d2d;
+    transform: scale(1.05);
 }
 
 .profile-name-section {
@@ -1232,11 +1239,11 @@ main {
 
 .edit-profile-btn-modern {
     padding: 0.75rem 1.5rem;
-    background: #4a90e2;
+    background-color: #1a1a1a;
     color: #ffffff;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 6px;
+    font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1245,9 +1252,9 @@ main {
 }
 
 .edit-profile-btn-modern:hover {
-    background: #357abd;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    background-color: #2d2d2d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Alert */

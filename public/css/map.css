@@ -22,19 +22,19 @@
 
 /* Map Statistics Card */
 .map-stats {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #1a1a1a;
     padding: 5px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     margin-bottom: 24px;
     text-align: center;
     color: white;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .map-stats:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .stats-number {
@@ -68,9 +68,9 @@
 .map-filters {
     background: white;
     padding: 28px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     flex: 0 0 320px;
     min-width: 280px;
     max-width: 400px;
@@ -120,8 +120,8 @@
 .filter-group input:focus,
 .filter-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     background: white;
 }
 
@@ -158,22 +158,23 @@
 
 /* Buttons */
 .btn-filter {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #1a1a1a;
     color: white;
     border: none;
     padding: 12px 28px;
-    border-radius: 10px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 15px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.01em;
 }
 
 .btn-filter:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background-color: #2d2d2d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-filter:active {
@@ -212,9 +213,9 @@
     z-index: 1000;
     background: white;
     padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     min-width: 200px;
 }
 
@@ -353,22 +354,23 @@
 }
 
 .btn-view {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #1a1a1a;
     color: white;
     text-decoration: none;
     padding: 10px 20px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 13px;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    font-weight: 500;
+    transition: all 0.2s ease;
     flex: 1;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-view:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    background-color: #2d2d2d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-like {

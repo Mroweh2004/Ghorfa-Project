@@ -158,58 +158,40 @@ function validatePriceRange() {
 }
 
 /* =========================
-   Front-end sorting
+   Server-side sorting
 ========================= */
-function initPropertySort(selectId = 'sort-options', gridSelector = '.listings-grid') {
+function initPropertySort(selectId = 'sort-options') {
   const select = document.getElementById(selectId);
-  const grid = document.querySelector(gridSelector);
-  if (!select || !grid) return;
+  if (!select) return;
 
-  const readNum = (val, fallback = 0) => {
-    const n = Number(val);
-    return Number.isFinite(n) ? n : fallback;
-  };
-
-  const byPriceAsc  = (a, b) => readNum(a.dataset.price, Infinity) - readNum(b.dataset.price, Infinity);
-  const byPriceDesc = (a, b) => readNum(b.dataset.price, -Infinity) - readNum(a.dataset.price, -Infinity);
-  const byDateDesc  = (a, b) => readNum(b.dataset.created) - readNum(a.dataset.created);
-  const byDateAsc   = (a, b) => readNum(a.dataset.created) - readNum(b.dataset.created);
-  const byLikesDesc = (a, b) => readNum(b.dataset.likes, 0) - readNum(a.dataset.likes, 0);
-
-  function sortCards(mode) {
-    let cards = Array.from(grid.children);
-
-    switch (mode) {
-      case 'price-low':  cards.sort(byPriceAsc);  break;
-      case 'price-high': cards.sort(byPriceDesc); break;
-      case 'newest':     cards.sort(byDateDesc);  break;
-      case 'latest':     cards.sort(byDateAsc);   break; 
-      case 'recommended':
-      default:
-        cards.sort(byLikesDesc);
-        break;
-    }
-
-    const frag = document.createDocumentFragment();
-    cards.forEach(card => frag.appendChild(card));
-    grid.appendChild(frag);
-  }
-
+  // Set initial value from URL parameter
   const urlParams = new URLSearchParams(window.location.search);
   const urlSort = urlParams.get('sort');
-  const saved = localStorage.getItem('search_sort');
-  const initial = urlSort || saved || 'newest';
-  select.value = initial;
-  sortCards(initial);
+  if (urlSort) {
+    select.value = urlSort;
+  }
 
+  // Reload page with sort parameter when changed
   select.addEventListener('change', (e) => {
-    const mode = e.target.value;
-    const params = new URLSearchParams(window.location.search);
-    params.set('sort', mode);
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, '', newUrl);
-    localStorage.setItem('search_sort', mode);
-    sortCards(mode);
+    const sortValue = e.target.value;
+    const currentParams = new URLSearchParams(window.location.search);
+    
+    // Update or add sort parameter
+    if (sortValue && sortValue !== 'recommended') {
+      currentParams.set('sort', sortValue);
+    } else {
+      // Remove sort parameter for 'recommended' (default)
+      currentParams.delete('sort');
+    }
+    
+    // Preserve page parameter if exists, otherwise remove it (start from page 1)
+    if (currentParams.has('page')) {
+      currentParams.set('page', '1');
+    }
+    
+    // Reload page with new parameters
+    const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+    window.location.href = newUrl;
   });
 }
 
