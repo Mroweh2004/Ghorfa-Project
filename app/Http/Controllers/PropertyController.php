@@ -540,13 +540,6 @@ class PropertyController extends Controller
         return $geocodingService->geocode($address);
     }
 
-    /**
-     * Extract a specific address component from address_components array
-     *
-     * @param array $addressComponents
-     * @param string $type
-     * @return string|null
-     */
     private function extractAddressComponent(array $addressComponents, string $type): ?string
     {
         foreach ($addressComponents as $component) {
@@ -557,14 +550,7 @@ class PropertyController extends Controller
         return null;
     }
 
-    /**
-     * Apply sorting to the query based on sort parameter
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $sort
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    private function applySorting($query, $sort)
+       private function applySorting($query, $sort)
     {
         switch ($sort) {
             case 'price-low':
@@ -584,8 +570,28 @@ class PropertyController extends Controller
                 // Sort by number of likes (most liked first)
                 return $query->withCount('likedBy')
                     ->orderBy('liked_by_count', 'desc')
-                    ->orderBy('created_at', 'desc'); // Secondary sort by newest
+                    ->orderBy('created_at', 'desc'); 
         }
+    }
+
+    public function popularCities($limit = 10)
+    {
+        return Property::where('status', 'approved')
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->selectRaw('city, COUNT(*) as property_count')
+            ->groupBy('city')
+            ->orderBy('property_count', 'desc')
+            ->orderBy('city', 'asc')
+            ->limit($limit)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->city,
+                    'count' => $item->property_count,
+                    'url' => route('filter-search', ['location' => $item->city])
+                ];
+            });
     }
 }
 

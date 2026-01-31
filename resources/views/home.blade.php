@@ -15,10 +15,16 @@
                     </form>
                     <div class="popular-searches">
                         <span>Popular:</span>
-                        <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
-                        <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
-                        <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
-                        <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
+                        @if(isset($popularCities) && $popularCities->count() > 0)
+                            @foreach($popularCities as $city)
+                                <a href="{{ $city['url'] }}">{{ $city['name'] }}</a>
+                            @endforeach
+                        @else
+                            <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
+                            <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
+                            <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
+                            <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -115,10 +121,17 @@
                     </form>
                     <div class="popular-searches">
                         <span>Popular:</span>
-                        <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
-                        <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
-                        <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
-                        <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
+                        @if(isset($popularCities) && $popularCities->count() > 0)
+                            @foreach($popularCities as $city)
+                                <a href="{{ $city['url'] }}">{{ $city['name'] }}</a>
+                            @endforeach
+                        @else
+                            {{-- Fallback to default cities if no data available --}}
+                            <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
+                            <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
+                            <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
+                            <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
+                        @endif
                     </div>
                 </div>
             </div>
