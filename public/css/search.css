@@ -3,7 +3,6 @@
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 2.5rem;
-    max-width: 1400px;
 }
 
 /* Filters sidebar */
