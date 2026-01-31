@@ -15,7 +15,11 @@ use Illuminate\Support\Facades\Storage;
 class MainController extends Controller
 {
     function homePage(){
-        return view("home");
+        // Get popular cities dynamically
+        $propertyController = new PropertyController();
+        $popularCities = $propertyController->popularCities(4); // Get top 4 cities
+        
+        return view("home", compact('popularCities'));
     }
 
     function profileInfo(){
