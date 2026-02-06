@@ -513,6 +513,10 @@ body {
 }
 
 .section-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e2e8f0;
@@ -531,6 +535,27 @@ body {
 .section-header h2 i {
     color: #3b82f6;
 }
+.section-tools{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    background:#fff;
+    border:1px solid #e2e8f0;
+    padding:.45rem .65rem;
+    border-radius:.5rem;
+  }
+  
+  .section-tools i{
+    color:#64748b;
+  }
+  
+  .section-search{
+    border:none;
+    outline:none;
+    width:220px;
+    font-size:.9rem;
+    background:transparent;
+  }
 
 .badge {
     display: inline-block;

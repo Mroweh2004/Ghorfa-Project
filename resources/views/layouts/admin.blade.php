@@ -52,8 +52,8 @@
                         </li>
                         <li class="nav-item">
                             <a href="#landlords-section" class="nav-link">
-                                <i class="fas fa-users"></i>
-                                <span>Landlords</span>
+                            <i class="fas fa-user-tie"></i>
+                            <span>Landlords</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -101,7 +101,7 @@
                     </button>
                     <div class="header-search">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search or type command..." id="adminSearch">
+                        <input type="text" placeholder="Search dashboard..." id="adminSearch">
                         <span class="search-shortcut">⌘K</span>
                     </div>
                 </div>

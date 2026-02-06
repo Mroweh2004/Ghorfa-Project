@@ -512,10 +512,8 @@ function MoveBetweenSections(){
         section.style.display = 'none';
     });
     
-    // Get all navigation links that point to sections
     const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
     
-    // Function to show a specific section and hide others
     function showSection(sectionId) {
         // Hide all sections
         sections.forEach(section => {
@@ -523,14 +521,12 @@ function MoveBetweenSections(){
             section.classList.remove('active');
         });
         
-        // Show the target section
         const targetSection = document.querySelector(sectionId);
         if (targetSection) {
             targetSection.style.display = 'block';
             targetSection.classList.add('active');
         }
         
-        // Update active nav link
         navLinks.forEach(link => {
             link.parentElement.classList.remove('active');
         });
@@ -540,28 +536,45 @@ function MoveBetweenSections(){
         }
     }
     
-    // Add click event listeners to nav links
     navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             e.preventDefault();
+    
             const targetId = this.getAttribute('href');
-            if (targetId && targetId.startsWith('#')) {
-                showSection(targetId);
-                // Smooth scroll to section
-                const targetSection = document.querySelector(targetId);
-                if (targetSection) {
-                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+            if (!targetId || !targetId.startsWith('#')) return;
+    
+            // 1️⃣ Show ONLY the target section (this hides all others)
+            showSection(targetId);
+    
+            // 2️⃣ Clear global search input
+            const searchInput = document.getElementById('adminSearch');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+    
+            // 3️⃣ Reset filtering ONLY inside the visible section
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.querySelectorAll('table tbody tr').forEach(row => {
+                    row.style.display = '';
+                });
+    
+                targetSection.querySelectorAll('.activity-list li').forEach(li => {
+                    li.style.display = '';
+                });
+    
+                // Optional smooth scroll
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
     
-    // Show the first section or dashboard section by default
-    // Check if there's a hash in the URL
+    
+    
+    
     if (window.location.hash) {
         showSection(window.location.hash);
     } else {
-        // Show the first section by default, or applications section
         const firstSection = sections[0];
         if (firstSection) {
             showSection('#' + firstSection.id);
@@ -579,10 +592,99 @@ function MoveBetweenSections(){
 window.handleApproveProperty = handleApproveProperty;
 window.handleRejectProperty = handleRejectProperty;
 
-// Initialize section navigation when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', MoveBetweenSections);
 } else {
     MoveBetweenSections();
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("adminSearch");
+    if (!input) return;
+  
+    function getVisibleSection() {
+      // Your code adds `.active` and sets display:block for the shown section
+      return document.querySelector(".content-section.active")
+        || Array.from(document.querySelectorAll(".content-section"))
+            .find(sec => sec.style.display !== "none");
+    }
+  
+    function filterTable(section, query) {
+      const table = section.querySelector("table");
+      if (!table) return false;
+  
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
+  
+      rows.forEach((row) => {
+        const isEmptyRow = row.querySelector(".empty-state-cell");
+        if (isEmptyRow) {
+          row.style.display = query ? "none" : "";
+          return;
+        }
+  
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? "" : "none";
+      });
+  
+      return true;
+    }
+  
+    function filterActivity(section, query) {
+      const list = section.querySelector(".activity-list");
+      if (!list) return false;
+  
+      const items = Array.from(list.querySelectorAll("li"));
+      items.forEach((li) => {
+        const isEmpty = li.classList.contains("empty-activity");
+        if (isEmpty) {
+          li.style.display = query ? "none" : "";
+          return;
+        }
+        li.style.display = li.innerText.toLowerCase().includes(query) ? "" : "none";
+      });
+  
+      return true;
+    }
+  
+    input.addEventListener("input", () => {
+      const query = input.value.trim().toLowerCase();
+      const section = getVisibleSection();
+      if (!section) return;
+  
+      // Only filter the visible section
+      if (!filterTable(section, query)) {
+        filterActivity(section, query);
+      }
+    });
+  
+    // Optional: when switching sections, clear search + reset filters
+    function resetSection(section) {
+      if (!section) return;
+  
+      const table = section.querySelector("table");
+      if (table) {
+        table.querySelectorAll("tbody tr").forEach((row) => (row.style.display = ""));
+      }
+  
+      const list = section.querySelector(".activity-list");
+      if (list) {
+        list.querySelectorAll("li").forEach((li) => (li.style.display = ""));
+      }
+    }
+  
+    // Hook into section changes (hash navigation)
+    window.addEventListener("hashchange", () => {
+      input.value = "";
+      resetSection(getVisibleSection());
+    });
+  
+    // Cmd/Ctrl + K focuses search
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+  });
+  
+  
