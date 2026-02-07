@@ -36,15 +36,6 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#applications-section" class="nav-link">
-                                <i class="fas fa-file-alt"></i>
-                                <span>Applications</span>
-                                @if(isset($stats) && $stats['pending_applications'] > 0)
-                                    <span class="nav-badge">{{ $stats['pending_applications'] }}</span>
-                                @endif
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a href="#users-section" class="nav-link">
                                 <i class="fas fa-users"></i>
                                 <span>Users</span>
@@ -57,15 +48,24 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="#applications-section" class="nav-link">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Pending landlords</span>
+                                @include('components.nav-badge', ['key' => 'pending_applications'])
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="#properties-section" class="nav-link">
                             <i class="fas fa-building"></i>
-                            <span>Pending</span>
+                            <span>Pending Properties</span>
+                            @include('components.nav-badge', ['key' => 'pending_properties'])
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="#recent-activity" class="nav-link">
                                 <i class="fas fa-history"></i>
                                 <span>Activity</span>
+                                @include('components.nav-badge', ['key' => 'activities'])
                             </a>
                         </li>
                     </ul>
