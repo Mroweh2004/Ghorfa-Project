@@ -259,6 +259,16 @@
     font-weight: 500;
     letter-spacing: 0.01em;
 }
+.listing-tag--unavailable {
+    top: auto;
+    left: 0.625rem;
+    bottom: 0.625rem;
+    background-color: #b91c1c;
+    color: #fff;
+}
+.listing-tag--unavailable:not([title*="Sold"]) {
+    background-color: #b45309;
+}
 .setting-btn {
     position: absolute;
     top: 0.875rem;
@@ -323,6 +333,15 @@
 .setting-list li a:hover {
     background-color: #f9fafb;
     color: #1a1a1a;
+}
+
+.setting-list form,
+.form-inline {
+    display: inline;
+}
+
+.like-count {
+    display: none;
 }
 .delete-btn {
     background: none;

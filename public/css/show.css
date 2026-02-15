@@ -73,6 +73,15 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.property-badge--unavailable {
+    background: rgba(185, 28, 28, 0.95);
+    color: #fff;
+}
+
+.property-badge--unavailable .badge-text {
+    color: #fff;
+}
+
 .badge-text {
     font-weight: 600;
     color: #1a1a1a;

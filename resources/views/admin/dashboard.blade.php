@@ -270,7 +270,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ $property->user->name }}</td>
+                                <td>{{ optional($property->landlord)->name ?? 'Unknown' }}</td>
                                 <td>{{ $property->city }}, {{ $property->country }}</td>
                                 <td>${{ number_format($property->price) }}/month</td>
                                 <td>{{ $property->created_at->diffForHumans() }}</td>

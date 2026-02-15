@@ -5,29 +5,52 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\TransactionScopes;
 
 class Transaction extends Model
 {
-    use HasFactory;
+    use HasFactory, TransactionScopes;
 
     protected $fillable = [
         'user_id',
         'property_id',
         'type',
         'price',
-        'unit_id',
+        'currency',
         'status',
         'notes',
-        'starting_time',
-        'finishing_time',
+        'start_date',
+        'end_date',
+        'start_time',
+        'end_time',
         'paid_at',
+        'buyer_approved_at',
+        'rules_accepted',
+        'rules_exceptions',
+        'contract_path',
+        'contract_generated_at',
+        'seller_payment_confirmed_at',
+        'refund_requested_at',
+        'refund_confirmed_by_buyer_at',
+        'cancel_reason',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
-        'starting_time' => 'string',
-        'finishing_time' => 'string',
+        'currency' => 'string',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'start_time' => 'string',
+        'end_time' => 'string',
         'paid_at' => 'datetime',
+        'buyer_approved_at' => 'datetime',
+        'rules_accepted' => 'boolean',
+        'rules_exceptions' => 'string',
+        'contract_path' => 'string',
+        'contract_generated_at' => 'datetime',
+        'seller_payment_confirmed_at' => 'datetime',
+        'refund_requested_at' => 'datetime',
+        'refund_confirmed_by_buyer_at' => 'datetime',
     ];
 
     /**
@@ -44,14 +67,6 @@ class Transaction extends Model
     public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class);
-    }
-
-    /**
-     * Get the unit (currency) associated with the transaction.
-     */
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
     }
 
     /**
@@ -125,4 +140,258 @@ class Transaction extends Model
     {
         return $this->type === 'refund';
     }
+
+    // ===================== WORKFLOW STATE CHECKS =====================
+
+    /**
+     * Check if contract has been generated (ready for buyer approval)
+     */
+    public function hasContractGenerated(): bool
+    {
+        return $this->contract_generated_at !== null && $this->contract_path !== null;
+    }
+
+    /**
+     * Check if buyer has approved/accepted the contract
+     */
+    public function isBuyerApproved(): bool
+    {
+        return $this->buyer_approved_at !== null;
+    }
+
+    /**
+     * Check if seller has confirmed payment received
+     */
+    public function isSellerPaymentConfirmed(): bool
+    {
+        return $this->seller_payment_confirmed_at !== null;
+    }
+
+    /**
+     * Check if refund has been requested (seller cancelled after payment)
+     */
+    public function isRefundRequested(): bool
+    {
+        return $this->refund_requested_at !== null;
+    }
+
+    /**
+     * Check if buyer has confirmed receiving the refund
+     */
+    public function isRefundConfirmed(): bool
+    {
+        return $this->refund_confirmed_by_buyer_at !== null;
+    }
+
+    /**
+     * Check if transaction can proceed to buyer approval (contract must exist)
+     */
+    public function canBuyerApprove(): bool
+    {
+        return $this->isPending() && $this->hasContractGenerated() && !$this->isBuyerApproved();
+    }
+
+    /**
+     * Check if transaction can be marked as confirmed (buyer must approve)
+     */
+    public function canBeConfirmed(): bool
+    {
+        return $this->isPending() && $this->isBuyerApproved();
+    }
+
+    /**
+     * Check if transaction can be marked as paid (seller must confirm payment)
+     */
+    public function canBePaid(): bool
+    {
+        return $this->isConfirmed() && !$this->isPaid();
+    }
+
+    /**
+     * Check if transaction can be marked as completed
+     */
+    public function canBeCompleted(): bool
+    {
+        return $this->isPaid() && !$this->isRefundRequested();
+    }
+
+    /**
+     * Check if transaction can be refunded (can only refund if already paid)
+     */
+    public function canBeRefunded(): bool
+    {
+        return $this->isPaid() && $this->isRefundRequested() && !$this->isRefundConfirmed();
+    }
+
+    /**
+     * Check if seller can cancel before payment
+     */
+    public function canSellerCancelBeforePayment(): bool
+    {
+        return $this->isConfirmed() && !$this->isPaid();
+    }
+
+    /**
+     * Check if buyer can cancel before payment (called by buyer before paying)
+     */
+    public function canBuyerCancelBeforePayment(): bool
+    {
+        return in_array($this->status, ['pending', 'confirmed']) && !$this->isPaid();
+    }
+
+    /**
+     * Check if seller can initiate refund (only if paid)
+     */
+    public function canSellerInitiateRefund(): bool
+    {
+        return $this->isPaid() && !$this->isRefundRequested();
+    }
+
+    /**
+     * Transition: Generate contract (admin action)
+     */
+    public function generateContract(string $contractPath): bool
+    {
+        if (!$this->isPending()) {
+            return false;
+        }
+        return $this->update([
+            'contract_path' => $contractPath,
+            'contract_generated_at' => now(),
+        ]);
+    }
+
+    /**
+     * Transition: Buyer approves contract.
+     * Sets buyer_approved_at and status to 'confirmed' so the transaction state reflects approval.
+     */
+    public function approveBuyerContract(): bool
+    {
+        if (!$this->canBuyerApprove()) {
+            return false;
+        }
+        return $this->update([
+            'buyer_approved_at' => now(),
+            'status' => 'confirmed',
+        ]);
+    }
+
+    /**
+     * Transition: Move to confirmed (after buyer approves)
+     */
+    public function toConfirmed(): bool
+    {
+        if (!$this->canBeConfirmed()) {
+            return false;
+        }
+        return $this->update([
+            'status' => 'confirmed',
+        ]);
+    }
+
+    /**
+     * Transition: Mark as paid (seller confirms payment received)
+     */
+    public function confirmSellerPayment(): bool
+    {
+        if (!$this->canBePaid()) {
+            return false;
+        }
+        return $this->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'seller_payment_confirmed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Transition: Mark as completed (rental/sale finished)
+     */
+    public function toCompleted(): bool
+    {
+        if (!$this->canBeCompleted()) {
+            return false;
+        }
+        return $this->update([
+            'status' => 'completed',
+        ]);
+    }
+
+    /**
+     * Transition: Buyer rejects contract before payment
+     */
+    public function rejectContract(): bool
+    {
+        if (!$this->isPending() || !$this->isBuyerApproved()) {
+            return false;
+        }
+        return $this->update([
+            'status' => 'cancelled_by_buyer',
+        ]);
+    }
+
+    /**
+     * Transition: Buyer cancels before payment (before confirming)
+     */
+    public function cancelByBuyer(string $reason = null): bool
+    {
+        if (!$this->canBuyerCancelBeforePayment()) {
+            return false;
+        }
+        return $this->update([
+            'status' => 'cancelled_by_buyer',
+            'cancel_reason' => $reason,
+        ]);
+    }
+
+    /**
+     * Transition: Seller cancels before payment
+     */
+    public function cancelBySeller(string $reason = null): bool
+    {
+        if (!$this->canSellerCancelBeforePayment()) {
+            return false;
+        }
+        return $this->update([
+            'status' => 'cancelled_by_seller',
+            'cancel_reason' => $reason,
+        ]);
+    }
+
+    /**
+     * Transition: Seller requests refund (after payment)
+     */
+    public function requestRefund(string $reason = null): bool
+    {
+        if (!$this->canSellerInitiateRefund()) {
+            return false;
+        }
+        return $this->update([
+            'refund_requested_at' => now(),
+            'cancel_reason' => $reason,
+        ]);
+    }
+
+    /**
+     * Transition: Buyer confirms they received refund
+     */
+    public function confirmRefund(): bool
+    {
+        if (!$this->canBeRefunded()) {
+            return false;
+        }
+        return $this->update([
+            'status' => 'refunded',
+            'refund_confirmed_by_buyer_at' => now(),
+        ]);
+    }
+
+    public const RENT_BLOCKING_STATUSES = ['confirmed', 'paid'];
+
+    public function scopeBlocksAvailability($q)
+    {
+        return $q->where('type', 'rent')
+                ->whereIn('status', self::RENT_BLOCKING_STATUSES);
+    }
+
 }

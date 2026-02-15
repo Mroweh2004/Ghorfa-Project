@@ -113,6 +113,16 @@ main {
     font-size: 0.8rem;
     font-weight: 500;
 }
+.listing-tag--unavailable {
+    top: auto;
+    left: 1rem;
+    bottom: 1rem;
+    background-color: #b91c1c;
+    color: #fff;
+}
+.listing-tag--unavailable:not([title*="Sold"]) {
+    background-color: #b45309;
+}
 .setting-btn {
     position: absolute;
     top: 1rem;
@@ -168,6 +178,20 @@ main {
     background-color: #f0f0f0;
     color: var(--primary-color);
 }
+
+.setting-list form,
+.form-inline {
+    display: inline;
+}
+
+.like-count {
+    display: none;
+}
+
+.guest-login-message {
+    color: red;
+}
+
 .delete-btn {
     background: none;
     border: none;

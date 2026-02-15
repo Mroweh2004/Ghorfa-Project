@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LandlordApplication;
 use App\Models\Property;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +43,24 @@ class LandlordController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Get transaction requests for landlord's properties
+        $propertyIds = Property::where('user_id', $user->id)->pluck('id');
+        $transactionRequests = Transaction::whereIn('property_id', $propertyIds)
+            ->with(['user', 'property'])
+            ->where('status', 'pending')
+            ->where(function($query) {
+                $query->whereNull('contract_generated_at');
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get transactions awaiting actions (contract approved, payment pending, etc)
+        $activeTransactions = Transaction::whereIn('property_id', $propertyIds)
+            ->with(['user', 'property'])
+            ->whereIn('status', ['confirmed', 'paid'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $stats = [
             'total_properties' => Property::where('user_id', $user->id)->count(),
             'active_listings' => Property::where('user_id', $user->id)->where('status', 'approved')->count(),
@@ -51,9 +70,11 @@ class LandlordController extends Controller
                 ->join('properties', 'property_likes.property_id', '=', 'properties.id')
                 ->where('properties.user_id', $user->id)
                 ->count(),
+            'pending_requests' => $transactionRequests->count(),
+            'active_transactions' => $activeTransactions->count(),
         ];
 
-        return view('landlord.dashboard', compact('approvedProperties', 'pendingProperties', 'rejectedProperties', 'stats'));
+        return view('landlord.dashboard', compact('approvedProperties', 'pendingProperties', 'rejectedProperties', 'stats', 'transactionRequests', 'activeTransactions'));
     }
 
     public function showApplyForm()
