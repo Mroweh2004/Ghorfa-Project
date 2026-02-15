@@ -1,0 +1,263 @@
+/* Landlord Dashboard Tables */
+
+.requests-table-wrapper,
+.transactions-table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.requests-table,
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.requests-table thead,
+.transactions-table thead {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.requests-table th,
+.transactions-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.requests-table tbody tr,
+.transactions-table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+.requests-table tbody tr:hover,
+.transactions-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.requests-table td,
+.transactions-table td {
+    padding: 15px;
+}
+
+/* Request/Transaction Buyer Cell */
+.request-buyer-cell,
+.transaction-buyer-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.buyer-avatar,
+.buyer-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.buyer-avatar {
+    object-fit: cover;
+    background: #f0f0f0;
+}
+
+.buyer-avatar-placeholder {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.request-buyer-cell > div,
+.transaction-buyer-cell > div {
+    flex: 1;
+}
+
+.request-buyer-cell strong,
+.transaction-buyer-cell strong {
+    display: block;
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.request-buyer-cell small {
+    display: block;
+    margin-top: 3px;
+    color: #999;
+    font-size: 12px;
+}
+
+/* Request/Transaction Actions */
+.request-actions,
+.transaction-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 8px 12px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-sm.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-sm.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-sm.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-sm.btn-success:hover {
+    background: #218838;
+}
+
+.btn-sm.btn-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-sm.btn-warning:hover {
+    background: #e0a800;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-confirmed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-paid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.badge-success {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-info {
+    background: #cff4fc;
+    color: #055160;
+}
+
+/* Text utilities */
+.text-muted {
+    color: #999;
+    font-size: 12px;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 768px) {
+    .requests-table,
+    .transactions-table {
+        font-size: 13px;
+    }
+
+    .requests-table th,
+    .transactions-table th,
+    .requests-table td,
+    .transactions-table td {
+        padding: 10px 8px;
+    }
+
+    .request-buyer-cell,
+    .transaction-buyer-cell {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .buyer-avatar,
+    .buyer-avatar-placeholder {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .request-actions,
+    .transaction-actions {
+        justify-content: center;
+    }
+
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .requests-table-wrapper,
+    .transactions-table-wrapper {
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+
+    .requests-table,
+    .transactions-table {
+        min-width: 500px;
+    }
+
+    .requests-table th,
+    .transactions-table th {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .requests-table td,
+    .transactions-table td {
+        padding: 8px;
+        font-size: 12px;
+    }
+}

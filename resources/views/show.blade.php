@@ -3,6 +3,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/show.css') }}">
+<link rel="stylesheet" href="{{ asset('css/transaction-request.css') }}">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 @endpush
@@ -24,6 +25,11 @@
                 <div class="property-badge">
                     <span class="badge-text">{{ $property->listing_type }}</span>
                 </div>
+                @if($property->getAvailabilityMessage())
+                <div class="property-badge property-badge--unavailable">
+                    <span class="badge-text">{{ $property->getAvailabilityMessage() }}</span>
+                </div>
+                @endif
                 <div class="image-counter">
                     <i class="fas fa-images"></i>
                     <span>{{ $property->images->count() }} photos</span>
@@ -56,7 +62,7 @@
                     <!-- Property Location Map -->
                     @if($property->latitude && $property->longitude)
                     <div class="property-location-map-container">
-                        <div id="property-location-map" style="width: 100%; height: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"></div>
+                        <div id="property-location-map"></div>
                     </div>
                     @endif
 
@@ -268,6 +274,52 @@
         </div>
     </section>
 
+    <!-- Transaction Request Section -->
+    @auth
+    @if(auth()->id() !== $property->user_id && auth()->user()->role !== 'admin' && $property->landlord)
+    <section class="transaction-request-section">
+        <div class="container">
+            <div class="request-card">
+                @if($property->isSold())
+                <div class="request-header">
+                    <h2>Not available for new requests</h2>
+                    <p class="text-muted">{{ $property->getAvailabilityMessage() }}</p>
+                </div>
+                @else
+                <div class="request-header">
+                    <h2>Interested in this property?</h2>
+                    <p>Submit a request to {{ $property->landlord->name }}</p>
+                    @if(strtolower($property->listing_type ?? '') === 'rent' && $property->rentedUntil())
+                    @php $activeRental = $property->getActiveRentalDateRange(); @endphp
+                    <p class="request-availability-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Available from <strong>{{ $property->getMinRentalStartDate() }}</strong>.
+                        @if($activeRental)
+                        Current booking: {{ $activeRental['start']->format('M j, Y') }} – {{ $activeRental['end']->format('M j, Y') }} (these dates are not available).
+                        @endif
+                    </p>
+                    @endif
+                </div>
+                <div class="request-buttons">
+                    @if(strtolower($property->listing_type ?? '') === 'rent')
+                    <button class="btn btn-primary" onclick="openRentalRequestModal()">
+                        <i class="fas fa-calendar-check"></i>
+                        Request to Rent
+                    </button>
+                    @elseif(strtolower($property->listing_type ?? '') === 'sale')
+                    <button class="btn btn-primary" onclick="openPurchaseRequestModal()">
+                        <i class="fas fa-handshake"></i>
+                        Request to Buy
+                    </button>
+                    @endif
+                </div>
+                @endif
+            </div>
+        </div>
+    </section>
+    @endif
+    @endauth
+
     <!-- Action Buttons -->
     <div class="property-actions">
         <div class="container">
@@ -467,8 +519,203 @@ function initPropertyShowMap() {
     function openReviewModal(){ document.getElementById('reviewModal').style.display = 'flex'; }
     function closeReviewModal(){ document.getElementById('reviewModal').style.display = 'none'; }
     window.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeReviewModal(); });
+
+    // Transaction request modals
+    function openRentalRequestModal() {
+        @auth
+            document.getElementById('rentalRequestModal').style.display = 'flex';
+            var startInput = document.getElementById('start_date');
+            var endInput = document.getElementById('end_date');
+            var minStart = startInput.getAttribute('data-min-date') || startInput.getAttribute('min');
+            if (minStart) {
+                startInput.setAttribute('min', minStart);
+                endInput.setAttribute('min', minStart);
+            }
+            if (startInput.value && startInput.value > endInput.value) {
+                endInput.value = startInput.value;
+                endInput.setAttribute('min', startInput.value);
+            }
+        @else
+            window.location.href = '{{ route("login") }}';
+        @endauth
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var startInput = document.getElementById('start_date');
+        var endInput = document.getElementById('end_date');
+        if (startInput && endInput) {
+            startInput.addEventListener('change', function() {
+                endInput.setAttribute('min', this.value);
+                if (endInput.value && endInput.value < this.value) {
+                    endInput.value = this.value;
+                }
+            });
+        }
+    });
+
+    function closeRentalRequestModal() {
+        document.getElementById('rentalRequestModal').style.display = 'none';
+    }
+
+    function openPurchaseRequestModal() {
+        @auth
+            document.getElementById('purchaseRequestModal').style.display = 'flex';
+        @else
+            window.location.href = '{{ route("login") }}';
+        @endauth
+    }
+
+    function closePurchaseRequestModal() {
+        document.getElementById('purchaseRequestModal').style.display = 'none';
+    }
+
+    window.addEventListener('keydown', function(e){
+        if(e.key === 'Escape') {
+            closeRentalRequestModal();
+            closePurchaseRequestModal();
+        }
+    });
+
+    function submitRentalRequest() {
+        const form = document.getElementById('rentalRequestForm');
+        const formData = new FormData(form);
+        
+        fetch('{{ route("transactions.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Request submitted successfully! Waiting for landlord approval.');
+                closeRentalRequestModal();
+                location.reload();
+            } else if (data.errors) {
+                const errorMessage = Object.values(data.errors).flat().join('\n');
+                alert('Error: ' + errorMessage);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting your request.');
+        });
+    }
+
+    function submitPurchaseRequest() {
+        const form = document.getElementById('purchaseRequestForm');
+        const formData = new FormData(form);
+        
+        fetch('{{ route("transactions.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Request submitted successfully! Waiting for landlord approval.');
+                closePurchaseRequestModal();
+                location.reload();
+            } else if (data.errors) {
+                const errorMessage = Object.values(data.errors).flat().join('\n');
+                alert('Error: ' + errorMessage);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting your request.');
+        });
+    }
 </script>
 
+<!-- Rental Request Modal -->
+@auth
+<div id="rentalRequestModal" class="modal-overlay" onclick="if(event.target === this) closeRentalRequestModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Request to Rent</h2>
+            <button class="modal-close" onclick="closeRentalRequestModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="rentalRequestForm">
+            @csrf
+            <input type="hidden" name="property_id" value="{{ $property->id }}">
+            <input type="hidden" name="type" value="rent">
+            
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="date" id="start_date" name="start_date" required min="{{ $property->getMinRentalStartDate() }}" data-min-date="{{ $property->getMinRentalStartDate() }}">
+            </div>
 
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="date" id="end_date" name="end_date" required min="{{ $property->getMinRentalStartDate() }}">
+            </div>
+
+            <div class="form-group">
+                <label for="rules_accepted">Do you accept the property rules?</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rules_accepted" name="rules_accepted" value="1">
+                        <span>Yes, I accept all property rules</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="rules_exceptions">Any rules you don't accept? (Optional)</label>
+                <textarea id="rules_exceptions" name="rules_exceptions" rows="3" placeholder="Explain which rules you have concerns about..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Additional Notes (Optional)</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Tell the landlord about yourself..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeRentalRequestModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitRentalRequest()">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endauth
+
+<!-- Purchase Request Modal -->
+@auth
+<div id="purchaseRequestModal" class="modal-overlay" onclick="if(event.target === this) closePurchaseRequestModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Request to Buy</h2>
+            <button class="modal-close" onclick="closePurchaseRequestModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="purchaseRequestForm" action="{{ route('transactions.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="property_id" value="{{ $property->id }}">
+            <input type="hidden" name="type" value="buy">
+            
+            <div class="form-group">
+                <label for="purchase_notes">Additional Notes (Optional)</label>
+                <textarea id="purchase_notes" name="notes" rows="4" placeholder="Tell the landlord about your interest and any questions..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closePurchaseRequestModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endauth
 
 @endsection 

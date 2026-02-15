@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
+
 
 class Property extends Model
 {
@@ -41,9 +43,9 @@ class Property extends Model
         return $this->belongsToMany(Rule::class, 'property_rule');
     }
 
-    public function user()
+    public function landlord()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function images()
@@ -127,4 +129,105 @@ class Property extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function blockingRentTransactions()
+    {
+        return $this->transactions()
+            ->where('type', 'rent')
+            ->whereIn('status', ['confirmed', 'paid']);
+    }
+
+    public function isAvailableFor(string $startDate, string $endDate): bool
+    {
+        return !Transaction::query()
+            ->where('property_id', $this->id)
+            ->where('type', 'rent')
+            ->whereIn('status', ['confirmed', 'paid'])
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('start_date', [$startDate, $endDate])
+                ->orWhereBetween('end_date', [$startDate, $endDate])
+                ->orWhere(function ($q2) use ($startDate, $endDate) {
+                    $q2->where('start_date', '<=', $startDate)
+                        ->where('end_date', '>=', $endDate);
+                });
+            })
+            ->exists();
+    }
+
+    public function rentedUntil(): ?Carbon
+    {
+        $tx = $this->getActiveRentalTransaction();
+        return $tx?->end_date;
+    }
+
+    /**
+     * Get the active (current or upcoming) rental transaction blocking the property, if any.
+     */
+    public function getActiveRentalTransaction(): ?\App\Models\Transaction
+    {
+        return $this->transactions()
+            ->where('type', 'rent')
+            ->whereIn('status', ['confirmed', 'paid'])
+            ->whereDate('end_date', '>=', now()->toDateString())
+            ->orderBy('end_date')
+            ->first();
+    }
+
+    /**
+     * Get the date range of the active rental (for blocking dates in the request form). Returns ['start' => Carbon, 'end' => Carbon] or null.
+     */
+    public function getActiveRentalDateRange(): ?array
+    {
+        $tx = $this->getActiveRentalTransaction();
+        if ($tx === null || !$tx->start_date || !$tx->end_date) {
+            return null;
+        }
+        return ['start' => $tx->start_date, 'end' => $tx->end_date];
+    }
+
+    /**
+     * Earliest date a new rental can start (day after current rental ends, or today).
+     */
+    public function getMinRentalStartDate(): string
+    {
+        $until = $this->rentedUntil();
+        if ($until !== null) {
+            return $until->copy()->addDay()->format('Y-m-d');
+        }
+        return now()->format('Y-m-d');
+    }
+
+    /**
+     * Whether the property has been sold (has a completed/paid purchase transaction).
+     */
+    public function isSold(): bool
+    {
+        return $this->transactions()
+            ->where('type', 'buy')
+            ->whereIn('status', ['paid', 'completed'])
+            ->exists();
+    }
+
+    /**
+     * Human-readable availability message for display on search and listing pages.
+     * Returns null when available.
+     */
+    public function getAvailabilityMessage(): ?string
+    {
+        if ($this->isSold()) {
+            return 'Sold – Not available';
+        }
+        $until = $this->rentedUntil();
+        if ($until !== null) {
+            return 'Not available until ' . $until->format('M j, Y');
+        }
+        return null;
+    }
+
+    /**
+     * Whether the property is currently available for new requests (not sold, not under an active rental).
+     */
+    public function isAvailableForListing(): bool
+    {
+        return !$this->isSold() && $this->rentedUntil() === null;
+    }
 }

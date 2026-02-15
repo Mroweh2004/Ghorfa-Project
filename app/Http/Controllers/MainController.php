@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Amenity;
 use App\Models\Listing;
 use App\Models\Property;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -77,6 +78,19 @@ class MainController extends Controller
     }
     function profileSecurity (){
         return view("profile.security");    
+    }
+
+    /**
+     * List current user's transaction requests (as buyer).
+     * Buyer can open each one to see the full report and approve/reject contract.
+     */
+    function profileTransactions()
+    {
+        $transactions = Transaction::where('user_id', auth()->id())
+            ->with('property')
+            ->orderByDesc('created_at')
+            ->paginate(15);
+        return view('profile.transactions', compact('transactions'));
     }
 
     function searchPage(){

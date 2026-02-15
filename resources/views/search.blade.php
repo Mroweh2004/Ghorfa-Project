@@ -131,6 +131,9 @@
                     <div class="listing-image">
                         <img src="{{ \App\Services\PropertyImageService::getImageUrl($property) }}" alt="{{ $property->title }}">
                         <span class="listing-tag">For {{ $property->listing_type }}</span>
+                        @if($property->getAvailabilityMessage())
+                        <span class="listing-tag listing-tag--unavailable" title="{{ $property->getAvailabilityMessage() }}">{{ $property->getAvailabilityMessage() }}</span>
+                        @endif
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                         <ul class="setting-list">
                             <li><a href="{{route('properties.show', $property->id) }}">View</a></li>
@@ -138,7 +141,7 @@
                                 @if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id)
                                     <li><a href="{{ route('properties.edit', $property->id) }}">Edit</a></li>
                                     <li>
-                                        <form action="{{ route('properties.destroy', $property->id) }}" method="POST" style="display: inline;">
+                                        <form action="{{ route('properties.destroy', $property->id) }}" method="POST" class="form-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this property?')">Delete</button>
@@ -155,7 +158,7 @@
                             >
                                 <i class="fa-{{ $property->isLikedBy(auth()->id()) ? 'solid' : 'regular' }} fa-heart"></i>
                             </button>
-                            <span class="like-count" id="like-count-{{ $property->id }}" style="display: none;">{{ $property->likedBy()->count() }}</span>
+                            <span class="like-count" id="like-count-{{ $property->id }}">{{ $property->likedBy()->count() }}</span>
                         @else
                             <button class="favorite-btn" data-login-url="{{ route('login') }}">
                                 <i class="fa-regular fa-heart"></i>

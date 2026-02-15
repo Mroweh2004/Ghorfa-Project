@@ -10,16 +10,18 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\LandlordController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TransactionController;
 
 //-----------Pages Routes-----------------
 Route::get( '/', [MainController::class,"homePage"])->name(name: 'home');
-Route::prefix('profile')->group(function (): void {
+Route::prefix('profile')->middleware('auth')->group(function (): void {
     Route::get('/info', [MainController::class, 'profileInfo'])->name('profileInfo');
     Route::get('/properties',  [MainController::class, 'profileProperties'])->name('profileProperties');
     Route::get('/favorites', [MainController::class, 'profileFavorites'])->name('profileFavorites');
     Route::get('/security',  [MainController::class, 'profileSecurity'])->name('profileSecurity');
-    Route::put('/info', [MainController::class, 'updateProfile'])->name('profile.update')->middleware('auth');
-    Route::put('/photo', [MainController::class, 'updateProfilePhoto'])->name('profile.update.photo')->middleware('auth');
+    Route::get('/transactions', [MainController::class, 'profileTransactions'])->name('profile.transactions');
+    Route::put('/info', [MainController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/photo', [MainController::class, 'updateProfilePhoto'])->name('profile.update.photo');
 });
 Route::get('/profile', [MainController::class,"profilePage"])->name('profile');
 Route::get('/search', [PropertyController::class, 'index'])->name('search');
@@ -88,4 +90,28 @@ Route::middleware(['auth'])->prefix('notifications')->group(function () {
     Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
     Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+});
+
+//----------------Transaction Routes-------------------
+Route::middleware(['auth'])->prefix('transactions')->group(function () {
+    // Create new transaction request
+    Route::post('/', [TransactionController::class, 'store'])->name('transactions.store');
+    
+    // View transaction details
+    Route::get('/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+    
+    // Download transaction report
+    Route::get('/{transaction}/download-report', [TransactionController::class, 'downloadReport'])->name('transactions.download-report');
+    
+    // Workflow state transitions
+    Route::post('/{transaction}/generate-contract', [TransactionController::class, 'generateContract'])->name('transactions.generate-contract')->middleware(AdminMiddleware::class);
+    Route::post('/{transaction}/approve-contract', [TransactionController::class, 'approveContract'])->name('transactions.approve-contract');
+    Route::post('/{transaction}/reject-contract', [TransactionController::class, 'rejectContract'])->name('transactions.reject-contract');
+    Route::post('/{transaction}/confirm', [TransactionController::class, 'confirm'])->name('transactions.confirm')->middleware(AdminMiddleware::class);
+    Route::post('/{transaction}/confirm-payment', [TransactionController::class, 'confirmPayment'])->name('transactions.confirm-payment');
+    Route::post('/{transaction}/complete', [TransactionController::class, 'complete'])->name('transactions.complete')->middleware(AdminMiddleware::class);
+    Route::post('/{transaction}/cancel', [TransactionController::class, 'cancelByBuyer'])->name('transactions.cancel');
+    Route::post('/{transaction}/cancel-seller', [TransactionController::class, 'cancelBySeller'])->name('transactions.cancel-seller');
+    Route::post('/{transaction}/request-refund', [TransactionController::class, 'requestRefund'])->name('transactions.request-refund');
+    Route::post('/{transaction}/confirm-refund', [TransactionController::class, 'confirmRefund'])->name('transactions.confirm-refund');
 });

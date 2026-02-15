@@ -48,7 +48,7 @@ class AdminController extends Controller
             ->get();
 
         // Pending properties for approval
-        $pendingProperties = Property::with(['user', 'images' => function($query) {
+        $pendingProperties = Property::with(['landlord', 'images' => function($query) {
                 $query->orderBy('is_primary', 'desc')->limit(1);
             }])
             ->where('status', 'pending')
@@ -62,7 +62,7 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
-        $recentProperties = Property::with('user')
+        $recentProperties = Property::with('landlord')
             ->where('status', 'approved')
             ->orderBy('created_at', 'desc')
             ->limit(5)
@@ -254,18 +254,20 @@ class AdminController extends Controller
                 
                 // Notify the landlord that their property has been approved
                 try {
-                    $this->createNotification(
-                        $property->user,
-                        'approve',
-                        'Property Approved!',
-                        'Congratulations! Your property "' . $property->title . '" has been approved by an admin and is now published and visible to all users.',
-                        $property
-                    );
-                    Log::info('Property approval notification sent', [
-                        'property_id' => $property->id,
-                        'landlord_id' => $property->user_id,
-                        'landlord_name' => $property->user->name
-                    ]);
+                    if ($property->user) {
+                        $this->createNotification(
+                            $property->user,
+                            'approve',
+                            'Property Approved!',
+                            'Congratulations! Your property "' . $property->title . '" has been approved by an admin and is now published and visible to all users.',
+                            $property
+                        );
+                        Log::info('Property approval notification sent', [
+                            'property_id' => $property->id,
+                            'landlord_id' => $property->user_id,
+                            'landlord_name' => $property->user->name
+                        ]);
+                    }
                 } catch (\Exception $notificationError) {
                     // Log activity
                     $this->logActivity(
@@ -349,19 +351,21 @@ class AdminController extends Controller
                         $rejectionMessage .= ' Please contact support for more information or review your property details and resubmit.';
                     }
                     
-                    $this->createNotification(
-                        $property->user,
-                        'reject',
-                        'Property Rejected',
-                        $rejectionMessage,
-                        $property
-                    );
-                    Log::info('Property rejection notification sent', [
-                        'property_id' => $property->id,
-                        'landlord_id' => $property->user_id,
-                        'landlord_name' => $property->user->name,
-                        'admin_notes' => $adminNotes
-                    ]);
+                    if ($property->user) {
+                        $this->createNotification(
+                            $property->user,
+                            'reject',
+                            'Property Rejected',
+                            $rejectionMessage,
+                            $property
+                        );
+                        Log::info('Property rejection notification sent', [
+                            'property_id' => $property->id,
+                            'landlord_id' => $property->user_id,
+                            'landlord_name' => $property->user->name,
+                            'admin_notes' => $adminNotes
+                        ]);
+                    }
                 } catch (\Exception $notificationError) {
                     Log::error('Failed to send property rejection notification', [
                         'property_id' => $property->id,

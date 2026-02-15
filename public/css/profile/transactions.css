@@ -1,0 +1,106 @@
+/* Profile – My requests (transactions) page */
+
+.my-requests-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 0;
+}
+
+.my-requests-page h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.my-requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.my-requests-table th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.875rem;
+}
+
+.my-requests-table td {
+    padding: 0.875rem 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.my-requests-table tr:hover td {
+    background: #f8fafc;
+}
+
+.my-requests-table .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.my-requests-table .status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.my-requests-table .status-confirmed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.my-requests-table .status-paid {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.my-requests-table .status-completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.my-requests-table .status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.my-requests-table .view-report-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    background: #0f172a;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.my-requests-table .view-report-btn:hover {
+    background: #1e293b;
+    color: #fff;
+}
+
+.my-requests-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+}
+
+.my-requests-empty i {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+.my-requests-page .pagination {
+    margin-top: 1rem;
+}
