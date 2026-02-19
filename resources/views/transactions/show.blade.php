@@ -146,7 +146,12 @@
                     </div>
                     <div class="request-detail-item">
                         <label><i class="fas fa-dollar-sign"></i> Price</label>
-                        <span>${{ number_format($property->price) }}/month</span>
+                        <span>
+                            ${{ number_format($property->price) }}
+                            @if(($property->listing_type ?? null) === 'rent')
+                                /{{ $property->price_duration ?? 'month' }}
+                            @endif
+                        </span>
                     </div>
                     @if($property->bedroom_nb)
                     <div class="request-detail-item">

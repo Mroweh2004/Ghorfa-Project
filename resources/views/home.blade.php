@@ -6,26 +6,31 @@
 <main>
         <section id="Main-Container" class="Main-Container">
             <div class="Main-Container-content">
-                <h1>Find Your Perfect Living Space</h1>
-                <p>Connect with roommates and discover affordable housing in destination cities</p>
-                <div class="search-container">
-                    <form class="search-box" action="{{ route('filter-search') }}" method="GET">
-                        <input type="text" name="location" class="search-input" placeholder="Enter city or neighborhood...">
-                        <button type="submit" class="main-list-btn">Find Rooms</button>
-                    </form>
-                    <div class="popular-searches">
-                        <span>Popular:</span>
-                        @if(isset($popularCities) && $popularCities->count() > 0)
-                            @foreach($popularCities as $city)
-                                <a href="{{ $city['url'] }}">{{ $city['name'] }}</a>
-                            @endforeach
-                        @else
-                            <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
-                            <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
-                            <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
-                            <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
-                        @endif
+                <div class="hero-text-content">
+                    <h1>Find Your Perfect Living Space</h1>
+                    <p>Connect with roommates and discover affordable housing in destination cities</p>
+                    <div class="search-container">
+                        <form class="search-box" action="{{ route('filter-search') }}" method="GET">
+                            <input type="text" name="location" class="search-input" placeholder="Enter city or neighborhood...">
+                            <button type="submit" class="main-list-btn">Find Rooms</button>
+                        </form>
+                        <div class="popular-searches">
+                            <span>Popular:</span>
+                            @if(isset($popularCities) && $popularCities->count() > 0)
+                                @foreach($popularCities as $city)
+                                    <a href="{{ $city['url'] }}">{{ $city['name'] }}</a>
+                                @endforeach
+                            @else
+                                <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
+                                <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
+                                <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
+                                <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
+                            @endif
+                        </div>
                     </div>
+                </div>
+                <div class="hero-character-container">
+                    <img src="{{ asset('images/character/home-hero.png') }}" alt="Welcome!" class="hero-character-image">
                 </div>
             </div>
         </section>
@@ -35,25 +40,33 @@
             <div class="feature-grid">
                
                 <div class="card">
-                    <i class="fas fa-building"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/search-looking.png') }}" alt="Search" class="feature-character">
+                    </div>
                     <h3>Wide Range of Listings</h3>
                     <p>Explore various rental options including rooms, apartments, and PG accommodations.</p>
                 </div>
                 
                 <div class="card">
-                    <i class="fas fa-filter"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/search-magnifying.png') }}" alt="Filter" class="feature-character">
+                    </div>
                     <h3>Advanced Filters</h3>
                     <p>Find exactly what you need with our detailed search filters.</p>
                 </div>
                 
                 <div class="card">
-                    <i class="fas fa-users"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/wave-2.png') }}" alt="Connect" class="feature-character">
+                    </div>
                     <h3>Roommate Matching</h3>
                     <p>Connect with compatible roommates based on your preferences.</p>
                 </div>
                 
                 <div class="card">
-                    <i class="fa-solid fa-map-location-dot"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/map-navigating.png') }}" alt="Map" class="feature-character">
+                    </div>
                     <h3>Search By Map</h3>
                     <p>Quick and simple way to choose the perfect location.</p>
                 </div>
@@ -88,6 +101,9 @@
 
         <section id="additional-section" class="additional-section">
             <div class="additional-section-content">
+                <div class="additional-section-character">
+                    <img src="{{ asset('images/character/success-celebrating.png') }}" alt="Join us!" class="cta-character">
+                </div>
                 <div class="additional-section-text">
                     <h2>Ready to Find Your Next Home?</h2>
                     <p>Join thousands of happy users who found their perfect space through Ghorfa</p>
@@ -112,27 +128,32 @@
     <main>
         <section id="Main-Container" class="Main-Container">
             <div class="Main-Container-content">
-                <h1>Find Your Perfect Living Space</h1>
-                <p>Connect with roommates and discover affordable housing in destination cities</p>
-                <div class="search-container">
-                    <form class="search-box" action="{{ route('filter-search') }}" method="GET">
-                        <input type="text" name="location" class="search-input" placeholder="Enter city or neighborhood...">
-                        <button type="submit" class="main-list-btn">Find Rooms</button>
-                    </form>
-                    <div class="popular-searches">
-                        <span>Popular:</span>
-                        @if(isset($popularCities) && $popularCities->count() > 0)
-                            @foreach($popularCities as $city)
-                                <a href="{{ $city['url'] }}">{{ $city['name'] }}</a>
-                            @endforeach
-                        @else
-                            {{-- Fallback to default cities if no data available --}}
-                            <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
-                            <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
-                            <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
-                            <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
-                        @endif
+                <div class="hero-text-content">
+                    <h1>Find Your Perfect Living Space</h1>
+                    <p>Connect with roommates and discover affordable housing in destination cities</p>
+                    <div class="search-container">
+                        <form class="search-box" action="{{ route('filter-search') }}" method="GET">
+                            <input type="text" name="location" class="search-input" placeholder="Enter city or neighborhood...">
+                            <button type="submit" class="main-list-btn">Find Rooms</button>
+                        </form>
+                        <div class="popular-searches">
+                            <span>Popular:</span>
+                            @if(isset($popularCities) && $popularCities->count() > 0)
+                                @foreach($popularCities as $city)
+                                    <a href="{{ $city['url'] }}">{{ $city['name'] }}</a>
+                                @endforeach
+                            @else
+                                {{-- Fallback to default cities if no data available --}}
+                                <a href="{{ route('filter-search', ['location' => 'Beirut']) }}">Beirut</a>
+                                <a href="{{ route('filter-search', ['location' => 'Saida']) }}">Saida</a>
+                                <a href="{{ route('filter-search', ['location' => 'Tyre']) }}">Tyre</a>
+                                <a href="{{ route('filter-search', ['location' => 'Baalbak']) }}">Baalbak</a>
+                            @endif
+                        </div>
                     </div>
+                </div>
+                <div class="hero-character-container">
+                    <img src="{{ asset('images/character/home-hero.png') }}" alt="Welcome!" class="hero-character-image">
                 </div>
             </div>
         </section>
@@ -142,25 +163,33 @@
             <div class="feature-grid">
                
                 <div class="card">
-                    <i class="fas fa-building"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/search-looking.png') }}" alt="Search" class="feature-character">
+                    </div>
                     <h3>Wide Range of Listings</h3>
                     <p>Explore various rental options including rooms, apartments, and PG accommodations.</p>
                 </div>
                 
                 <div class="card">
-                    <i class="fas fa-filter"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/search-magnifying.png') }}" alt="Filter" class="feature-character">
+                    </div>
                     <h3>Advanced Filters</h3>
                     <p>Find exactly what you need with our detailed search filters.</p>
                 </div>
                 
                 <div class="card">
-                    <i class="fas fa-users"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/wave-2.png') }}" alt="Connect" class="feature-character">
+                    </div>
                     <h3>Roommate Matching</h3>
                     <p>Connect with compatible roommates based on your preferences.</p>
                 </div>
                 
                 <div class="card">
-                    <i class="fa-solid fa-map-location-dot"></i>
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/map-navigating.png') }}" alt="Map" class="feature-character">
+                    </div>
                     <h3>Search By Map</h3>
                     <p>Quick and simple way to choose the perfect location.</p>
                 </div>
@@ -193,6 +222,9 @@
 
         <section id="additional-section" class="additional-section">
             <div class="additional-section-content">
+                <div class="additional-section-character">
+                    <img src="{{ asset('images/character/success-celebrating.png') }}" alt="Join us!" class="cta-character">
+                </div>
                 <div class="additional-section-text">
                     <h2>Are you a property owner?</h2>
                     <p>List your property and start earning money by renting it out. Join our community of successful property owners today!</p>

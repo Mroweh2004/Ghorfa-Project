@@ -58,7 +58,12 @@
                     @endauth
                 </div>
                 <div class="listing-content">
-                    <div class="listing-price">{{ $property->price }}$/month</div>
+                    <div class="listing-price">
+                        {{ $property->price }}$
+                        @if(($property->listing_type ?? null) === 'rent')
+                            /{{ $property->price_duration ?? 'month' }}
+                        @endif
+                    </div>
                     <h3>{{ $property->title }}</h3>
                     <p class="listing-location">
                         <i class="fas fa-map-marker-alt"></i> 

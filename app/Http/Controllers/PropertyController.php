@@ -189,6 +189,13 @@ class PropertyController extends Controller
             'city'          => 'nullable|string',
             'address'       => 'nullable|string',
             'price'         => 'required|numeric|min:0',
+            'price_duration' => 'required_if:listing_type,rent|nullable|string|in:month,week,day,year',
+            'price_per_day' => 'nullable|numeric|min:0',
+            'price_per_week' => 'nullable|numeric|min:0',
+            'price_per_month' => 'nullable|numeric|min:0',
+            'price_per_year' => 'nullable|numeric|min:0',
+            'rent_duration_units' => 'required_if:listing_type,rent|nullable|array|min:1',
+            'rent_duration_units.*' => 'in:day,week,month,year',
             'unit'          => 'required|integer|exists:units,id',
             'area_m3'       => 'required|numeric|min:0',
             'room_nb'       => 'required|integer|min:0',
@@ -214,6 +221,30 @@ class PropertyController extends Controller
         try {
             $validated['unit_id'] = $validated['unit'];
             unset($validated['unit'], $validated['images'], $validated['remove_images']);
+
+            // Store accepted rent duration units as comma-separated string for SET column
+            if (($validated['listing_type'] ?? null) === 'rent') {
+                $validated['rent_duration_units'] = implode(',', (array) ($validated['rent_duration_units'] ?? []));
+            } else {
+                $validated['rent_duration_units'] = null;
+            }
+
+            if (($validated['listing_type'] ?? null) === 'rent') {
+                $days = ['day' => 1, 'week' => 7, 'month' => 30, 'year' => 365];
+                $baseUnit = $validated['price_duration'] ?? 'month';
+                $basePrice = (float) ($validated['price'] ?? 0);
+                $divisor = $days[$baseUnit] ?? 30;
+                $perDay = $divisor > 0 ? ($basePrice / $divisor) : 0;
+                $validated['price_per_day'] = round($perDay, 2);
+                $validated['price_per_week'] = round($perDay * 7, 2);
+                $validated['price_per_month'] = round($perDay * 30, 2);
+                $validated['price_per_year'] = round($perDay * 365, 2);
+            } else {
+                $validated['price_per_day'] = null;
+                $validated['price_per_week'] = null;
+                $validated['price_per_month'] = null;
+                $validated['price_per_year'] = null;
+            }
 
             if (isset($validated['latitude']) && isset($validated['longitude']) 
                 && !empty($validated['latitude']) && !empty($validated['longitude'])) {
@@ -356,6 +387,13 @@ class PropertyController extends Controller
                 'city'          => 'nullable|string',
                 'address'       => 'nullable|string',
                 'price'         => 'required|numeric|min:0',
+                'price_duration' => 'required_if:listing_type,rent|nullable|string|in:month,week,day,year',
+                'price_per_day' => 'nullable|numeric|min:0',
+                'price_per_week' => 'nullable|numeric|min:0',
+                'price_per_month' => 'nullable|numeric|min:0',
+                'price_per_year' => 'nullable|numeric|min:0',
+                'rent_duration_units' => 'required_if:listing_type,rent|nullable|array|min:1',
+                'rent_duration_units.*' => 'in:day,week,month,year',
                 'unit'          => 'required|integer|exists:units,id',
                 'area_m3'       => 'required|numeric|min:0',
                 'room_nb'       => 'nullable|integer|min:0',
@@ -383,6 +421,31 @@ class PropertyController extends Controller
             $validated['unit_id'] = $validated['unit'] ?? null;
             $validated['status'] = 'pending'; // New properties require admin approval
             unset($validated['unit']);
+
+            // Store accepted rent duration units as comma-separated string for SET column
+            if (($validated['listing_type'] ?? null) === 'rent') {
+                $validated['rent_duration_units'] = implode(',', (array) ($validated['rent_duration_units'] ?? []));
+            } else {
+                $validated['rent_duration_units'] = null;
+            }
+
+            // Calculate and store prices per duration unit (server-side source of truth)
+            if (($validated['listing_type'] ?? null) === 'rent') {
+                $days = ['day' => 1, 'week' => 7, 'month' => 30, 'year' => 365];
+                $baseUnit = $validated['price_duration'] ?? 'month';
+                $basePrice = (float) ($validated['price'] ?? 0);
+                $divisor = $days[$baseUnit] ?? 30;
+                $perDay = $divisor > 0 ? ($basePrice / $divisor) : 0;
+                $validated['price_per_day'] = round($perDay, 2);
+                $validated['price_per_week'] = round($perDay * 7, 2);
+                $validated['price_per_month'] = round($perDay * 30, 2);
+                $validated['price_per_year'] = round($perDay * 365, 2);
+            } else {
+                $validated['price_per_day'] = null;
+                $validated['price_per_week'] = null;
+                $validated['price_per_month'] = null;
+                $validated['price_per_year'] = null;
+            }
             $amenityIds = (array)($request->input('amenities', []));
             $ruleIds    = (array)($request->input('rules', []));
 

@@ -362,7 +362,12 @@
                                     {{ $property->city }}, {{ $property->country }}
                                 </td>
                                 <td>{{ $property->property_type }}</td>
-                                <td class="property-price-cell">${{ number_format($property->price) }}/month</td>
+                                <td class="property-price-cell">
+                                    ${{ number_format($property->price) }}
+                                    @if(($property->listing_type ?? null) === 'rent')
+                                        /{{ $property->price_duration ?? 'month' }}
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="status-badge status-approved">Published</span>
                                 </td>
@@ -436,7 +441,12 @@
                                     {{ $property->city }}, {{ $property->country }}
                                 </td>
                                 <td>{{ $property->property_type }}</td>
-                                <td class="property-price-cell">${{ number_format($property->price) }}/month</td>
+                                <td class="property-price-cell">
+                                    ${{ number_format($property->price) }}
+                                    @if(($property->listing_type ?? null) === 'rent')
+                                        /{{ $property->price_duration ?? 'month' }}
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="status-badge status-pending">Pending</span>
                                 </td>
@@ -510,7 +520,12 @@
                                     {{ $property->city }}, {{ $property->country }}
                                 </td>
                                 <td>{{ $property->property_type }}</td>
-                                <td class="property-price-cell">${{ number_format($property->price) }}/month</td>
+                                <td class="property-price-cell">
+                                    ${{ number_format($property->price) }}
+                                    @if(($property->listing_type ?? null) === 'rent')
+                                        /{{ $property->price_duration ?? 'month' }}
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="status-badge status-rejected">Rejected</span>
                                 </td>

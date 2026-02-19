@@ -1505,3 +1505,51 @@ html {
 .gallery-item:hover::after {
     opacity: 1;
 }
+
+/* ============================
+   REQUEST CARD CHARACTER
+   ============================ */
+.request-card-content {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.request-character {
+    flex: 0 0 180px;
+}
+
+.request-helper-character {
+    width: 180px;
+    height: auto;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.1));
+    animation: thumbsUp 2s ease-in-out infinite;
+}
+
+@keyframes thumbsUp {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-8px) scale(1.05);
+    }
+}
+
+.request-info {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .request-card-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .request-character {
+        flex: 0 0 140px;
+    }
+    
+    .request-helper-character {
+        width: 140px;
+    }
+}

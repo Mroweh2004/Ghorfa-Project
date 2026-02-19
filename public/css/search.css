@@ -208,6 +208,7 @@
 
 /* --- FIX: equal-height cards + sticky meta --- */
 .listing-card {
+    position: relative;
     background: var(--white);
     border-radius: 8px;
     overflow: hidden;
@@ -298,7 +299,7 @@
     position: absolute;
     background-color: #ffffff;
     min-width: 140px;
-    z-index: 5;
+    z-index: 2147483647 !important;
     top: 3rem;
     right: 0.875rem;
     border-radius: 6px;
@@ -1083,3 +1084,86 @@
         transform: scale(0.95);
     }
 }
+
+/* ============================
+   NO RESULTS / EMPTY STATE
+   ============================ */
+.no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    min-height: 400px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    margin: 20px 0;
+}
+
+.no-results-character {
+    margin-bottom: 30px;
+}
+
+.empty-state-character {
+    width: 200px;
+    height: auto;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.1));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+.no-results h3 {
+    font-size: 1.8rem;
+    color: #1f2937;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.no-results p {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin-bottom: 24px;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.reset-filters-btn {
+    display: inline-block;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.reset-filters-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+@media (max-width: 768px) {
+    .empty-state-character {
+        width: 150px;
+    }
+    
+    .no-results h3 {
+        font-size: 1.5rem;
+    }
+    
+    .no-results p {
+        font-size: 1rem;
+    }
+}
+

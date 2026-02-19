@@ -55,7 +55,9 @@
                         </div>
                         <div class="property-price-section">
                             <div class="price-main">${{ number_format($property->price) }}</div>
-                            <div class="price-period">per month</div>
+                            @if(($property->listing_type ?? null) === 'rent')
+                                <div class="price-period">per {{ $property->price_duration ?? 'month' }}</div>
+                            @endif
                         </div>
                     </div>
 
@@ -286,32 +288,39 @@
                     <p class="text-muted">{{ $property->getAvailabilityMessage() }}</p>
                 </div>
                 @else
-                <div class="request-header">
-                    <h2>Interested in this property?</h2>
-                    <p>Submit a request to {{ $property->landlord->name }}</p>
-                    @if(strtolower($property->listing_type ?? '') === 'rent' && $property->rentedUntil())
-                    @php $activeRental = $property->getActiveRentalDateRange(); @endphp
-                    <p class="request-availability-hint">
-                        <i class="fas fa-info-circle"></i>
-                        Available from <strong>{{ $property->getMinRentalStartDate() }}</strong>.
-                        @if($activeRental)
-                        Current booking: {{ $activeRental['start']->format('M j, Y') }} – {{ $activeRental['end']->format('M j, Y') }} (these dates are not available).
-                        @endif
-                    </p>
-                    @endif
-                </div>
-                <div class="request-buttons">
-                    @if(strtolower($property->listing_type ?? '') === 'rent')
-                    <button class="btn btn-primary" onclick="openRentalRequestModal()">
-                        <i class="fas fa-calendar-check"></i>
-                        Request to Rent
-                    </button>
-                    @elseif(strtolower($property->listing_type ?? '') === 'sale')
-                    <button class="btn btn-primary" onclick="openPurchaseRequestModal()">
-                        <i class="fas fa-handshake"></i>
-                        Request to Buy
-                    </button>
-                    @endif
+                <div class="request-card-content">
+                    <div class="request-character">
+                        <img src="{{ asset('images/character/view-thumbs-up.png') }}" alt="Great choice!" class="request-helper-character">
+                    </div>
+                    <div class="request-info">
+                        <div class="request-header">
+                            <h2>Interested in this property?</h2>
+                            <p>Submit a request to {{ $property->landlord->name }}</p>
+                            @if(strtolower($property->listing_type ?? '') === 'rent' && $property->rentedUntil())
+                            @php $activeRental = $property->getActiveRentalDateRange(); @endphp
+                            <p class="request-availability-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Available from <strong>{{ $property->getMinRentalStartDate() }}</strong>.
+                                @if($activeRental)
+                                Current booking: {{ $activeRental['start']->format('M j, Y') }} – {{ $activeRental['end']->format('M j, Y') }} (these dates are not available).
+                                @endif
+                            </p>
+                            @endif
+                        </div>
+                        <div class="request-buttons">
+                            @if(strtolower($property->listing_type ?? '') === 'rent')
+                            <button class="btn btn-primary" onclick="openRentalRequestModal()">
+                                <i class="fas fa-calendar-check"></i>
+                                Request to Rent
+                            </button>
+                            @elseif(strtolower($property->listing_type ?? '') === 'sale')
+                            <button class="btn btn-primary" onclick="openPurchaseRequestModal()">
+                                <i class="fas fa-handshake"></i>
+                                Request to Buy
+                            </button>
+                            @endif
+                        </div>
+                    </div>
                 </div>
                 @endif
             </div>
@@ -319,6 +328,39 @@
     </section>
     @endif
     @endauth
+
+    {{-- Guest Transaction Request Section --}}
+    @guest
+    @if($property->landlord && !$property->isSold())
+    <section class="transaction-request-section">
+        <div class="container">
+            <div class="request-card">
+                <div class="request-card-content">
+                    <div class="request-character">
+                        <img src="{{ asset('images/character/view-thumbs-up.png') }}" alt="Great choice!" class="request-helper-character">
+                    </div>
+                    <div class="request-info">
+                        <div class="request-header">
+                            <h2>Interested in this property?</h2>
+                            <p>Login to submit a request to {{ $property->landlord->name }}</p>
+                        </div>
+                        <div class="request-buttons">
+                            <a href="{{ route('login') }}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Login to Request
+                            </a>
+                            <a href="{{ route('register') }}" class="btn btn-secondary">
+                                <i class="fas fa-user-plus"></i>
+                                Register
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
+    @endguest
 
     <!-- Action Buttons -->
     <div class="property-actions">
@@ -526,14 +568,26 @@ function initPropertyShowMap() {
             document.getElementById('rentalRequestModal').style.display = 'flex';
             var startInput = document.getElementById('start_date');
             var endInput = document.getElementById('end_date');
-            var minStart = startInput.getAttribute('data-min-date') || startInput.getAttribute('min');
-            if (minStart) {
+            var minStart = startInput ? (startInput.getAttribute('data-min-date') || startInput.getAttribute('min')) : null;
+            if (startInput && endInput && minStart) {
                 startInput.setAttribute('min', minStart);
                 endInput.setAttribute('min', minStart);
             }
-            if (startInput.value && startInput.value > endInput.value) {
+            if (startInput && endInput && startInput.value && startInput.value > endInput.value) {
                 endInput.value = startInput.value;
                 endInput.setAttribute('min', startInput.value);
+            }
+            var rulesAccepted = document.getElementById('rules_accepted');
+            var rulesExceptionsGroup = document.getElementById('rules_exceptions_group');
+            var rulesExceptionsInput = document.getElementById('rules_exceptions');
+            if (rulesAccepted && rulesExceptionsGroup && rulesExceptionsInput) {
+                if (rulesAccepted.checked) {
+                    rulesExceptionsGroup.classList.remove('is-visible');
+                    rulesExceptionsInput.removeAttribute('required');
+                } else {
+                    rulesExceptionsGroup.classList.add('is-visible');
+                    rulesExceptionsInput.setAttribute('required', 'required');
+                }
             }
         @else
             window.location.href = '{{ route("login") }}';
@@ -550,6 +604,24 @@ function initPropertyShowMap() {
                     endInput.value = this.value;
                 }
             });
+        }
+        var rulesAccepted = document.getElementById('rules_accepted');
+        var rulesExceptionsGroup = document.getElementById('rules_exceptions_group');
+        var rulesExceptionsInput = document.getElementById('rules_exceptions');
+        function toggleRulesExceptions() {
+            if (!rulesAccepted || !rulesExceptionsGroup || !rulesExceptionsInput) return;
+            if (rulesAccepted.checked) {
+                rulesExceptionsGroup.classList.remove('is-visible');
+                rulesExceptionsInput.removeAttribute('required');
+                rulesExceptionsInput.value = '';
+            } else {
+                rulesExceptionsGroup.classList.add('is-visible');
+                rulesExceptionsInput.setAttribute('required', 'required');
+            }
+        }
+        if (rulesAccepted) {
+            rulesAccepted.addEventListener('change', toggleRulesExceptions);
+            toggleRulesExceptions();
         }
     });
 
@@ -578,6 +650,30 @@ function initPropertyShowMap() {
 
     function submitRentalRequest() {
         const form = document.getElementById('rentalRequestForm');
+        var startDate = document.getElementById('start_date');
+        var endDate = document.getElementById('end_date');
+        if (startDate && endDate) {
+            if (!startDate.value.trim()) {
+                alert('Please select a check-in date.');
+                return;
+            }
+            if (!endDate.value.trim()) {
+                alert('Please select a check-out date so the rental period is clear. The property cannot be rented for an unknown duration.');
+                return;
+            }
+            if (endDate.value <= startDate.value) {
+                alert('Check-out date must be after check-in date.');
+                return;
+            }
+        }
+        var rulesAccepted = document.getElementById('rules_accepted');
+        var rulesExceptions = document.getElementById('rules_exceptions');
+        if (rulesAccepted && rulesExceptions) {
+            if (!rulesAccepted.checked && !rulesExceptions.value.trim()) {
+                alert('Please either accept all property rules, or explain which rules you do not accept.');
+                return;
+            }
+        }
         const formData = new FormData(form);
         
         fetch('{{ route("transactions.store") }}', {
@@ -651,17 +747,18 @@ function initPropertyShowMap() {
             <input type="hidden" name="type" value="rent">
             
             <div class="form-group">
-                <label for="start_date">Start Date</label>
+                <label for="start_date">Check-in date <span class="required-asterisk">*</span></label>
                 <input type="date" id="start_date" name="start_date" required min="{{ $property->getMinRentalStartDate() }}" data-min-date="{{ $property->getMinRentalStartDate() }}">
             </div>
 
             <div class="form-group">
                 <label for="end_date">End Date</label>
                 <input type="date" id="end_date" name="end_date" required min="{{ $property->getMinRentalStartDate() }}">
+                <span class="form-hint">Both dates are required to define the rental period.</span>
             </div>
 
             <div class="form-group">
-                <label for="rules_accepted">Do you accept the property rules?</label>
+                <label for="rules_accepted">Do you accept the property rules? <span class="required-asterisk">*</span></label>
                 <div class="checkbox-group">
                     <label class="checkbox-label">
                         <input type="checkbox" id="rules_accepted" name="rules_accepted" value="1">
@@ -670,9 +767,10 @@ function initPropertyShowMap() {
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="rules_exceptions">Any rules you don't accept? (Optional)</label>
+            <div class="form-group rules-exceptions-group" id="rules_exceptions_group">
+                <label for="rules_exceptions">Explain which rules you don't accept <span class="required-asterisk">*</span></label>
                 <textarea id="rules_exceptions" name="rules_exceptions" rows="3" placeholder="Explain which rules you have concerns about..."></textarea>
+                <span class="form-hint">Required if you do not accept all property rules.</span>
             </div>
 
             <div class="form-group">

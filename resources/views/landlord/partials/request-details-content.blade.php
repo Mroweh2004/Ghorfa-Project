@@ -48,6 +48,12 @@
                 <label><i class="fas fa-calendar-alt"></i> Request date</label>
                 <span>{{ $transaction->created_at ? $transaction->created_at->format('M j, Y') : 'N/A' }}</span>
             </div>
+            <div class="request-detail-item">
+                <label><i class="fas fa-check-double"></i> Rules accepted</label>
+                <span class="request-detail-rules-accepted {{ $transaction->rules_accepted ? 'request-detail-rules-accepted--yes' : 'request-detail-rules-accepted--no' }}">
+                    {{ $transaction->rules_accepted ? 'Yes ✓' : 'No ✗' }}
+                </span>
+            </div>
             @if($transaction->type === 'rent')
             <div class="request-detail-item">
                 <label><i class="fas fa-calendar-check"></i> Check-in</label>
@@ -57,12 +63,7 @@
                 <label><i class="fas fa-calendar-times"></i> Check-out</label>
                 <span>{{ $transaction->end_date ? \Carbon\Carbon::parse($transaction->end_date)->format('M j, Y') : 'N/A' }}</span>
             </div>
-            <div class="request-detail-item">
-                <label><i class="fas fa-check-double"></i> Rules accepted</label>
-                <span class="request-detail-rules-accepted {{ $transaction->rules_accepted ? 'request-detail-rules-accepted--yes' : 'request-detail-rules-accepted--no' }}">
-                    {{ $transaction->rules_accepted ? 'Yes ✓' : 'No ✗' }}
-                </span>
-            </div>
+            
             @endif
             @if($transaction->rules_exceptions && trim($transaction->rules_exceptions))
             <div class="request-detail-item request-detail-item--full">
@@ -99,7 +100,12 @@
             </div>
             <div class="request-detail-item">
                 <label><i class="fas fa-dollar-sign"></i> Price</label>
-                <span>${{ number_format($property->price) }}/month</span>
+                <span>
+                    ${{ number_format($property->price) }}
+                    @if(($property->listing_type ?? null) === 'rent')
+                        /{{ $property->price_duration ?? 'month' }}
+                    @endif
+                </span>
             </div>
             @if($property->bedroom_nb)
             <div class="request-detail-item">
