@@ -272,7 +272,12 @@
                                 </td>
                                 <td>{{ optional($property->landlord)->name ?? 'Unknown' }}</td>
                                 <td>{{ $property->city }}, {{ $property->country }}</td>
-                                <td>${{ number_format($property->price) }}/month</td>
+                                <td>
+                                    ${{ number_format($property->price) }}
+                                    @if(($property->listing_type ?? null) === 'rent')
+                                        /{{ $property->price_duration ?? 'month' }}
+                                    @endif
+                                </td>
                                 <td>{{ $property->created_at->diffForHumans() }}</td>
                                 <td>
                                     <a 

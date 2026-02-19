@@ -7,13 +7,47 @@
 
 @section('content')
 <section class="title-section">
-  <div class="content-title">
-    <h1>List Your Space</h1>
-    <p>Specify your property details properly</p>
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1>List Your Space</h1>
+      <p>Follow the steps to create your listing</p>
+    </div>
+    <div class="hero-character">
+      <img src="{{ asset('images/character/wave-1.png') }}" alt="Welcome" class="character-image">
+    </div>
   </div>
 </section>
 
 <section class="content-section">
+  {{-- Progress Indicator --}}
+  <div class="wizard-progress">
+    <div class="wizard-helper-character">
+      <img src="{{ asset('images/character/thinking.png') }}" alt="Guide" class="helper-avatar">
+      <div class="helper-speech-bubble">Let's get started!</div>
+    </div>
+    
+    <div class="wizard-step active" data-step="1">
+      <div class="step-number">1</div>
+      <div class="step-title">Basic Info</div>
+    </div>
+    <div class="wizard-step" data-step="2">
+      <div class="step-number">2</div>
+      <div class="step-title">Location</div>
+    </div>
+    <div class="wizard-step" data-step="3">
+      <div class="step-number">3</div>
+      <div class="step-title">Details</div>
+    </div>
+    <div class="wizard-step" data-step="4">
+      <div class="step-number">4</div>
+      <div class="step-title">Features</div>
+    </div>
+    <div class="wizard-step" data-step="5">
+      <div class="step-number">5</div>
+      <div class="step-title">Images</div>
+    </div>
+  </div>
+
   <form class="listing-form" method="POST" action="{{ route('submit-listing') }}" enctype="multipart/form-data" novalidate>
     @csrf
     
@@ -30,9 +64,18 @@
     @endif
 
     <div class="form-content">
-      {{-- ================= BASIC INFO ================= --}}
-      <div class="inside-form-section">
-        <h1 class="form-section-title">Basic Info</h1>
+      {{-- STEP 1 --}}
+      <div class="wizard-content" data-step="1">
+        <div class="character-helper">
+          <img src="{{ asset('images/character/tie.png') }}" alt="Guide" class="character-helper-image">
+          <div class="character-helper-text">
+            <h4>Let's start with the basics!</h4>
+            <p>Tell us about your property. A great title and description help tenants find your listing faster.</p>
+          </div>
+        </div>
+        
+        <div class="inside-form-section">
+          <h1 class="form-section-title">Basic Info</h1>
 
         <div class="form-input">
           <label for="title" class="inputs-label">Title</label>
@@ -86,10 +129,21 @@
             @error('listing_type') <small class="text-danger">{{ $message }}</small> @enderror
           </div>
         </div>
+      </div>
+      </div>
+      
+      {{-- STEP 2 --}}
+      <div class="wizard-content" data-step="2" style="display:none;">
+        <div class="character-helper">
+          <img src="{{ asset('images/character/phone.png') }}" alt="Guide" class="character-helper-image">
+          <div class="character-helper-text">
+            <h4>Where's your property?</h4>
+            <p>Click on the map to pin your exact location. The more precise, the easier it is for tenants to find you!</p>
+          </div>
         </div>
-      {{-- ================= LOCATION ================= --}}
-      <div class="inside-form-section">
-        <h1 class="form-section-title">Location</h1>
+        
+        <div class="inside-form-section">
+          <h1 class="form-section-title">Location</h1>
         {{-- Hidden fields for coordinates --}}
         <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
         <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}">
@@ -109,16 +163,27 @@
           @error('longitude') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
       </div>
-     
+      </div>
 
-      {{-- ================= DETAILS ================= --}}
-      <div class="details">
+      {{-- STEP 3 --}}
+      <div class="wizard-content" data-step="3" style="display:none;">
+        <div class="character-helper">
+          <img src="{{ asset('images/character/thinking.png') }}" alt="Guide" class="character-helper-image">
+          <div class="character-helper-text">
+            <h4>Now for the details!</h4>
+            <p>Set your pricing, size, and property specifics. Don't forget to choose accepted rent durations!</p>
+          </div>
+        </div>
+        
         <div class="inside-form-section">
           <h1 class="form-section-title">Details</h1>
 
           <div class="form-input">
             <label for="price" class="inputs-label">Price</label>
-            <label for="unit">Unit</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label for="unit" class="inputs-label" style="margin-bottom: 0;">Unit</label>
+              <label for="rent_duration_units" class="inputs-label" style="margin-bottom: 0;">Accepted rent duration units</label>
+            </div>
             <div class="row">
               <input
                 type="number"
@@ -136,9 +201,66 @@
                 <option value="{{ $unit->id }}" {{ old('unit') == $unit->id ? 'selected' : '' }}>{{ $unit->code }}</option>
                 @endforeach
               </select>
+              <select name="price_duration" id="price_duration">
+                @php $duration = old('price_duration', 'month'); @endphp
+                <option value="month" {{ $duration === 'month' ? 'selected' : '' }}>per month</option>
+                <option value="week"  {{ $duration === 'week' ? 'selected' : '' }}>per week</option>
+                <option value="day"   {{ $duration === 'day' ? 'selected' : '' }}>per day</option>
+                <option value="year"  {{ $duration === 'year' ? 'selected' : '' }}>per year</option>
+              </select>
+              @php
+                $defaultUnits = ['day', 'week', 'month', 'year'];
+                $rentUnits = old('rent_duration_units', $defaultUnits);
+                if (!is_array($rentUnits)) $rentUnits = [$rentUnits];
+              @endphp
+              <div id="rent_duration_units" class="rent-duration-grid" aria-label="Accepted rent duration units">
+                <label class="rent-unit">
+                  <input type="checkbox" name="rent_duration_units[]" value="day" {{ in_array('day', $rentUnits) ? 'checked' : '' }}>
+                  <span class="rent-unit-text">day</span>
+                </label>
+                <label class="rent-unit">
+                  <input type="checkbox" name="rent_duration_units[]" value="week" {{ in_array('week', $rentUnits) ? 'checked' : '' }}>
+                  <span class="rent-unit-text">week</span>
+                </label>
+                <label class="rent-unit">
+                  <input type="checkbox" name="rent_duration_units[]" value="month" {{ in_array('month', $rentUnits) ? 'checked' : '' }}>
+                  <span class="rent-unit-text">month</span>
+                </label>
+                <label class="rent-unit">
+                  <input type="checkbox" name="rent_duration_units[]" value="year" {{ in_array('year', $rentUnits) ? 'checked' : '' }}>
+                  <span class="rent-unit-text">year</span>
+                </label>
+              </div>
             </div>
             <small>Enter a numeric value only (currency handled elsewhere).</small>
+            <small><strong>Auto-calculated:</strong> we'll compute the equivalent prices for day/week/month/year from your selected duration.</small>
             @error('price') <small class="text-danger">{{ $message }}</small> @enderror
+            @error('price_duration') <small class="text-danger">{{ $message }}</small> @enderror
+            @error('rent_duration_units') <small class="text-danger">{{ $message }}</small> @enderror
+            @error('unit') <small class="text-danger">{{ $message }}</small> @enderror
+
+            <div class="price-breakdown">
+              <div class="price-breakdown-title">💰 Calculated prices</div>
+              <small style="display: block; margin-bottom: 12px; color: #6b7280;">These prices are auto-calculated from your main price, but you can edit each one individually if needed.</small>
+              <div class="price-breakdown-grid">
+                <div class="price-breakdown-item">
+                  <label for="price_per_day">Per day</label>
+                  <input type="number" id="price_per_day" name="price_per_day" value="{{ old('price_per_day') }}" step="0.01" min="0" placeholder="Auto-calculated">
+                </div>
+                <div class="price-breakdown-item">
+                  <label for="price_per_week">Per week</label>
+                  <input type="number" id="price_per_week" name="price_per_week" value="{{ old('price_per_week') }}" step="0.01" min="0" placeholder="Auto-calculated">
+                </div>
+                <div class="price-breakdown-item">
+                  <label for="price_per_month">Per month</label>
+                  <input type="number" id="price_per_month" name="price_per_month" value="{{ old('price_per_month') }}" step="0.01" min="0" placeholder="Auto-calculated">
+                </div>
+                <div class="price-breakdown-item">
+                  <label for="price_per_year">Per year</label>
+                  <input type="number" id="price_per_year" name="price_per_year" value="{{ old('price_per_year') }}" step="0.01" min="0" placeholder="Auto-calculated">
+                </div>
+              </div>
+            </div>
           </div>
           <div class="row">
             <div class="form-input">
@@ -201,10 +323,23 @@
               @error('bedroom_nb') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
         </div>
-        </div>
+      </div>
+      </div>
 
-        {{-- Amenities as pills (unchanged titles / structure) --}}
-        <div class="form-input amenities-group">
+      {{-- STEP 4 --}}
+      <div class="wizard-content" data-step="4" style="display:none;">
+        <div class="character-helper">
+          <img src="{{ asset('images/character/wave-2.png') }}" alt="Guide" class="character-helper-image">
+          <div class="character-helper-text">
+            <h4>What makes your place special?</h4>
+            <p>Select amenities and set house rules. These help tenants understand what to expect!</p>
+          </div>
+        </div>
+        
+        <div class="inside-form-section">
+          <h1 class="form-section-title">Amenities & Rules</h1>
+          
+          <div class="form-input amenities-group">
           <h4 class="checkbox-label">Amenities</h4>
           <div class="amenities-grid">
             @foreach($amenities as $amenity)
@@ -241,10 +376,20 @@
           <small>Common examples: No smoking, No pets, Quiet hours, ID required on check-in.</small>
         </div>
       </div>
+      </div>
 
-      {{-- ================= IMAGES ================= --}}
-      <div class="inside-form-section">
-        <h1 class="form-section-title">Images</h1>
+      {{-- STEP 5 --}}
+      <div class="wizard-content" data-step="5" style="display:none;">
+        <div class="character-helper">
+          <img src="{{ asset('images/character/phone.png') }}" alt="Guide" class="character-helper-image">
+          <div class="character-helper-text">
+            <h4>Almost there! Add photos</h4>
+            <p>Great photos make all the difference! Upload at least 3 high-quality images to showcase your property.</p>
+          </div>
+        </div>
+        
+        <div class="inside-form-section">
+          <h1 class="form-section-title">Images</h1>
 
         <div class="form-input">
           <label for="images" class="inputs-label">Upload Images</label>
@@ -276,10 +421,13 @@
           @error('images') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
       </div>
+      </div>
 
-      {{-- ================= SUBMIT ================= --}}
-      <div class="form-control">
-        <button type="submit" aria-label="Submit your listing">Submit Listing</button>
+      {{-- Navigation Buttons --}}
+      <div class="wizard-navigation">
+        <button type="button" class="wizard-btn wizard-prev" id="wizardPrev" style="display:none;">← Previous</button>
+        <button type="button" class="wizard-btn wizard-next" id="wizardNext">Next →</button>
+        <button type="submit" class="wizard-btn wizard-submit" id="wizardSubmit" style="display:none;">Submit Listing</button>
       </div>
     </div>
   </form>

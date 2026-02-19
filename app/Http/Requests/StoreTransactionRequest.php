@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTransactionRequest extends FormRequest
 {
@@ -25,7 +26,12 @@ class StoreTransactionRequest extends FormRequest
             'start_date' => 'required_if:type,rent|date',
             'end_date' => 'required_if:type,rent|date|after:start_date',
             'rules_accepted' => 'boolean',
-            'rules_exceptions' => 'nullable|string|max:1000',
+            'rules_exceptions' => [
+                Rule::requiredIf(fn () => $this->input('type') === 'rent' && ! $this->boolean('rules_accepted')),
+                'nullable',
+                'string',
+                'max:1000',
+            ],
             'notes' => 'nullable|string|max:1000',
         ];
     }
@@ -43,6 +49,7 @@ class StoreTransactionRequest extends FormRequest
             'start_date.required_if' => 'Start date is required for rental transactions.',
             'end_date.required_if' => 'End date is required for rental transactions.',
             'end_date.after' => 'End date must be after start date.',
+            'rules_exceptions.required' => 'Please either accept all property rules or explain which rules you do not accept.',
         ];
     }
 }

@@ -387,11 +387,168 @@ function validatePropertyLocation() {
     });
 }
 
+  /* ============================ Simple Wizard ============================ */
+  function initWizard() {
+    let currentStep = 1;
+    const totalSteps = 5;
+    
+    const prevBtn = document.getElementById('wizardPrev');
+    const nextBtn = document.getElementById('wizardNext');
+    const submitBtn = document.getElementById('wizardSubmit');
+    const speechBubble = document.querySelector('.helper-speech-bubble');
+    const helperAvatar = document.querySelector('.helper-avatar');
+    
+    const stepMessages = {
+      1: { text: "Let's get started!", image: "/images/character/thinking.png" },
+      2: { text: "Pin your location!", image: "/images/character/phone.png" },
+      3: { text: "Set your pricing!", image: "/images/character/thinking.png" },
+      4: { text: "Add amenities!", image: "/images/character/wave-2.png" },
+      5: { text: "Almost done!", image: "/images/character/phone.png" }
+    };
+    
+    if (!prevBtn || !nextBtn || !submitBtn) return;
+    
+    function showStep(step) {
+      // Hide all steps
+      document.querySelectorAll('.wizard-content').forEach(el => {
+        el.style.display = 'none';
+      });
+      
+      // Show current step
+      const currentContent = document.querySelector(`.wizard-content[data-step="${step}"]`);
+      if (currentContent) {
+        currentContent.style.display = 'block';
+      }
+      
+      // Update progress
+      document.querySelectorAll('.wizard-step').forEach((el, index) => {
+        el.classList.remove('active', 'completed');
+        if (index + 1 < step) {
+          el.classList.add('completed');
+        } else if (index + 1 === step) {
+          el.classList.add('active');
+        }
+      });
+      
+      // Update buttons
+      prevBtn.style.display = step === 1 ? 'none' : 'inline-block';
+      nextBtn.style.display = step === totalSteps ? 'none' : 'inline-block';
+      submitBtn.style.display = step === totalSteps ? 'inline-block' : 'none';
+      
+      // Update speech bubble and avatar with animation
+      if (speechBubble && stepMessages[step]) {
+        speechBubble.textContent = stepMessages[step].text;
+        speechBubble.style.animation = 'none';
+        setTimeout(() => {
+          speechBubble.style.animation = 'fadeInUp 0.5s ease';
+        }, 10);
+      }
+      
+      if (helperAvatar && stepMessages[step]) {
+        helperAvatar.src = stepMessages[step].image;
+      }
+      
+      // Trigger map resize on step 2
+      if (step === 2 && window.map) {
+        setTimeout(() => {
+          google.maps.event.trigger(window.map, 'resize');
+        }, 100);
+      }
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    nextBtn.addEventListener('click', () => {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+      }
+    });
+    
+    prevBtn.addEventListener('click', () => {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    });
+    
+    // Allow clicking on step indicators to navigate (only to completed or current steps)
+    document.querySelectorAll('.wizard-step').forEach((stepEl, index) => {
+      stepEl.addEventListener('click', () => {
+        const targetStep = index + 1;
+        // Allow navigation to any previous step or current step
+        if (targetStep <= currentStep) {
+          currentStep = targetStep;
+          showStep(currentStep);
+        }
+      });
+    });
+    
+    // Initialize
+    showStep(1);
+  }
+
+  /* ============================ Price Auto-Calculation ============================ */
+  function initPriceAutoCalculation() {
+    const priceInput = document.getElementById('price');
+    const durationSelect = document.getElementById('price_duration');
+    const perDay = document.getElementById('price_per_day');
+    const perWeek = document.getElementById('price_per_week');
+    const perMonth = document.getElementById('price_per_month');
+    const perYear = document.getElementById('price_per_year');
+
+    if (!priceInput || !durationSelect || !perDay || !perWeek || !perMonth || !perYear) return;
+
+    const DAYS = { day: 1, week: 7, month: 30, year: 365 };
+
+    const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+
+    function recalc() {
+      const raw = String(priceInput.value ?? '').trim();
+      const base = parseFloat(raw);
+      const unit = durationSelect.value;
+
+      if (!raw || Number.isNaN(base) || base < 0 || !DAYS[unit]) {
+        // Don't clear if user is manually editing
+        return;
+      }
+
+      const perDayValue = base / DAYS[unit];
+      perDay.value = round2(perDayValue);
+      perWeek.value = round2(perDayValue * 7);
+      perMonth.value = round2(perDayValue * 30);
+      perYear.value = round2(perDayValue * 365);
+    }
+
+    // Only recalculate when main price or duration changes
+    priceInput.addEventListener('input', recalc);
+    durationSelect.addEventListener('change', recalc);
+    
+    // Initial calculation on page load
+    recalc();
+    
+    // Add visual feedback when user manually edits calculated prices
+    [perDay, perWeek, perMonth, perYear].forEach(input => {
+      input.addEventListener('focus', function() {
+        this.style.background = '#ffffff';
+      });
+      
+      input.addEventListener('blur', function() {
+        if (!this.value) {
+          this.style.background = '#eff6ff';
+        }
+      });
+    });
+  }
+
   /* ============================ Init ============================ */
   function initListProperty() {
     console.log('Initializing list property page...');
     setupImagePreview('images', 'image-previews');
     validatePropertyLocation();
+    initPriceAutoCalculation();
+    initWizard();
   }
 
   if (document.readyState === 'loading') {

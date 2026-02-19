@@ -125,8 +125,10 @@
                 </div>
             </div>
 
-            <div class="listings-grid">
-                @foreach($properties as $property)
+            
+                @if($properties->count() > 0)
+                <div class="listings-grid">    
+                    @foreach($properties as $property)
                 <div class="listing-card" data-price="{{ $property->price }}" data-created="{{ $property->created_at->timestamp }}" data-likes="{{ $property->likedBy()->count() }}">
                     <div class="listing-image">
                         <img src="{{ \App\Services\PropertyImageService::getImageUrl($property) }}" alt="{{ $property->title }}">
@@ -135,21 +137,6 @@
                         <span class="listing-tag listing-tag--unavailable" title="{{ $property->getAvailabilityMessage() }}">{{ $property->getAvailabilityMessage() }}</span>
                         @endif
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
-                        <ul class="setting-list">
-                            <li><a href="{{route('properties.show', $property->id) }}">View</a></li>
-                            @if(auth()->check())
-                                @if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id)
-                                    <li><a href="{{ route('properties.edit', $property->id) }}">Edit</a></li>
-                                    <li>
-                                        <form action="{{ route('properties.destroy', $property->id) }}" method="POST" class="form-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this property?')">Delete</button>
-                                        </form>
-                                    </li>
-                                @endif
-                            @endif
-                        </ul>
                         @auth
                             <button 
                                 class="favorite-btn like-btn" 
@@ -165,6 +152,21 @@
                             </button>
                         @endauth
                     </div>
+                    <ul class="setting-list">
+                        <li><a href="{{route('properties.show', $property->id) }}">View</a></li>
+                        @if(auth()->check())
+                            @if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id)
+                                <li><a href="{{ route('properties.edit', $property->id) }}">Edit</a></li>
+                                <li>
+                                    <form action="{{ route('properties.destroy', $property->id) }}" method="POST" class="form-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this property?')">Delete</button>
+                                    </form>
+                                </li>
+                            @endif
+                        @endif
+                    </ul>
                     <div class="listing-content">
                     <span class="available-from">Listed {{ $property->created_at->diffForHumans() }}</span>
                         <h3>{{ $property->title }}</h3>
@@ -187,11 +189,23 @@
                         </div>
                     </div>
                     <div class="listing-meta">
-                        <div class="listing-price"><b>${{ $property->price }}</b>/month</div>                       
+                        <div class="listing-price">
+                            <b>${{ $property->price }}</b>@if(($property->listing_type ?? null) === 'rent')/{{ $property->price_duration ?? 'month' }}@endif
+                        </div>                       
                         <a href="{{ route('properties.show', $property->id) }}" class="view-btn">View Details</a>
                     </div>
                 </div>
                 @endforeach
+                @else
+                <div class="no-results">
+                    <div class="no-results-character">
+                        <img src="{{ asset('images/character/search-looking.png') }}" alt="No results" class="empty-state-character">
+                    </div>
+                    <h3>No properties found</h3>
+                    <p>We couldn't find any properties matching your criteria. Try adjusting your filters or search in a different area.</p>
+                    <a href="{{ route('search') }}" class="reset-filters-btn">Reset Filters</a>
+                </div>
+                @endif
             </div>
 
             <div class="pagination">

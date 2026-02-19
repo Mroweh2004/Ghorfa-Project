@@ -348,3 +348,159 @@
         font-size: 1rem;
     }
 }
+
+/* ============================
+   CHARACTER STYLES FOR HOME PAGE
+   ============================ */
+
+/* Hero Character */
+
+.Main-Container-content {
+    position: relative;
+    min-height: 500px;
+}
+
+.hero-text-content {
+    flex: 1;
+    max-width: 650px;
+    position: relative;
+    z-index: 10;
+}
+
+.hero-character-container {
+    position: absolute;
+    left: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hero-character-image {
+    width: 320px;
+    max-width: 320px;
+    height: auto;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
+    animation: float 3s ease-in-out infinite;
+    opacity: 0.85;
+}
+
+/* Ensure all text content is above character */
+.hero-text-content h1,
+.hero-text-content p,
+.search-container,
+.search-box,
+.search-input,
+.main-list-btn,
+.popular-searches {
+    position: relative;
+    z-index: 100;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+/* Feature Characters */
+.feature-icon-character {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 140px;
+}
+
+.feature-character {
+    width: 120px;
+    height: auto;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
+}
+
+.card:hover .feature-character {
+    transform: scale(1.1) translateY(-5px);
+}
+
+/* CTA Section Character */
+.additional-section-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.additional-section-character {
+    margin-bottom: 10px;
+}
+
+.cta-character {
+    width: 200px;
+    height: auto;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+/* Responsive Character Adjustments */
+@media (max-width: 1024px) {
+    .Main-Container-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .hero-text-content {
+        max-width: 100%;
+    }
+    
+    .hero-character-container {
+        position: absolute;
+        left: 5%;
+        top: 45%;
+        transform: translateY(-50%);
+    }
+    
+    .hero-character-image {
+        width: 260px;
+        max-width: 260px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-character-container {
+        left: 50%;
+        top: 30%;
+        transform: translate(-50%, -50%);
+        opacity: 0.6;
+    }
+    
+    .hero-character-image {
+        width: 200px;
+        max-width: 200px;
+    }
+    
+    .feature-icon-character {
+        height: 120px;
+    }
+    
+    .feature-character {
+        width: 100px;
+    }
+    
+    .cta-character {
+        width: 160px;
+    }
+}
+
