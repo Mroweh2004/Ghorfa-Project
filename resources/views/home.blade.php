@@ -54,15 +54,7 @@
                     <h3>Advanced Filters</h3>
                     <p>Find exactly what you need with our detailed search filters.</p>
                 </div>
-                
-                <div class="card">
-                    <div class="feature-icon-character">
-                        <img src="{{ asset('images/character/wave-2.png') }}" alt="Connect" class="feature-character">
-                    </div>
-                    <h3>Roommate Matching</h3>
-                    <p>Connect with compatible roommates based on your preferences.</p>
-                </div>
-                
+
                 <div class="card">
                     <div class="feature-icon-character">
                         <img src="{{ asset('images/character/map-navigating.png') }}" alt="Map" class="feature-character">
