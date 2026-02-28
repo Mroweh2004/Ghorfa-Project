@@ -10,10 +10,12 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
+        // use firstOrCreate so running the seeder multiple times won't violate unique constraints
+        User::firstOrCreate([
+            'email' => 'admin@example.com',
+        ], [
             'first_name' => 'Admin',
             'last_name' => 'User',
-            'email' => 'admin@example.com',
             'password' => Hash::make('123'),
             'role' => 'admin',
             'phone_nb' => '70000001',
@@ -22,10 +24,11 @@ class UserSeeder extends Seeder
             'address' => 'Beirut, Lebanon'
         ]);
 
-        User::create([
+        User::firstOrCreate([
+            'email' => 'user@example.com',
+        ], [
             'first_name' => 'Regular',
             'last_name' => 'User',
-            'email' => 'user@example.com',
             'password' => Hash::make('password'),
             'role' => 'client',
             'phone_nb' => '70000002',
