@@ -139,7 +139,9 @@ class Property extends Model
     {
         return $this->transactions()
             ->where('type', 'rent')
-            ->whereIn('status', ['confirmed', 'paid']);
+            ->where(function ($q) {
+                $q->whereIn('status', ['confirmed'])->orWhere('paid', true);
+            });
     }
 
     public function isAvailableFor(string $startDate, string $endDate): bool
@@ -147,7 +149,9 @@ class Property extends Model
         return !Transaction::query()
             ->where('property_id', $this->id)
             ->where('type', 'rent')
-            ->whereIn('status', ['confirmed', 'paid'])
+            ->where(function ($q) {
+                $q->whereIn('status', ['confirmed'])->orWhere('paid', true);
+            })
             ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('start_date', [$startDate, $endDate])
                 ->orWhereBetween('end_date', [$startDate, $endDate])
@@ -172,7 +176,9 @@ class Property extends Model
     {
         return $this->transactions()
             ->where('type', 'rent')
-            ->whereIn('status', ['confirmed', 'paid'])
+            ->where(function ($q) {
+                $q->whereIn('status', ['confirmed'])->orWhere('paid', true);
+            })
             ->whereDate('end_date', '>=', now()->toDateString())
             ->orderBy('end_date')
             ->first();
@@ -209,7 +215,9 @@ class Property extends Model
     {
         return $this->transactions()
             ->where('type', 'buy')
-            ->whereIn('status', ['paid', 'completed'])
+            ->where(function ($q) {
+                $q->where('paid', true)->orWhere('status', 'completed');
+            })
             ->exists();
     }
 

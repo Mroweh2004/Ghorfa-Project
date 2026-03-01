@@ -4,60 +4,60 @@
 
 @section('content')
 <div class="admin-dashboard">
-    <!-- Statistics Cards -->
+    <!-- Statistics Cards: show only "new" counts; numbers clear when section is opened -->
     <div class="stats-grid">
-        <div class="stat-card stat-card-primary">
+        <div class="stat-card stat-card-primary" data-stat-section="users">
             <div class="stat-icon">
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-content">
-                <h3>{{ $stats['total_users'] }}</h3>
-                <p>Total Users</p>
+                <h3 class="stat-count">{{ $stats['new_users'] }}</h3>
+                <p>New Users</p>
             </div>
         </div>
 
-        <div class="stat-card stat-card-success">
+        <div class="stat-card stat-card-success" data-stat-section="landlords">
             <div class="stat-icon">
                 <i class="fas fa-user-tie"></i>
             </div>
             <div class="stat-content">
-                <h3>{{ $stats['total_landlords'] }}</h3>
-                <p>Landlords</p>
+                <h3 class="stat-count">{{ $stats['new_landlords'] }}</h3>
+                <p>New Landlords</p>
             </div>
         </div>
 
-        <div class="stat-card stat-card-info">
+        <div class="stat-card stat-card-info" data-stat-section="properties">
             <div class="stat-icon">
                 <i class="fas fa-building"></i>
             </div>
             <div class="stat-content">
-                <h3>{{ $stats['total_properties'] }}</h3>
-                <p>Properties</p>
+                <h3 class="stat-count">{{ $stats['new_pending_properties'] }}</h3>
+                <p>Pending Properties</p>
             </div>
         </div>
 
-        <div class="stat-card stat-card-warning">
+        <div class="stat-card stat-card-warning" data-stat-section="applications">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-content">
-                <h3>{{ $stats['pending_applications'] }}</h3>
+                <h3 class="stat-count">{{ $stats['new_pending_applications'] }}</h3>
                 <p>Pending Applications</p>
             </div>
         </div>
     </div>
 
     <!-- Main Content Sections -->
-    <div class="dashboard-content" data-pending-applications-route="{{ route('admin.pending-applications') }}">
+    <div class="dashboard-content" data-pending-applications-route="{{ route('admin.pending-applications') }}" data-mark-section-seen-url="{{ route('admin.mark-section-seen') }}">
         
         <!-- Pending Applications Section -->
-        <div id="applications-section" class="content-section">
+        <div id="applications-section" class="content-section" data-section-name="applications">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-file-alt"></i>
                     Pending Landlord Applications
-                    @if($stats['pending_applications'] > 0)
-                        <span class="badge badge-warning">{{ $stats['pending_applications'] }}</span>
+                    @if($stats['new_pending_applications'] > 0)
+                        <span class="badge badge-warning section-badge" data-badge-section="applications">{{ $stats['new_pending_applications'] }}</span>
                     @endif
                 </h2>
             </div>
@@ -114,7 +114,7 @@
         </div>
 
         <!-- Landlord Management Section -->
-        <div id="landlords-section" class="content-section">
+        <div id="landlords-section" class="content-section" data-section-name="landlords">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-user-cog"></i>
@@ -171,7 +171,7 @@
             </div>
         </div>
     <!-- User Management Section -->
-    <div id="users-section" class="content-section">
+    <div id="users-section" class="content-section" data-section-name="users">
                 <div class="section-header">
                     <h2>
                         <i class="fas fa-user-cog"></i>
@@ -229,13 +229,13 @@
             </div>
 
         <!-- Pending Properties Section -->
-        <div id="properties-section" class="content-section">
+        <div id="properties-section" class="content-section" data-section-name="properties">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-building"></i>
                     Pending Properties for Approval
-                    @if($stats['pending_properties'] > 0)
-                        <span class="badge badge-warning">{{ $stats['pending_properties'] }}</span>
+                    @if($stats['new_pending_properties'] > 0)
+                        <span class="badge badge-warning section-badge" data-badge-section="properties">{{ $stats['new_pending_properties'] }}</span>
                     @endif
                 </h2>
             </div>

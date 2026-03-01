@@ -35,6 +35,9 @@
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7L9 18l-5-5"/></svg> Fast onboarding</li>
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7L9 18l-5-5"/></svg> Landlord tools</li>
       </ul>
+      <div class="register-character">
+        <img src="{{ asset('images/character/success-celebrating.png') }}" alt="Join us!" class="register-character-image">
+      </div>
 
       <div class="aside-footer">Already have an account?
         <a href="{{ route('login') }}">Sign in</a>

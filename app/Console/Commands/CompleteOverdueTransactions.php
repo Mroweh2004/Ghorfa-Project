@@ -9,7 +9,7 @@ class CompleteOverdueTransactions extends Command
 {
     protected $signature = 'transactions:complete-overdue';
 
-    protected $description = 'Mark transactions as completed when their end date has passed (status: paid, end_date < today)';
+    protected $description = 'Mark transactions as completed when their end date has passed (end_date < today); paid is unchanged';
 
     public function handle(): int
     {

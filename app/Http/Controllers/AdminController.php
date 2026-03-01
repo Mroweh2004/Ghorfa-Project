@@ -11,24 +11,40 @@ use Illuminate\Support\Facades\Log;
 use App\Traits\CreatesNotifications;
 use App\Traits\LogsActivity;
 use App\Models\Activity;
+use Illuminate\Support\Facades\Session;
 
 class AdminController extends Controller
 {
     use CreatesNotifications, LogsActivity;
+
+    private const SESSION_KEYS = [
+        'applications' => 'admin_seen_applications_at',
+        'landlords' => 'admin_seen_landlords_at',
+        'users' => 'admin_seen_users_at',
+        'properties' => 'admin_seen_pending_properties_at',
+    ];
+
     public function dashboard()
     {
-        // Statistics
+        // "New" counts: only items since last time admin opened that section (null = never seen = all count as new)
+        $seenApplications = Session::get(self::SESSION_KEYS['applications']);
+        $seenLandlords = Session::get(self::SESSION_KEYS['landlords']);
+        $seenUsers = Session::get(self::SESSION_KEYS['users']);
+        $seenProperties = Session::get(self::SESSION_KEYS['properties']);
+
         $stats = [
-            'total_users' => User::where('role', '!=', 'admin')->count(),
-            'total_landlords' => User::where('role', 'landlord')->count(),
-            'total_properties' => Property::count(),
-            'pending_properties' => Property::where('status', 'pending')->count(),
-            'approved_properties' => Property::where('status', 'approved')->count(),
-            'pending_applications' => LandlordApplication::where('status', 'pending')->count(),
-            'approved_applications' => LandlordApplication::where('status', 'approved')->count(),
-            'rejected_applications' => LandlordApplication::where('status', 'rejected')->count(),
-            'total_likes' => DB::table('property_likes')->count(),
-            'total_reviews' => DB::table('reviews')->count(),
+            'new_users' => $seenUsers
+                ? User::where('role', 'client')->where('created_at', '>', $seenUsers)->count()
+                : User::where('role', 'client')->count(),
+            'new_landlords' => $seenLandlords
+                ? User::where('role', 'landlord')->where('created_at', '>', $seenLandlords)->count()
+                : User::where('role', 'landlord')->count(),
+            'new_pending_properties' => $seenProperties
+                ? Property::where('status', 'pending')->where('created_at', '>', $seenProperties)->count()
+                : Property::where('status', 'pending')->count(),
+            'new_pending_applications' => $seenApplications
+                ? LandlordApplication::where('status', 'pending')->where('created_at', '>', $seenApplications)->count()
+                : LandlordApplication::where('status', 'pending')->count(),
         ];
 
         // Data
@@ -75,6 +91,19 @@ class AdminController extends Controller
             ->get();
 
         return view('admin.dashboard', compact('users', 'landlords', 'pendingApplications', 'stats', 'recentUsers', 'recentProperties', 'pendingProperties', 'recentActivities'));
+    }
+
+    /**
+     * Mark a dashboard section as seen so "new" counts for that section go to zero.
+     */
+    public function markSectionSeen(Request $request)
+    {
+        $section = $request->input('section');
+        if (!isset(self::SESSION_KEYS[$section])) {
+            return response()->json(['success' => false, 'message' => 'Invalid section'], 400);
+        }
+        Session::put(self::SESSION_KEYS[$section], now()->toDateTimeString());
+        return response()->json(['success' => true]);
     }
 
     public function deleteUser(User $user)

@@ -295,3 +295,46 @@
   label { color: var(--muted); }
     .aside-sub, .terms, .text-danger { color: var(--muted); }
     .text-danger { color: var(--error); }
+
+/* ============================
+   REGISTER CHARACTER STYLES
+   ============================ */
+
+.register-character {
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.register-character-image {
+    width: 180px;
+    height: auto;
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15));
+    animation: celebrateBounce 2s ease-in-out infinite;
+}
+
+@keyframes celebrateBounce {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    25% {
+        transform: translateY(-12px) scale(1.05);
+    }
+    50% {
+        transform: translateY(0px) scale(1);
+    }
+    75% {
+        transform: translateY(-6px) scale(1.02);
+    }
+}
+
+@media (max-width: 768px) {
+    .register-character {
+        margin-top: 1.5rem;
+    }
+    
+    .register-character-image {
+        width: 140px;
+    }
+}

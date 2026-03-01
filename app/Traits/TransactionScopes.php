@@ -62,7 +62,7 @@ trait TransactionScopes
      */
     public function scopePaid(Builder $query): Builder
     {
-        return $query->where('status', 'paid');
+        return $query->where('paid', true);
     }
 
     /**
@@ -144,7 +144,9 @@ trait TransactionScopes
     public function scopeBlockingDates(Builder $query, string $startDate, string $endDate): Builder
     {
         return $query->rentals()
-                    ->whereIn('status', ['confirmed', 'paid'])
+                    ->where(function ($q) {
+                        $q->whereIn('status', ['confirmed'])->orWhere('paid', true);
+                    })
                     ->where(function ($q) use ($startDate, $endDate) {
                         $q->whereBetween('start_date', [$startDate, $endDate])
                           ->orWhereBetween('end_date', [$startDate, $endDate])
@@ -169,7 +171,7 @@ trait TransactionScopes
      */
     public function scopeUnpaid(Builder $query): Builder
     {
-        return $query->whereNull('paid_at');
+        return $query->where('paid', false);
     }
 
     /**
@@ -177,7 +179,7 @@ trait TransactionScopes
      */
     public function scopePaidTransactions(Builder $query): Builder
     {
-        return $query->whereNotNull('paid_at');
+        return $query->where('paid', true);
     }
 
     /**
@@ -205,12 +207,13 @@ trait TransactionScopes
     }
 
     /**
-     * Paid transactions whose end date/time has passed (eligible for auto-complete).
+     * Transactions whose end date has passed (eligible for auto-complete).
+     * Status is set to completed regardless of paid – paid remains false if payment was never completed.
      */
     public function scopeEligibleForAutoComplete(Builder $query): Builder
     {
         $today = now()->toDateString();
-        return $query->where('status', 'paid')
+        return $query->where('status', '!=', 'completed')
             ->whereNotNull('end_date')
             ->where('end_date', '<', $today)
             ->whereNull('refund_requested_at');

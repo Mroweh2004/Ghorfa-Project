@@ -352,3 +352,40 @@ body {
         padding: 18px;
     }
 }
+
+/* ============================
+   LOGIN CHARACTER STYLES
+   ============================ */
+
+.login-character {
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-character-image {
+    width: 180px;
+    height: auto;
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@media (max-width: 768px) {
+    .login-character {
+        margin-top: 1.5rem;
+    }
+    
+    .login-character-image {
+        width: 140px;
+    }
+}

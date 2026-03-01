@@ -23,7 +23,8 @@ class MainController extends Controller
     }
 
     function profileInfo(){
-        return view(view: "profile.info");
+        $favorites = auth()->user()->likedProperties()->with(['images', 'amenities', 'rules'])->paginate(12);
+        return view("profile.info", compact('favorites'));
     }    
     function updateProfile(Request $request){
         $user = $request->user();
@@ -71,10 +72,6 @@ class MainController extends Controller
         }
 
         return redirect()->route('profileInfo')->with('success', 'Profile photo updated.');
-    }
-    function profileFavorites(){
-        $properties = auth()->user()->likedProperties()->paginate(12);
-        return view("profile.favorites", compact('properties'));   
     }
     function profileSecurity (){
         return view("profile.security");    

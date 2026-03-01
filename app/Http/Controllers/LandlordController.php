@@ -9,15 +9,32 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use App\Traits\CreatesNotifications;
 
 class LandlordController extends Controller
 {
     use CreatesNotifications;
+
+    private const SESSION_KEYS = [
+        'requests' => 'landlord_seen_requests_at',
+        'active' => 'landlord_seen_active_at',
+        'published' => 'landlord_seen_published_at',
+        'pending' => 'landlord_seen_pending_at',
+        'rejected' => 'landlord_seen_rejected_at',
+    ];
+
     public function dashboard()
     {
         $user = Auth::user();
-        
+        $propertyIds = Property::where('user_id', $user->id)->pluck('id');
+
+        $seenRequests = Session::get(self::SESSION_KEYS['requests']);
+        $seenActive = Session::get(self::SESSION_KEYS['active']);
+        $seenPublished = Session::get(self::SESSION_KEYS['published']);
+        $seenPending = Session::get(self::SESSION_KEYS['pending']);
+        $seenRejected = Session::get(self::SESSION_KEYS['rejected']);
+
         // Get properties grouped by status
         $approvedProperties = Property::where('user_id', $user->id)
             ->where('status', 'approved')
@@ -44,7 +61,6 @@ class LandlordController extends Controller
             ->get();
 
         // Get transaction requests for landlord's properties
-        $propertyIds = Property::where('user_id', $user->id)->pluck('id');
         $transactionRequests = Transaction::whereIn('property_id', $propertyIds)
             ->with(['user', 'property'])
             ->where('status', 'pending')
@@ -57,9 +73,28 @@ class LandlordController extends Controller
         // Get transactions awaiting actions (contract approved, payment pending, etc)
         $activeTransactions = Transaction::whereIn('property_id', $propertyIds)
             ->with(['user', 'property'])
-            ->whereIn('status', ['confirmed', 'paid'])
+            ->where(function ($q) {
+                $q->whereIn('status', ['confirmed'])->orWhere('paid', true);
+            })
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // New counts: only items since last time landlord opened that section
+        $newPendingRequests = $seenRequests
+            ? $transactionRequests->where('created_at', '>', $seenRequests)->count()
+            : $transactionRequests->count();
+        $newActiveTransactions = $seenActive
+            ? $activeTransactions->where('created_at', '>', $seenActive)->count()
+            : $activeTransactions->count();
+        $newPublished = $seenPublished
+            ? $approvedProperties->where('created_at', '>', $seenPublished)->count()
+            : $approvedProperties->count();
+        $newPendingProperties = $seenPending
+            ? $pendingProperties->where('created_at', '>', $seenPending)->count()
+            : $pendingProperties->count();
+        $newRejected = $seenRejected
+            ? $rejectedProperties->where('updated_at', '>', $seenRejected)->count()
+            : $rejectedProperties->count();
 
         $stats = [
             'total_properties' => Property::where('user_id', $user->id)->count(),
@@ -70,11 +105,27 @@ class LandlordController extends Controller
                 ->join('properties', 'property_likes.property_id', '=', 'properties.id')
                 ->where('properties.user_id', $user->id)
                 ->count(),
-            'pending_requests' => $transactionRequests->count(),
-            'active_transactions' => $activeTransactions->count(),
+            'new_pending_requests' => $newPendingRequests,
+            'new_active_transactions' => $newActiveTransactions,
+            'new_published' => $newPublished,
+            'new_pending_properties' => $newPendingProperties,
+            'new_rejected' => $newRejected,
         ];
 
         return view('landlord.dashboard', compact('approvedProperties', 'pendingProperties', 'rejectedProperties', 'stats', 'transactionRequests', 'activeTransactions'));
+    }
+
+    /**
+     * Mark a dashboard section as seen so the nav badge for that section is cleared.
+     */
+    public function markSectionSeen(Request $request)
+    {
+        $section = $request->input('section');
+        if (!isset(self::SESSION_KEYS[$section])) {
+            return response()->json(['success' => false, 'message' => 'Invalid section'], 400);
+        }
+        Session::put(self::SESSION_KEYS[$section], now()->toDateTimeString());
+        return response()->json(['success' => true]);
     }
 
     public function showApplyForm()

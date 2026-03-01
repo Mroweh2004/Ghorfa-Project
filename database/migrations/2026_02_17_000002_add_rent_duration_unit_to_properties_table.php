@@ -18,7 +18,7 @@ return new class extends Migration
 
         DB::table('properties')
             ->whereNull('rent_duration_units')
-            ->update(['rent_duration_units' => 'month']);
+            ->update(['rent_duration_units' => 'day,week,month,year']);
     }
 
     public function down(): void

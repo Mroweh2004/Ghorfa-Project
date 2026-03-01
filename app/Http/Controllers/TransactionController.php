@@ -418,7 +418,7 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
                     </div>
                     <div class="info-row">
                         <span class="info-label">Status:</span>
-                        <span class="info-value"><span class="status-badge status-{$transaction->status}">{$this->getStatusLabel($transaction->status)}</span></span>
+                        <span class="info-value"><span class="status-badge ' . ($transaction->paid ? 'status-paid">Payment Received' : 'status-' . $transaction->status . '">' . $this->getStatusLabel($transaction->status)) . '</span></span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Amount:</span>
@@ -504,7 +504,6 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
         return match($status) {
             'pending' => 'Pending Review',
             'confirmed' => 'Confirmed',
-            'paid' => 'Payment Received',
             'completed' => 'Completed',
             'cancelled_by_buyer' => 'Cancelled by Buyer',
             'cancelled_by_seller' => 'Cancelled by Seller',
