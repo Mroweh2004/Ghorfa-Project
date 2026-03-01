@@ -10,7 +10,6 @@
 
 @section('content')
 <div class="main-container">
-<!-- Left Sidebar Navigation (fixed, collapsible) -->
 <aside id="landlordSidebar" class="landlord-sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
@@ -30,8 +29,8 @@
                     <a href="#requests-section" class="nav-link">
                         <i class="fas fa-envelope-open-text"></i>
                         <span>Requests</span>
-                        @if($stats['pending_requests'] > 0)
-                            <span class="nav-badge">{{ $stats['pending_requests'] }}</span>
+                        @if($stats['new_pending_requests'] > 0)
+                            <span class="nav-badge section-badge" data-badge-section="requests">{{ $stats['new_pending_requests'] }}</span>
                         @endif
                     </a>
                 </li>
@@ -39,8 +38,8 @@
                     <a href="#active-section" class="nav-link">
                         <i class="fas fa-handshake"></i>
                         <span>Active Transactions</span>
-                        @if($stats['active_transactions'] > 0)
-                            <span class="nav-badge">{{ $stats['active_transactions'] }}</span>
+                        @if($stats['new_active_transactions'] > 0)
+                            <span class="nav-badge section-badge" data-badge-section="active">{{ $stats['new_active_transactions'] }}</span>
                         @endif
                     </a>
                 </li>
@@ -48,8 +47,8 @@
                     <a href="#published-section" class="nav-link">
                         <i class="fas fa-check-circle"></i>
                         <span>Published</span>
-                        @if($approvedProperties->count() > 0)
-                            <span class="nav-badge">{{ $approvedProperties->count() }}</span>
+                        @if($stats['new_published'] > 0)
+                            <span class="nav-badge section-badge" data-badge-section="published">{{ $stats['new_published'] }}</span>
                         @endif
                     </a>
                 </li>
@@ -57,8 +56,8 @@
                     <a href="#pending-section" class="nav-link">
                         <i class="fas fa-clock"></i>
                         <span>Pending</span>
-                        @if($pendingProperties->count() > 0)
-                            <span class="nav-badge">{{ $pendingProperties->count() }}</span>
+                        @if($stats['new_pending_properties'] > 0)
+                            <span class="nav-badge section-badge" data-badge-section="pending">{{ $stats['new_pending_properties'] }}</span>
                         @endif
                     </a>
                 </li>
@@ -66,8 +65,8 @@
                     <a href="#rejected-section" class="nav-link">
                         <i class="fas fa-times-circle"></i>
                         <span>Rejected</span>
-                        @if($rejectedProperties->count() > 0)
-                            <span class="nav-badge nav-badge-danger">{{ $rejectedProperties->count() }}</span>
+                        @if($stats['new_rejected'] > 0)
+                            <span class="nav-badge nav-badge-danger section-badge" data-badge-section="rejected">{{ $stats['new_rejected'] }}</span>
                         @endif
                     </a>
                 </li>
@@ -102,10 +101,13 @@
             <h1>Landlord Dashboard</h1>
             <p>Manage your properties and track your listings</p>
         </div>
+        <div class="header-character">
+            <img src="{{ asset('images/character/tie.png') }}" alt="Dashboard" class="dashboard-character">
+        </div>
     </header>
 
     <!-- Content Area -->
-    <div class="landlord-content">
+    <div class="landlord-content" data-mark-section-seen-url="{{ route('landlord.mark-section-seen') }}">
         <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card stat-card-primary">
@@ -152,7 +154,7 @@
         <!-- Dashboard Content Sections -->
 
             <!-- Rental/Purchase Requests Section -->
-            <div id="requests-section" class="content-section">
+            <div id="requests-section" class="content-section" data-section-name="requests">
                 <div class="section-header">
                     <h2>
                         <i class="fas fa-envelope-open-text"></i>
@@ -218,7 +220,12 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">No rental or purchase requests at the moment.</td>
+                                <td colspan="6" class="empty-state-cell">
+                                    <div class="dashboard-empty-state">
+                                        <img src="{{ asset('images/character/dashboard-empty.png') }}" alt="No requests" class="empty-dashboard-character">
+                                        <p class="text-muted">No rental or purchase requests at the moment.</p>
+                                    </div>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -228,7 +235,7 @@
             
 
             <!-- Active Transactions Section -->
-            <div id="active-section" class="content-section">
+            <div id="active-section" class="content-section" data-section-name="active">
                 <div class="section-header">
                     <h2>
                         <i class="fas fa-handshake"></i>
@@ -272,9 +279,9 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($transaction->status === 'confirmed')
+                                    @if($transaction->status === 'confirmed' && !$transaction->paid)
                                         <span class="status-badge status-confirmed">Awaiting Payment</span>
-                                    @elseif($transaction->status === 'paid')
+                                    @elseif($transaction->paid)
                                         <span class="status-badge status-paid">Payment Received</span>
                                     @endif
                                 </td>
@@ -284,11 +291,11 @@
                                 </td>
                                 <td>
                                     <div class="transaction-actions">
-                                        @if($transaction->status === 'confirmed')
+                                        @if($transaction->status === 'confirmed' && !$transaction->paid)
                                             <button class="btn btn-sm btn-success" onclick="confirmPaymentModal({{ $transaction->id }})">
                                                 <i class="fas fa-check"></i> Confirm Payment
                                             </button>
-                                        @elseif($transaction->status === 'paid')
+                                        @elseif($transaction->paid)
                                             <button class="btn btn-sm btn-primary" onclick="completeTransactionModal({{ $transaction->id }})">
                                                 <i class="fas fa-flag-checkered"></i> Complete
                                             </button>
@@ -301,7 +308,12 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">No active transactions at the moment.</td>
+                                <td colspan="6" class="empty-state-cell">
+                                    <div class="dashboard-empty-state">
+                                        <img src="{{ asset('images/character/dashboard-empty.png') }}" alt="No transactions" class="empty-dashboard-character">
+                                        <p class="text-muted">No active transactions at the moment.</p>
+                                    </div>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -312,7 +324,7 @@
 
         <!-- Published Properties Section -->
         @if($approvedProperties->count() > 0)
-        <div id="published-section" class="content-section">
+        <div id="published-section" class="content-section" data-section-name="published">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-check-circle"></i>
@@ -391,7 +403,7 @@
 
         <!-- Pending Properties Section -->
         @if($pendingProperties->count() > 0)
-        <div id="pending-section" class="content-section">
+        <div id="pending-section" class="content-section" data-section-name="pending">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-clock"></i>
@@ -470,7 +482,7 @@
 
         <!-- Rejected Properties Section -->
         @if($rejectedProperties->count() > 0)
-        <div id="rejected-section" class="content-section">
+        <div id="rejected-section" class="content-section" data-section-name="rejected">
             <div class="section-header">
                 <h2>
                     <i class="fas fa-times-circle"></i>
@@ -575,8 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     const sections = document.querySelectorAll('.content-section');
 
-    // Show only the selected section and hide others
-    function showSection(sectionId) {
+    function showSection(sectionId, markAsSeen) {
         sections.forEach(s => {
             if (s.id === sectionId) {
                 s.style.display = '';
@@ -587,7 +598,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Update active nav link
         navLinks.forEach(link => {
             link.classList.remove('active');
             const href = link.getAttribute('href') || '';
@@ -596,15 +606,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Update URL hash without jumping
         if (history.replaceState) {
             history.replaceState(null, null, '#' + sectionId);
         } else {
             window.location.hash = sectionId;
         }
+
+        if (markAsSeen) {
+            const targetSection = document.getElementById(sectionId);
+            const sectionName = targetSection && targetSection.getAttribute('data-section-name');
+            if (sectionName) markSectionSeen(sectionName);
+        }
     }
 
-    // Handle click on nav links
+    function markSectionSeen(sectionName) {
+        const url = document.querySelector('[data-mark-section-seen-url]') && document.querySelector('[data-mark-section-seen-url]').dataset.markSectionSeenUrl;
+        if (!url) return;
+        const token = document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').content;
+        if (!token) return;
+        const formData = new FormData();
+        formData.append('_token', token);
+        formData.append('section', sectionName);
+        fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+            credentials: 'same-origin',
+            body: formData
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            if (data.success) {
+                const badge = document.querySelector('.section-badge[data-badge-section="' + sectionName + '"]');
+                if (badge) badge.style.display = 'none';
+            }
+        }).catch(function() {});
+    }
+
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href') || '';
@@ -613,14 +648,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 const targetId = href.substring(1);
                 const targetSection = document.getElementById(targetId);
                 if (targetSection) {
-                    showSection(targetId);
+                    showSection(targetId, true);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
         });
     });
 
-    // Initialize from URL hash or first section
     (function initVisibleSection() {
         let initial = window.location.hash ? window.location.hash.substring(1) : null;
         if (!initial) {
@@ -635,9 +669,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const sectionExists = initial && document.getElementById(initial);
         if (sectionExists) {
-            showSection(initial);
+            showSection(initial, false);
         } else if (sections.length > 0) {
-            showSection(sections[0].id);
+            showSection(sections[0].id, false);
         }
     })();
 

@@ -18,11 +18,10 @@ class Transaction extends Model
         'price',
         'currency',
         'status',
+        'paid',
         'notes',
         'start_date',
         'end_date',
-        'start_time',
-        'end_time',
         'paid_at',
         'buyer_approved_at',
         'rules_accepted',
@@ -38,10 +37,9 @@ class Transaction extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'currency' => 'string',
+        'paid' => 'boolean',
         'start_date' => 'date',
         'end_date' => 'date',
-        'start_time' => 'string',
-        'end_time' => 'string',
         'paid_at' => 'datetime',
         'buyer_approved_at' => 'datetime',
         'rules_accepted' => 'boolean',
@@ -82,7 +80,7 @@ class Transaction extends Model
      */
     public function isPaid(): bool
     {
-        return $this->status === 'paid';
+        return (bool) $this->paid;
     }
 
     /**
@@ -208,11 +206,23 @@ class Transaction extends Model
     }
 
     /**
-     * Check if transaction can be marked as completed
+     * Check if transaction can be marked as completed.
+     * Allowed when: (paid OR end date has passed) and not in refund process and not already completed.
      */
     public function canBeCompleted(): bool
     {
-        return $this->isPaid() && !$this->isRefundRequested();
+        if ($this->isCompleted() || $this->isRefundRequested()) {
+            return false;
+        }
+        return $this->isPaid() || $this->endDateHasPassed();
+    }
+
+    /**
+     * Check if the transaction end date has passed (for rentals).
+     */
+    public function endDateHasPassed(): bool
+    {
+        return $this->end_date && $this->end_date->isPast();
     }
 
     /**
@@ -298,7 +308,7 @@ class Transaction extends Model
             return false;
         }
         return $this->update([
-            'status' => 'paid',
+            'paid' => true,
             'paid_at' => now(),
             'seller_payment_confirmed_at' => now(),
         ]);
@@ -386,12 +396,15 @@ class Transaction extends Model
         ]);
     }
 
-    public const RENT_BLOCKING_STATUSES = ['confirmed', 'paid'];
+    public const RENT_BLOCKING_STATUSES = ['confirmed'];
 
     public function scopeBlocksAvailability($q)
     {
         return $q->where('type', 'rent')
-                ->whereIn('status', self::RENT_BLOCKING_STATUSES);
+                ->where(function ($q) {
+                    $q->whereIn('status', self::RENT_BLOCKING_STATUSES)
+                      ->orWhere('paid', true);
+                });
     }
 
 }

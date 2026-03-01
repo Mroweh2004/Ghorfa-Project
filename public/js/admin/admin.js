@@ -514,8 +514,7 @@ function MoveBetweenSections(){
     
     const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
     
-    function showSection(sectionId) {
-        // Hide all sections
+    function showSection(sectionId, markAsSeen) {
         sections.forEach(section => {
             section.style.display = 'none';
             section.classList.remove('active');
@@ -525,6 +524,10 @@ function MoveBetweenSections(){
         if (targetSection) {
             targetSection.style.display = 'block';
             targetSection.classList.add('active');
+            if (markAsSeen) {
+                const sectionName = targetSection.getAttribute('data-section-name');
+                if (sectionName) markSectionSeen(sectionName);
+            }
         }
         
         navLinks.forEach(link => {
@@ -535,6 +538,34 @@ function MoveBetweenSections(){
             activeLink.parentElement.classList.add('active');
         }
     }
+
+    function markSectionSeen(sectionName) {
+        const url = document.querySelector('[data-mark-section-seen-url]')?.dataset.markSectionSeenUrl;
+        if (!url) return;
+        const token = document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('input[name="_token"]')?.value;
+        if (!token) return;
+        const formData = new FormData();
+        formData.append('_token', token);
+        formData.append('section', sectionName);
+        fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+            credentials: 'same-origin',
+            body: formData
+        }).then(function(res) { return res.json(); }).then(function(data) {
+            if (data.success) {
+                // Clear stat card number for this section
+                const statCard = document.querySelector('.stat-card[data-stat-section="' + sectionName + '"]');
+                if (statCard) {
+                    const h3 = statCard.querySelector('.stat-count');
+                    if (h3) h3.textContent = '0';
+                }
+                // Hide section badge
+                const badge = document.querySelector('.section-badge[data-badge-section="' + sectionName + '"]');
+                if (badge) badge.style.display = 'none';
+            }
+        }).catch(function() {});
+    }
     
     navLinks.forEach(link => {
         link.addEventListener('click', function (e) {
@@ -543,8 +574,7 @@ function MoveBetweenSections(){
             const targetId = this.getAttribute('href');
             if (!targetId || !targetId.startsWith('#')) return;
     
-            // 1️⃣ Show ONLY the target section (this hides all others)
-            showSection(targetId);
+            showSection(targetId, true);
     
             // 2️⃣ Clear global search input
             const searchInput = document.getElementById('adminSearch');
@@ -552,39 +582,33 @@ function MoveBetweenSections(){
                 searchInput.value = '';
             }
     
-            // 3️⃣ Reset filtering ONLY inside the visible section
+            // Reset filtering ONLY inside the visible section
             const targetSection = document.querySelector(targetId);
             if (targetSection) {
                 targetSection.querySelectorAll('table tbody tr').forEach(row => {
                     row.style.display = '';
                 });
-    
                 targetSection.querySelectorAll('.activity-list li').forEach(li => {
                     li.style.display = '';
                 });
-    
-                // Optional smooth scroll
                 targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
     
-    
-    
-    
+    // Initial load / hash: show section but do not mark as seen
     if (window.location.hash) {
-        showSection(window.location.hash);
+        showSection(window.location.hash, false);
     } else {
         const firstSection = sections[0];
         if (firstSection) {
-            showSection('#' + firstSection.id);
+            showSection('#' + firstSection.id, false);
         }
     }
     
-    // Handle browser back/forward buttons
     window.addEventListener('hashchange', function() {
         if (window.location.hash) {
-            showSection(window.location.hash);
+            showSection(window.location.hash, false);
         }
     });
 }

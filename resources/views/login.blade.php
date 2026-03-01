@@ -51,6 +51,9 @@
                     Save and compare properties
                 </li>
             </ul>
+            <div class="login-character">
+                <img src="{{ asset('images/character/wave-1.png') }}" alt="Welcome back!" class="login-character-image">
+            </div>
             <div class="aside-footer">
                 New to Ghorfa?
                 <a href="{{ route('register') }}">Create an account</a>

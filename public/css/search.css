@@ -1,8 +1,14 @@
 /* Search page layout */
 .search-page {
     display: grid;
+    /* Sidebar 320px + remaining space for results (1fr) */
     grid-template-columns: 320px 1fr;
     gap: 2.5rem;
+}
+
+/* Profile Favorites tab: no sidebar, so one column so cards grid gets full width */
+.profile-main-content .search-page {
+    grid-template-columns: 1fr;
 }
 
 /* Filters sidebar */
@@ -405,6 +411,8 @@
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
 }
 
 .listing-price {

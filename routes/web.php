@@ -17,7 +17,6 @@ Route::get( '/', [MainController::class,"homePage"])->name(name: 'home');
 Route::prefix('profile')->middleware('auth')->group(function (): void {
     Route::get('/info', [MainController::class, 'profileInfo'])->name('profileInfo');
     Route::get('/properties',  [MainController::class, 'profileProperties'])->name('profileProperties');
-    Route::get('/favorites', [MainController::class, 'profileFavorites'])->name('profileFavorites');
     Route::get('/security',  [MainController::class, 'profileSecurity'])->name('profileSecurity');
     Route::get('/transactions', [MainController::class, 'profileTransactions'])->name('profile.transactions');
     Route::put('/info', [MainController::class, 'updateProfile'])->name('profile.update');
@@ -70,12 +69,14 @@ Route::middleware(['auth'])->prefix('landlord')->group(function () {
 
 Route::middleware(['auth', LandlordMiddleware::class])->prefix('landlord')->group(function () {
     Route::get('/dashboard', [LandlordController::class, 'dashboard'])->name('landlord.dashboard');
+    Route::post('/mark-section-seen', [LandlordController::class, 'markSectionSeen'])->name('landlord.mark-section-seen');
     Route::get('/properties', [LandlordController::class, 'properties'])->name('landlord.properties');
 });
 
 //----------------Admin Routes-------------------
 Route::middleware(['web', 'auth', AdminMiddleware::class])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('/mark-section-seen', [AdminController::class, 'markSectionSeen'])->name('admin.mark-section-seen');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
     Route::get('/pending-applications', [AdminController::class, 'getPendingApplications'])->name('admin.pending-applications');
     Route::post('/landlord-applications/{application}/approve', [AdminController::class, 'approveLandlordApplication'])->name('admin.landlord.approve');

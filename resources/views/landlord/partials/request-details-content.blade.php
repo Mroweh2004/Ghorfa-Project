@@ -2,8 +2,8 @@
     $user = $transaction->user;
     $property = $transaction->property;
     $userPhone = $user ? ($user->phone_nb ?? $user->phone ?? '') : '';
-    $statusLabel = $transaction->status ? str_replace('_', ' ', ucwords($transaction->status, '_')) : 'Pending';
-    $statusClass = 'request-detail-status--' . ($transaction->status ?? 'pending');
+    $statusLabel = $transaction->paid ? 'Payment Received' : ($transaction->status ? str_replace('_', ' ', ucwords($transaction->status, '_')) : 'Pending');
+    $statusClass = $transaction->paid ? 'request-detail-status--paid' : ('request-detail-status--' . ($transaction->status ?? 'pending'));
 @endphp
 
 <div class="request-details-content">

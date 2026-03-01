@@ -949,3 +949,84 @@
     font-size: 1.5rem;
   }
 }
+
+/* ============================
+   LANDLORD DASHBOARD CHARACTER STYLES
+   ============================ */
+
+.landlord-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.header-character {
+    flex-shrink: 0;
+}
+
+.dashboard-character {
+    width: 140px;
+    height: auto;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Empty State Character */
+.empty-state-cell {
+    padding: 3rem 2rem !important;
+}
+
+.dashboard-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.empty-dashboard-character {
+    width: 160px;
+    height: auto;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    animation: confusedFloat 3s ease-in-out infinite;
+}
+
+@keyframes confusedFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-12px) rotate(-3deg);
+    }
+}
+
+.dashboard-empty-state p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .landlord-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .dashboard-character {
+        width: 100px;
+    }
+    
+    .empty-dashboard-character {
+        width: 120px;
+    }
+}

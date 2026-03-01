@@ -9,12 +9,21 @@
 @section('content')
 <main>
     <div class="my-requests-page">
-        <h2><i class="fas fa-file-contract"></i> My requests</h2>
-        <p class="text-muted mb-3">Your rental and purchase requests. Open a request to view the full report (price, property, rules, amenities) and approve or reject the contract once the landlord has generated it.</p>
+        <div class="requests-header">
+            <div class="requests-header-content">
+                <h2><i class="fas fa-file-contract"></i> My requests</h2>
+                <p class="text-muted mb-3">Your rental and purchase requests. Open a request to view the full report (price, property, rules, amenities) and approve or reject the contract once the landlord has generated it.</p>
+            </div>
+            <div class="requests-character-container">
+                <img src="{{ asset('images/character/tie.png') }}" alt="Your Requests" class="requests-character">
+            </div>
+        </div>
 
         @if($transactions->isEmpty())
             <div class="my-requests-empty">
-                <i class="fas fa-inbox"></i>
+                <div class="empty-transactions-character">
+                    <img src="{{ asset('images/character/dashboard-empty.png') }}" alt="No requests yet" class="empty-state-character">
+                </div>
                 <p>You have no requests yet.</p>
                 <a href="{{ route('search') }}" class="view-report-btn">Search properties</a>
             </div>
