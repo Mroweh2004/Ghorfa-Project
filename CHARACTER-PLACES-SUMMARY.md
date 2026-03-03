@@ -82,7 +82,8 @@ Used in views/JS above:
 - home-hero.png  
 - map-navigating.png  
 - phone.png  
-- search-looking.png  
+- search-looking.png  9
+?. vc
 - search-magnifying.png  
 - success-celebrating.png  
 - tie.png  
