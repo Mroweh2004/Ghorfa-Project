@@ -54,7 +54,13 @@
                     <h3>Advanced Filters</h3>
                     <p>Find exactly what you need with our detailed search filters.</p>
                 </div>
-
+                <div class="card">
+                    <div class="feature-icon-character">
+                        <img src="{{ asset('images/character/transaction.png') }}" alt="Transactions" class="feature-character">
+                    </div>
+                    <h3>Transactions Online</h3>
+                    <p>Rent or buy through the site—request, and get a full transaction report.</p>
+                </div>
                 <div class="card">
                     <div class="feature-icon-character">
                         <img src="{{ asset('images/character/map-navigating.png') }}" alt="Map" class="feature-character">
@@ -169,13 +175,11 @@
                     <h3>Advanced Filters</h3>
                     <p>Find exactly what you need with our detailed search filters.</p>
                 </div>
-                
                 <div class="card">
                     <div class="feature-icon-character">
-                        <img src="{{ asset('images/character/wave-2.png') }}" alt="Connect" class="feature-character">
-                    </div>
-                    <h3>Roommate Matching</h3>
-                    <p>Connect with compatible roommates based on your preferences.</p>
+                    <img src="{{ asset('images/character/transaction.png') }}" alt="Transactions" class="feature-character">                    </div>
+                    <h3>Transactions Online</h3>
+                    <p>Rent or buy through the site—request, and get a full transaction report.</p>
                 </div>
                 
                 <div class="card">
@@ -203,6 +207,7 @@
                     <h3>Connect</h3>
                     <p>Chat with property owners or potential roommates</p>
                 </div>
+                
                 <div class="card">
                     <p class="step-number">3</p>
                     <i class="fas fa-key"></i>

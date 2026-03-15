@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule as ValidationRule;
 
 class MainController extends Controller
 {
@@ -32,8 +33,8 @@ class MainController extends Controller
         $validated = $request->validate([
             'first_name' => ['required','string','max:255'],
             'last_name' => ['required','string','max:255'],
-            'email' => ['required','string','email','max:255', Rule::unique('users')->ignore($user->id)],
-            'phone_nb' => ['required','string','max:30', Rule::unique('users')->ignore($user->id)],
+            'email' => ['required','string','email','max:255', ValidationRule::unique('users')->ignore($user->id)],
+            'phone_nb' => ['required','string','max:30', ValidationRule::unique('users')->ignore($user->id)],
             'date_of_birth' => ['nullable','date','before:today'],
             'address' => ['nullable','string'],
         ]);
