@@ -40,11 +40,19 @@ function closeImageModal() {
 
 function updateModalImage() {
     const modalImage = document.getElementById('modalImage');
-    modalImage.src = imageSources[currentImageIndex];
-    
-    // Add loading effect
-    modalImage.style.opacity = '0.7';
+    const newSrc = imageSources[currentImageIndex];
+    if (modalImage.src === newSrc) return;
+
+    modalImage.classList.add('loading');
+    modalImage.style.opacity = '0.5';
+    modalImage.src = newSrc;
+
     modalImage.onload = function() {
+        this.classList.remove('loading');
+        this.style.opacity = '1';
+    };
+    modalImage.onerror = function() {
+        this.classList.remove('loading');
         this.style.opacity = '1';
     };
 }
@@ -340,26 +348,75 @@ function initBackButton() {
     }
 }
 
-// Initialize image gallery with keyboard navigation
-function initImageGallery() {
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    
-    galleryItems.forEach((item, index) => {
-        item.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                const img = this.querySelector('img');
-                if (img) {
-                    openImageModal(img.src);
-                }
-            }
-        });
-        
-        // Make gallery items focusable
-        item.setAttribute('tabindex', '0');
-        item.setAttribute('role', 'button');
-        item.setAttribute('aria-label', `View image ${index + 1}`);
+// Gallery slider state
+let gallerySlideIndex = 0;
+let gallerySlideCount = 0;
+
+function updateGallerySlider() {
+    const track = document.getElementById('galleryTrack');
+    if (!track) return;
+    const slides = track.querySelectorAll('.gallery-slide');
+    gallerySlideCount = slides.length;
+    if (gallerySlideIndex >= gallerySlideCount) gallerySlideIndex = Math.max(0, gallerySlideCount - 1);
+    const offset = -gallerySlideIndex * 100;
+    track.style.transform = `translateX(${offset}%)`;
+    // Update dots
+    const dots = document.querySelectorAll('.gallery-dots .dot');
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === gallerySlideIndex));
+    // Disable arrows at ends
+    const prevBtn = document.getElementById('galleryPrev');
+    const nextBtn = document.getElementById('galleryNext');
+    if (prevBtn) prevBtn.disabled = gallerySlideIndex === 0;
+    if (nextBtn) nextBtn.disabled = gallerySlideIndex >= gallerySlideCount - 1;
+}
+
+function initGallerySlider() {
+    const track = document.getElementById('galleryTrack');
+    const dotsContainer = document.getElementById('galleryDots');
+    if (!track) return;
+    const slides = track.querySelectorAll('.gallery-slide');
+    gallerySlideCount = slides.length;
+    gallerySlideIndex = 0;
+
+    if (gallerySlideCount <= 1) {
+        const prevBtn = document.getElementById('galleryPrev');
+        const nextBtn = document.getElementById('galleryNext');
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (dotsContainer) dotsContainer.style.display = 'none';
+        return;
+    }
+
+    // Build dots
+    if (dotsContainer) {
+        dotsContainer.innerHTML = '';
+        for (let i = 0; i < gallerySlideCount; i++) {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', 'Go to photo ' + (i + 1));
+            dot.addEventListener('click', () => {
+                gallerySlideIndex = i;
+                updateGallerySlider();
+            });
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    document.getElementById('galleryPrev')?.addEventListener('click', () => {
+        if (gallerySlideIndex > 0) {
+            gallerySlideIndex--;
+            updateGallerySlider();
+        }
     });
+    document.getElementById('galleryNext')?.addEventListener('click', () => {
+        if (gallerySlideIndex < gallerySlideCount - 1) {
+            gallerySlideIndex++;
+            updateGallerySlider();
+        }
+    });
+
+    updateGallerySlider();
 }
 
 // Add loading states to action buttons
@@ -394,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initLikeButton();
     initContactButtons();
     initBackButton();
-    initImageGallery();
+    initGallerySlider();
     initActionButtons();
     initReviewSystem();
     

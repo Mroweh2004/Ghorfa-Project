@@ -133,9 +133,7 @@
                     <div class="listing-image">
                         <img src="{{ \App\Services\PropertyImageService::getImageUrl($property) }}" alt="{{ $property->title }}">
                         <span class="listing-tag">For {{ $property->listing_type }}</span>
-                        @if($property->getAvailabilityMessage())
-                        <span class="listing-tag listing-tag--unavailable" title="{{ $property->getAvailabilityMessage() }}">{{ $property->getAvailabilityMessage() }}</span>
-                        @endif
+                        
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                         @auth
                             <button 
@@ -186,6 +184,9 @@
                             @if($property->area_m3)
                                 <span><i class="fas fa-ruler-combined"></i> {{ $property->area_m3 }}m²</span>
                             @endif
+                            @if($property->getAvailabilityMessage())
+                        <span class="listing-tag listing-tag--unavailable" title="{{ $property->getAvailabilityMessage() }}">{{ $property->getAvailabilityMessage() }}</span>
+                        @endif
                         </div>
                     </div>
                     <div class="listing-meta">

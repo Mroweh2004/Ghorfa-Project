@@ -104,16 +104,30 @@
                         <p>{{ $property->description }}</p>
                     </div>
 
-                    <!-- Image Gallery -->
-                    @if($property->images->count() > 1)
+                    <!-- Image Gallery Slider -->
+                    @if($property->images->count() > 0)
                     <div class="property-gallery">
-                        <h3>Photos</h3>
-                        <div class="gallery-grid">
-                            @foreach($property->images as $image)
-                                <div class="gallery-item" onclick="openImageModal('{{ Storage::url($image->path) }}')">
-                                    <img src="{{ Storage::url($image->path) }}" alt="Property Image" class="gallery-image">
+                        <h3>Photos <span class="gallery-count">({{ $property->images->count() }})</span></h3>
+                        <div class="gallery-slider">
+                            <div class="gallery-slider-viewport">
+                                <div class="gallery-slider-track" id="galleryTrack">
+                                    @foreach($property->images as $image)
+                                        @php $imgUrl = Storage::url($image->path); @endphp
+                                        <div class="gallery-slide">
+                                            <img src="{{ $imgUrl }}" alt="Property photo {{ $loop->iteration }}" class="gallery-image" onclick="openImageModal('{{ $imgUrl }}')">
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
+                            </div>
+                            @if($property->images->count() > 1)
+                            <button type="button" class="gallery-arrow gallery-prev" id="galleryPrev" aria-label="Previous photo">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button type="button" class="gallery-arrow gallery-next" id="galleryNext" aria-label="Next photo">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <div class="gallery-dots" id="galleryDots"></div>
+                            @endif
                         </div>
                     </div>
                     @endif

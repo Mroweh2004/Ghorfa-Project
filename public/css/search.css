@@ -257,7 +257,7 @@
 .listing-tag {
     position: absolute;
     top: 0.625rem;
-    left: 0.625rem;
+    left: 50%;
     background-color: #1a1a1a;
     color: #ffffff;
     padding: 0.25rem 0.625rem;
@@ -268,13 +268,13 @@
 }
 .listing-tag--unavailable {
     top: auto;
-    left: 0.625rem;
+    left: 20%;
     bottom: 0.625rem;
     background-color: #b91c1c;
-    color: #fff;
+    color: #fff !important;
 }
 .listing-tag--unavailable:not([title*="Sold"]) {
-    background-color: #b45309;
+    background-color: #b40909;
 }
 .setting-btn {
     position: absolute;
