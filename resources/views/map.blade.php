@@ -131,7 +131,7 @@
     window.mapConfig = {
         reverseGeocodeEndpoint: '{{ route("map.reverse-geocode") }}',
         storageUrl: '{{ asset("storage") }}',
-        placeholderUrl: '{{ asset("img/background.jpg") }}',
+        placeholderUrl: '{{ asset("img/no_image.jpg") }}',
         mapRoute: '{{ route("map") }}'
     };
 

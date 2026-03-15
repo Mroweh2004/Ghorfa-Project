@@ -169,7 +169,7 @@ function createInfoWindowContent(property) {
     // Get storage URL and placeholder from window config (set by Blade template)
     // Fallback to default values if not configured
     const storageUrl = window.mapConfig?.storageUrl || '/storage';
-    const placeholderUrl = window.mapConfig?.placeholderUrl || '/img/background.jpg';
+    const placeholderUrl = window.mapConfig?.placeholderUrl || '/img/no_image.jpg';
     
     // Log warnings if config is missing (for debugging)
     if (!window.mapConfig) {
@@ -179,7 +179,7 @@ function createInfoWindowContent(property) {
             console.warn('storageUrl not found in mapConfig. Using fallback: /storage');
         }
         if (!window.mapConfig.placeholderUrl) {
-            console.warn('placeholderUrl not found in mapConfig. Using fallback: /img/background.jpg');
+            console.warn('placeholderUrl not found in mapConfig. Using fallback: /img/no_image.jpg');
         }
     }
 

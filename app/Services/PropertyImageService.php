@@ -17,7 +17,7 @@ class PropertyImageService
      */
     public static function getImageUrl(Property $property, ?string $defaultImage = null): string
     {
-        $defaultImage = $defaultImage ?? 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267';
+        $defaultImage = $defaultImage ?? asset('img/no_image.jpg');
         
         // Try to get primary image first
         $primaryImage = $property->images->where('is_primary', true)->first();
@@ -45,7 +45,7 @@ class PropertyImageService
      */
     public static function getImageAssetUrl(Property $property, ?string $defaultImage = null): string
     {
-        $defaultImage = $defaultImage ?? 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267';
+        $defaultImage = $defaultImage ?? asset('img/no_image.jpg');
         
         // Try to get primary image first
         $primaryImage = $property->images->where('is_primary', true)->first();
