@@ -170,15 +170,38 @@ class LandlordController extends Controller
         $validated = $request->validate([
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
-            'id_number' => 'nullable|string|max:255',
-            'trade_license' => 'nullable|string|max:255',
+            'document_type' => 'required|in:national_id,trade_license',
+            'document_number' => 'required|string|max:255',
+            'document_front' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'document_back' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'face_photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'notes' => 'nullable|string',
         ]);
 
         $validated['user_id'] = $user->id;
         $validated['status'] = 'pending';
+        if ($validated['document_type'] === 'national_id') {
+            $validated['id_number'] = $validated['document_number'];
+            $validated['trade_license'] = null;
+        } else {
+            $validated['trade_license'] = $validated['document_number'];
+            $validated['id_number'] = null;
+        }
+        unset($validated['document_number'], $validated['document_front'], $validated['document_back'], $validated['face_photo']);
 
-        $application = LandlordApplication::create($validated);
+        $application = null;
+        DB::transaction(function () use (&$application, $validated, $request) {
+            $application = LandlordApplication::create($validated);
+            $dir = 'landlord-applications/'.$application->id;
+            $frontPath = $request->file('document_front')->store($dir, 'public');
+            $backPath = $request->file('document_back')->store($dir, 'public');
+            $facePath = $request->file('face_photo')->store($dir, 'public');
+            $application->update([
+                'document_front_path' => $frontPath,
+                'document_back_path' => $backPath,
+                'face_photo_path' => $facePath,
+            ]);
+        });
         
         // Create notification for all admins about new pending application
         $admins = User::where('role', 'admin')->get();

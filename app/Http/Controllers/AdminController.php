@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\LandlordApplication;
 use App\Models\Property;
+use App\Models\Transaction;
+use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\CreatesNotifications;
@@ -90,7 +93,120 @@ class AdminController extends Controller
             ->limit(50)
             ->get();
 
-        return view('admin.dashboard', compact('users', 'landlords', 'pendingApplications', 'stats', 'recentUsers', 'recentProperties', 'pendingProperties', 'recentActivities'));
+        $overview = [
+            'clients' => User::where('role', 'client')->count(),
+            'landlords' => User::where('role', 'landlord')->count(),
+            'admins' => User::where('role', 'admin')->count(),
+            'users_total' => User::where('role', '!=', 'admin')->count(),
+            'properties_total' => Property::count(),
+            'properties_approved' => Property::where('status', 'approved')->count(),
+            'properties_pending' => Property::where('status', 'pending')->count(),
+            'properties_rejected' => Property::where('status', 'rejected')->count(),
+            'pending_applications' => LandlordApplication::where('status', 'pending')->count(),
+            'transactions_pending' => Transaction::where('status', 'pending')->count(),
+            'transactions_active' => Transaction::whereIn('status', ['confirmed'])->count(),
+            'transactions_completed' => Transaction::where('status', 'completed')->count(),
+            'reviews_total' => Review::count(),
+        ];
+
+        $chartData = $this->buildAdminChartData(14);
+
+        return view('admin.dashboard', compact(
+            'users',
+            'landlords',
+            'pendingApplications',
+            'stats',
+            'recentUsers',
+            'recentProperties',
+            'pendingProperties',
+            'recentActivities',
+            'overview',
+            'chartData'
+        ));
+    }
+
+    /**
+     * Daily series and breakdowns for admin dashboard charts (Chart.js).
+     */
+    private function buildAdminChartData(int $days): array
+    {
+        $start = Carbon::now()->subDays($days - 1)->startOfDay();
+        $end = Carbon::now()->endOfDay();
+
+        $labels = [];
+        $dateKeys = [];
+        for ($i = 0; $i < $days; $i++) {
+            $d = $start->copy()->addDays($i);
+            $labels[] = $d->format('M j');
+            $dateKeys[] = $d->format('Y-m-d');
+        }
+
+        $seriesForRole = function (string $role) use ($start, $end, $dateKeys): array {
+            $byDay = User::query()
+                ->where('role', $role)
+                ->whereBetween('created_at', [$start, $end])
+                ->get(['created_at'])
+                ->groupBy(fn (User $u) => $u->created_at->format('Y-m-d'))
+                ->map->count();
+
+            $out = [];
+            foreach ($dateKeys as $key) {
+                $out[] = (int) ($byDay[$key] ?? 0);
+            }
+
+            return $out;
+        };
+
+        $propertiesByDay = Property::query()
+            ->whereBetween('created_at', [$start, $end])
+            ->get(['created_at'])
+            ->groupBy(fn (Property $p) => $p->created_at->format('Y-m-d'))
+            ->map->count();
+
+        $propertiesSeries = [];
+        foreach ($dateKeys as $key) {
+            $propertiesSeries[] = (int) ($propertiesByDay[$key] ?? 0);
+        }
+
+        $applicationsByDay = LandlordApplication::query()
+            ->whereBetween('created_at', [$start, $end])
+            ->get(['created_at'])
+            ->groupBy(fn (LandlordApplication $a) => $a->created_at->format('Y-m-d'))
+            ->map->count();
+
+        $applicationsSeries = [];
+        foreach ($dateKeys as $key) {
+            $applicationsSeries[] = (int) ($applicationsByDay[$key] ?? 0);
+        }
+
+        return [
+            'labels' => $labels,
+            'series' => [
+                'clients' => $seriesForRole('client'),
+                'landlords' => $seriesForRole('landlord'),
+                'properties' => $propertiesSeries,
+                'applications' => $applicationsSeries,
+            ],
+            'propertyStatus' => [
+                'labels' => ['Approved', 'Pending', 'Rejected'],
+                'data' => [
+                    Property::where('status', 'approved')->count(),
+                    Property::where('status', 'pending')->count(),
+                    Property::where('status', 'rejected')->count(),
+                ],
+            ],
+            'listingTypes' => [
+                'labels' => ['Rent', 'Sale'],
+                'data' => [
+                    Property::where('status', 'approved')
+                        ->whereRaw('LOWER(COALESCE(listing_type, ?)) = ?', ['', 'rent'])
+                        ->count(),
+                    Property::where('status', 'approved')
+                        ->whereRaw('LOWER(COALESCE(listing_type, ?)) IN (?, ?, ?)', ['', 'sale', 'buy', 'sell'])
+                        ->count(),
+                ],
+            ],
+        ];
     }
 
     /**
@@ -127,6 +243,17 @@ class AdminController extends Controller
                     'user_name' => $application->user->name,
                     'user_email' => $application->user->email,
                     'phone' => $application->phone ?? $application->user->phone_nb,
+                    'document_type' => $application->document_type,
+                    'document_number' => $application->verificationNumber(),
+                    'front_url' => $application->document_front_path
+                        ? asset('storage/'.$application->document_front_path)
+                        : null,
+                    'back_url' => $application->document_back_path
+                        ? asset('storage/'.$application->document_back_path)
+                        : null,
+                    'face_url' => $application->face_photo_path
+                        ? asset('storage/'.$application->face_photo_path)
+                        : null,
                     'applied_at' => $application->created_at->diffForHumans(),
                     'created_at' => $application->created_at->toIso8601String(),
                 ];

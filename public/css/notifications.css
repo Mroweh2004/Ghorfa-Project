@@ -4,7 +4,7 @@
 
 .notification-bell-container {
     position: relative;
-    margin-right: 0.5 rem;
+    margin-right: 0.5rem;
 }
 
 .notification-bell {
@@ -91,9 +91,15 @@
     color: #3b82f6;
     cursor: pointer;
     font-size: 0.875rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    transition: background 0.2s;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+    font-family: inherit;
+    font-weight: 500;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    box-shadow: none;
 }
 
 .mark-all-read-btn:hover {

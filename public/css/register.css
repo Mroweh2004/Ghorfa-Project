@@ -27,7 +27,7 @@
     align-items: center;
     background: var(--bg);  
     padding: 40px 18px;
-    margin: 300px 0px;
+    margin: 80px 0px;
   }
   .auth-shell{
     display:grid;

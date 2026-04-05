@@ -76,7 +76,7 @@
         if (applications.length === 0) {
             applicationsTable.innerHTML = `
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">
                         No pending applications
                     </td>
                 </tr>
@@ -87,11 +87,28 @@
             return;
         }
 
-        applicationsTable.innerHTML = applications.map(app => `
+        applicationsTable.innerHTML = applications.map(app => {
+            const docLabel = app.document_type === 'trade_license'
+                ? 'Trade license'
+                : (app.document_type === 'national_id' ? 'National ID' : '—');
+            const docNum = app.document_number != null && String(app.document_number).length
+                ? escapeHtml(String(app.document_number))
+                : '—';
+            let photos = '—';
+            if (app.front_url && app.back_url) {
+                photos = `<a href="${app.front_url}" target="_blank" rel="noopener noreferrer">Front</a> <span class="admin-app-doc-sep">·</span> <a href="${app.back_url}" target="_blank" rel="noopener noreferrer">Back</a>`;
+                if (app.face_url) {
+                    photos += ` <span class="admin-app-doc-sep">·</span> <a href="${app.face_url}" target="_blank" rel="noopener noreferrer">Face</a>`;
+                }
+            }
+            return `
             <tr data-application-id="${app.id}">
                 <td>${escapeHtml(app.user_name)}</td>
                 <td>${escapeHtml(app.user_email)}</td>
                 <td>${escapeHtml(app.phone || 'N/A')}</td>
+                <td>${escapeHtml(docLabel)}</td>
+                <td>${docNum}</td>
+                <td>${photos}</td>
                 <td>${escapeHtml(app.applied_at)}</td>
                 <td style="display: flex; gap: 0.5rem;">
                     <button 
@@ -112,7 +129,8 @@
                     </button>
                 </td>
             </tr>
-        `).join('');
+        `;
+        }).join('');
 
         if (applicationsHeader) {
             applicationsHeader.textContent = `Pending Landlord Applications (${applications.length})`;
@@ -525,8 +543,15 @@ function MoveBetweenSections(){
             targetSection.style.display = 'block';
             targetSection.classList.add('active');
             if (markAsSeen) {
-                const sectionName = targetSection.getAttribute('data-section-name');
-                if (sectionName) markSectionSeen(sectionName);
+                const multi = targetSection.getAttribute('data-mark-sections');
+                if (multi) {
+                    multi.trim().split(/\s+/).forEach(function(name) {
+                        if (name) markSectionSeen(name);
+                    });
+                } else {
+                    const sectionName = targetSection.getAttribute('data-section-name');
+                    if (sectionName) markSectionSeen(sectionName);
+                }
             }
         }
         
@@ -625,90 +650,76 @@ if (document.readyState === 'loading') {
 document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("adminSearch");
     if (!input) return;
-  
+
     function getVisibleSection() {
-      // Your code adds `.active` and sets display:block for the shown section
-      return document.querySelector(".content-section.active")
-        || Array.from(document.querySelectorAll(".content-section"))
-            .find(sec => sec.style.display !== "none");
+        return document.querySelector(".content-section.active")
+            || Array.from(document.querySelectorAll(".content-section"))
+                .find(sec => sec.style.display !== "none");
     }
-  
-    function filterTable(section, query) {
-      const table = section.querySelector("table");
-      if (!table) return false;
-  
-      const rows = Array.from(table.querySelectorAll("tbody tr"));
-  
-      rows.forEach((row) => {
-        const isEmptyRow = row.querySelector(".empty-state-cell");
-        if (isEmptyRow) {
-          row.style.display = query ? "none" : "";
-          return;
-        }
-  
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(query) ? "" : "none";
-      });
-  
-      return true;
+
+    /** Filter every table in the section (e.g. landlords hub has two). */
+    function filterAllTables(section, query) {
+        section.querySelectorAll("table").forEach((table) => {
+            table.querySelectorAll("tbody tr").forEach((row) => {
+                const isEmptyRow = row.querySelector(".empty-state-cell");
+                if (isEmptyRow) {
+                    row.style.display = query ? "none" : "";
+                    return;
+                }
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? "" : "none";
+            });
+        });
     }
-  
+
     function filterActivity(section, query) {
-      const list = section.querySelector(".activity-list");
-      if (!list) return false;
-  
-      const items = Array.from(list.querySelectorAll("li"));
-      items.forEach((li) => {
-        const isEmpty = li.classList.contains("empty-activity");
-        if (isEmpty) {
-          li.style.display = query ? "none" : "";
-          return;
-        }
-        li.style.display = li.innerText.toLowerCase().includes(query) ? "" : "none";
-      });
-  
-      return true;
+        const list = section.querySelector(".activity-list");
+        if (!list) return;
+
+        list.querySelectorAll("li").forEach((li) => {
+            const isEmpty = li.classList.contains("empty-activity");
+            if (isEmpty) {
+                li.style.display = query ? "none" : "";
+                return;
+            }
+            li.style.display = li.innerText.toLowerCase().includes(query) ? "" : "none";
+        });
     }
-  
-    input.addEventListener("input", () => {
-      const query = input.value.trim().toLowerCase();
-      const section = getVisibleSection();
-      if (!section) return;
-  
-      // Only filter the visible section
-      if (!filterTable(section, query)) {
+
+    function applySearch() {
+        const query = input.value.trim().toLowerCase();
+        const section = getVisibleSection();
+        if (!section) return;
+        filterAllTables(section, query);
         filterActivity(section, query);
-      }
-    });
-  
-    // Optional: when switching sections, clear search + reset filters
-    function resetSection(section) {
-      if (!section) return;
-  
-      const table = section.querySelector("table");
-      if (table) {
-        table.querySelectorAll("tbody tr").forEach((row) => (row.style.display = ""));
-      }
-  
-      const list = section.querySelector(".activity-list");
-      if (list) {
-        list.querySelectorAll("li").forEach((li) => (li.style.display = ""));
-      }
     }
-  
-    // Hook into section changes (hash navigation)
+
+    input.addEventListener("input", applySearch);
+
+    function resetSectionDisplay(section) {
+        if (!section) return;
+        section.querySelectorAll("table tbody tr").forEach((row) => {
+            row.style.display = "";
+        });
+        const list = section.querySelector(".activity-list");
+        if (list) {
+            list.querySelectorAll("li").forEach((li) => {
+                li.style.display = "";
+            });
+        }
+    }
+
     window.addEventListener("hashchange", () => {
-      input.value = "";
-      resetSection(getVisibleSection());
+        input.value = "";
+        resetSectionDisplay(getVisibleSection());
     });
-  
-    // Cmd/Ctrl + K focuses search
+
     document.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        input.focus();
-      }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+            e.preventDefault();
+            input.focus();
+        }
     });
-  });
+});
   
   

@@ -13,6 +13,10 @@ class LandlordApplication extends Model
         'address',
         'id_number',
         'trade_license',
+        'document_type',
+        'document_front_path',
+        'document_back_path',
+        'face_photo_path',
         'notes',
         'status',
         'admin_notes',
@@ -47,5 +51,19 @@ class LandlordApplication extends Model
     public function isRejected(): bool
     {
         return $this->status === 'rejected';
+    }
+
+    public function verificationNumber(): ?string
+    {
+        return $this->id_number ?? $this->trade_license;
+    }
+
+    public function verificationLabel(): string
+    {
+        return match ($this->document_type) {
+            'national_id' => 'National ID',
+            'trade_license' => 'Trade license',
+            default => $this->id_number ? 'National ID' : ($this->trade_license ? 'Trade license' : 'Document'),
+        };
     }
 }
