@@ -58,6 +58,7 @@ class AdminController extends Controller
         
         $landlords = User::where('role', '!=', 'admin')
             ->where('role', 'landlord')
+            ->with('landlordApplication')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -111,6 +112,11 @@ class AdminController extends Controller
 
         $chartData = $this->buildAdminChartData(14);
 
+        $transactionsList = Transaction::query()
+            ->with(['user', 'property.landlord'])
+            ->orderByDesc('updated_at')
+            ->paginate(20, ['*'], 'txns');
+
         return view('admin.dashboard', compact(
             'users',
             'landlords',
@@ -121,7 +127,8 @@ class AdminController extends Controller
             'pendingProperties',
             'recentActivities',
             'overview',
-            'chartData'
+            'chartData',
+            'transactionsList'
         ));
     }
 
@@ -222,6 +229,19 @@ class AdminController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function showUser(User $user)
+    {
+        $user->load([
+            'landlordApplication.reviewer',
+            'properties' => fn ($q) => $q->select('id', 'user_id', 'title', 'status', 'created_at')->latest()->limit(10),
+        ]);
+
+        $propertyCount = Property::where('user_id', $user->id)->count();
+        $reviewCount = Review::where('user_id', $user->id)->count();
+
+        return view('admin.user-show', compact('user', 'propertyCount', 'reviewCount'));
+    }
+
     public function deleteUser(User $user)
     {
         if ($user->role !== 'admin') {
@@ -240,6 +260,7 @@ class AdminController extends Controller
             ->map(function ($application) {
                 return [
                     'id' => $application->id,
+                    'user_show_url' => route('admin.users.show', $application->user),
                     'user_name' => $application->user->name,
                     'user_email' => $application->user->email,
                     'phone' => $application->phone ?? $application->user->phone_nb,
@@ -268,6 +289,23 @@ class AdminController extends Controller
 
     public function approveLandlordApplication(Request $request, LandlordApplication $application)
     {
+        $isAjax = $request->expectsJson()
+            || $request->ajax()
+            || $request->wantsJson()
+            || $request->header('X-Requested-With') === 'XMLHttpRequest'
+            || $request->header('Accept') === 'application/json';
+
+        if (! $application->isPending()) {
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This application is not pending approval.',
+                ], 422);
+            }
+
+            return back()->with('error', 'This application is not pending approval.');
+        }
+
         try {
             DB::transaction(function () use ($application) {
                 $application->user->update(['role' => 'landlord']);
@@ -294,12 +332,6 @@ class AdminController extends Controller
                 );
             });
 
-            $isAjax = $request->expectsJson() 
-                || $request->ajax() 
-                || $request->wantsJson() 
-                || $request->header('X-Requested-With') === 'XMLHttpRequest'
-                || $request->header('Accept') === 'application/json';
-
             if ($isAjax) {
                 return response()->json([
                     'success' => true,
@@ -307,20 +339,13 @@ class AdminController extends Controller
                 ]);
             }
 
-            return redirect()->route('admin.dashboard')
-                ->with('success', 'Landlord application approved successfully!');
+            return back()->with('success', 'Landlord application approved successfully!');
         } catch (\Exception $e) {
             Log::error('Error approving landlord application: ' . $e->getMessage(), [
                 'application_id' => $application->id,
                 'user_id' => auth()->id(),
                 'exception' => $e
             ]);
-
-            $isAjax = $request->expectsJson() 
-                || $request->ajax() 
-                || $request->wantsJson() 
-                || $request->header('X-Requested-With') === 'XMLHttpRequest'
-                || $request->header('Accept') === 'application/json';
 
             if ($isAjax) {
                 return response()->json([
@@ -329,13 +354,18 @@ class AdminController extends Controller
                 ], 500);
             }
 
-            return redirect()->route('admin.dashboard')
-                ->with('error', 'Failed to approve application.');
+            return back()->with('error', 'Failed to approve application.');
         }
     }
 
     public function rejectLandlordApplication(Request $request, LandlordApplication $application)
     {
+        $isAjax = $request->expectsJson()
+            || $request->ajax()
+            || $request->wantsJson()
+            || $request->header('X-Requested-With') === 'XMLHttpRequest'
+            || $request->header('Accept') === 'application/json';
+
         try {
             $adminNotes = $request->input('admin_notes');
             
@@ -358,12 +388,6 @@ class AdminController extends Controller
                 $application
             );
 
-            $isAjax = $request->expectsJson() 
-                || $request->ajax() 
-                || $request->wantsJson() 
-                || $request->header('X-Requested-With') === 'XMLHttpRequest'
-                || $request->header('Accept') === 'application/json';
-
             if ($isAjax) {
                 return response()->json([
                     'success' => true,
@@ -371,8 +395,7 @@ class AdminController extends Controller
                 ]);
             }
 
-            return redirect()->route('admin.dashboard')
-                ->with('success', 'Landlord application rejected.');
+            return back()->with('success', 'Landlord application rejected.');
         } catch (\Exception $e) {
             Log::error('Error rejecting landlord application: ' . $e->getMessage(), [
                 'application_id' => $application->id,
@@ -380,21 +403,14 @@ class AdminController extends Controller
                 'exception' => $e
             ]);
 
-            $isAjax = $request->expectsJson() 
-                || $request->ajax() 
-                || $request->wantsJson() 
-                || $request->header('X-Requested-With') === 'XMLHttpRequest'
-                || $request->header('Accept') === 'application/json';
-
             if ($isAjax) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to reject application: ' . $e->getMessage(),
                 ], 500);
             }
-            
-            return redirect()->route('admin.dashboard')
-                ->with('error', 'Failed to reject application.');
+
+            return back()->with('error', 'Failed to reject application.');
         }
     }
 

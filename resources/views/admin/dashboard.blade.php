@@ -62,6 +62,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('admin.amenities.index') }}" class="nav-link">
+                                <i class="fas fa-concierge-bell"></i>
+                                <span>Amenities</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.rules.index') }}" class="nav-link">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Rules</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="#recent-activity" class="nav-link">
                                 <i class="fas fa-history"></i>
                                 <span>Activity</span>
@@ -283,6 +295,12 @@
                                     </td>
                                     <td>{{ $application->created_at->diffForHumans() }}</td>
                                     <td>
+                                        <a
+                                            href="{{ route('admin.users.show', $application->user) }}"
+                                            class="btn btn-info"
+                                        >
+                                            <i class="fas fa-eye" aria-hidden="true"></i> View
+                                        </a>
                                         <button
                                             type="button"
                                             class="btn btn-success approve-btn"
@@ -329,25 +347,42 @@
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
-                                <th>Role</th>
+                                <th>ID doc &amp; face</th>
                                 <th>Created At</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($landlords as $landlord)
+                            @php $landlordApp = $landlord->landlordApplication; @endphp
                             <tr>
                                 <td>{{ $landlord->id }}</td>
                                 <td>{{ $landlord->name }}</td>
                                 <td>{{ $landlord->email }}</td>
-                                <td>
-                                    <span class="role-badge role-{{ $landlord->role }}">
-                                        {{ ucfirst($landlord->role) }}
-                                    </span>
+                                <td class="admin-landlord-verification-cell">
+                                    <div class="admin-verification-thumbs" role="group" aria-label="Verification thumbnails">
+                                        @if($landlordApp && $landlordApp->document_front_path)
+                                            <a href="{{ route('admin.users.show', $landlord) }}" class="admin-v-thumb" title="National ID (front) — full profile">
+                                                <img src="{{ asset('storage/'.$landlordApp->document_front_path) }}" alt="" loading="lazy" width="56" height="56">
+                                            </a>
+                                        @else
+                                            <span class="admin-v-thumb admin-v-thumb--empty" title="No ID document on file">—</span>
+                                        @endif
+                                        @if($landlordApp && $landlordApp->face_photo_path)
+                                            <a href="{{ route('admin.users.show', $landlord) }}" class="admin-v-thumb" title="Face photo — full profile">
+                                                <img src="{{ asset('storage/'.$landlordApp->face_photo_path) }}" alt="" loading="lazy" width="56" height="56">
+                                            </a>
+                                        @else
+                                            <span class="admin-v-thumb admin-v-thumb--empty" title="No face photo on file">—</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>{{ $landlord->created_at->format('M d, Y') }}</td>
                                 <td>
-                                    <form action="{{ route('admin.users.delete', $landlord->id) }}" method="POST" style="display: inline;">
+                                    <a href="{{ route('admin.users.show', $landlord) }}" class="btn btn-info btn-sm admin-view-user-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.35rem;">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <form action="{{ route('admin.users.delete', $landlord) }}" method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">
@@ -406,7 +441,10 @@
                                 </td>
                                 <td>{{ $user->created_at->format('M d, Y') }}</td>
                                 <td>
-                                    <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display: inline;">
+                                    <a href="{{ route('admin.users.show', $user) }}" class="btn btn-info btn-sm admin-view-user-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.35rem;">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <form action="{{ route('admin.users.delete', $user) }}" method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">
@@ -580,6 +618,106 @@
                     </div>
                 </div>
             </section>
+
+            <h3 class="dashboard-subtitle"><i class="fas fa-list"></i> All transactions</h3>
+            <p class="dashboard-lead dashboard-lead--compact">Buyer or renter ↔ landlord for each property. Use <strong>Open</strong> for the full deal workspace (admin can view any transaction).</p>
+            <div class="applications-table admin-transactions-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Buyer / renter</th>
+                            <th>Landlord</th>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Paid</th>
+                            <th>Updated</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($transactionsList as $txn)
+                            @php
+                                $buyer = $txn->user;
+                                $landlord = $txn->property?->landlord;
+                                $typeLabel = match ($txn->type) {
+                                    'buy' => 'Buy',
+                                    'rent' => 'Rent',
+                                    'refund' => 'Refund',
+                                    default => ucfirst((string) $txn->type),
+                                };
+                                $statusLabel = match ($txn->status) {
+                                    'pending' => 'Pending',
+                                    'paid' => 'Paid',
+                                    'confirmed' => 'Confirmed',
+                                    'completed' => 'Completed',
+                                    'cancelled_by_buyer' => 'Cancelled (buyer)',
+                                    'cancelled_by_seller' => 'Cancelled (seller)',
+                                    'refunded' => 'Refunded',
+                                    default => ucfirst(str_replace('_', ' ', (string) $txn->status)),
+                                };
+                            @endphp
+                            <tr>
+                                <td>{{ $txn->id }}</td>
+                                <td>
+                                    @if($buyer)
+                                        <a href="{{ route('admin.users.show', $buyer) }}">{{ $buyer->name }}</a>
+                                        <div class="admin-txn-sub">{{ $buyer->email }}</div>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($landlord)
+                                        <a href="{{ route('admin.users.show', $landlord) }}">{{ $landlord->name }}</a>
+                                        <div class="admin-txn-sub">{{ $landlord->email }}</div>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($txn->property)
+                                        <span class="admin-txn-prop-title">{{ \Illuminate\Support\Str::limit($txn->property->title, 40) }}</span>
+                                        <div class="admin-txn-sub">#{{ $txn->property->id }}</div>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td><span class="admin-txn-type admin-txn-type--{{ $txn->type }}">{{ $typeLabel }}</span></td>
+                                <td><span class="admin-txn-amount">{{ $txn->currency ? $txn->currency.' ' : '$' }}{{ number_format((float) $txn->price, 2) }}</span></td>
+                                <td><span class="txn-status txn-status--{{ $txn->status }}">{{ $statusLabel }}</span></td>
+                                <td>
+                                    @if($txn->paid)
+                                        <span class="txn-paid-yes">Yes</span>
+                                    @else
+                                        <span class="txn-paid-no">No</span>
+                                    @endif
+                                </td>
+                                <td>{{ $txn->updated_at->diffForHumans() }}</td>
+                                <td>
+                                    <a href="{{ route('transactions.show', $txn) }}" class="btn btn-info btn-sm admin-view-user-btn" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                        <i class="fas fa-external-link-alt"></i> Open
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="empty-state-cell">
+                                    <i class="fas fa-handshake"></i>
+                                    No transactions yet
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if($transactionsList->hasPages())
+                <div class="pagination-wrapper">
+                    {{ $transactionsList->fragment('transactions-section')->links() }}
+                </div>
+            @endif
         </div>
 
         <!-- Recent Activities Section -->

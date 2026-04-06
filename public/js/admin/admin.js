@@ -110,7 +110,8 @@
                 <td>${docNum}</td>
                 <td>${photos}</td>
                 <td>${escapeHtml(app.applied_at)}</td>
-                <td style="display: flex; gap: 0.5rem;">
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    ${app.user_show_url ? `<a href="${escapeHtml(app.user_show_url)}" class="btn btn-info"><i class="fas fa-eye" aria-hidden="true"></i> View</a>` : ''}
                     <button 
                         type="button" 
                         class="btn btn-success approve-btn" 

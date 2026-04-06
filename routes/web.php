@@ -6,6 +6,8 @@ use App\Http\Controllers\MainController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\LandlordMiddleware;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminAmenityController;
+use App\Http\Controllers\AdminRuleController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\LandlordController;
 use App\Http\Controllers\AuthenticationController;
@@ -77,12 +79,18 @@ Route::middleware(['auth', LandlordMiddleware::class])->prefix('landlord')->grou
 Route::middleware(['web', 'auth', AdminMiddleware::class])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/mark-section-seen', [AdminController::class, 'markSectionSeen'])->name('admin.mark-section-seen');
-    Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('admin.users.show');
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
     Route::get('/pending-applications', [AdminController::class, 'getPendingApplications'])->name('admin.pending-applications');
     Route::post('/landlord-applications/{application}/approve', [AdminController::class, 'approveLandlordApplication'])->name('admin.landlord.approve');
     Route::post('/landlord-applications/{application}/reject', [AdminController::class, 'rejectLandlordApplication'])->name('admin.landlord.reject');
     Route::post('/properties/{property}/approve', [AdminController::class, 'approveProperty'])->name('admin.properties.approve');
     Route::post('/properties/{property}/reject', [AdminController::class, 'rejectProperty'])->name('admin.properties.reject');
+
+    Route::name('admin.')->group(function (): void {
+        Route::resource('amenities', AdminAmenityController::class)->except(['show']);
+        Route::resource('rules', AdminRuleController::class)->except(['show']);
+    });
 });
 
 //----------------Notification Routes-------------------

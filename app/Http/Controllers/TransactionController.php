@@ -74,7 +74,12 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        $transaction->load(['user', 'property.amenities', 'property.rules']);
+        $transaction->load([
+            'user',
+            'property.amenities',
+            'property.rules',
+            'property.images' => fn ($q) => $q->orderByDesc('is_primary')->limit(1),
+        ]);
 
         if (request()->wantsJson()) {
             return response()->json([
@@ -97,6 +102,9 @@ class TransactionController extends Controller
      */
     private function authorizeViewTransaction(Transaction $transaction): void
     {
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            return;
+        }
         $userId = auth()->id();
         $isBuyer = $transaction->user_id == $userId;
         $isLandlord = $transaction->property && $transaction->property->user_id == $userId;
@@ -366,6 +374,17 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
         $buyer = $transaction->user;
         $landlord = $property->landlord;
 
+        // Precompute for HTML (heredoc cannot reliably call $this->method() — parsed as property access).
+        $typeLabelForReport = $this->getTransactionTypeLabel($transaction);
+        $statusBadgeClass = $transaction->paid ? 'status-paid' : 'status-'.preg_replace('/[^a-z0-9_-]/i', '', $transaction->status);
+        $statusBadgeText = $transaction->paid ? 'Payment Received' : $this->getStatusLabel($transaction->status);
+        $priceDisplay = '$'.number_format((float) $transaction->price, 2).' '.($transaction->currency ?? 'USD');
+        $roomDetailsHtml = $this->getRoomDetails($property);
+        $rentalDatesHtml = $this->getRentalDates($transaction);
+        $rulesNotesHtml = $this->getRulesAndNotes($transaction);
+        $timelineHtml = $this->getTimeline($transaction);
+        $printedAt = now()->format('M d, Y H:i A');
+
         $html = <<<HTML
         <!DOCTYPE html>
         <html lang="en">
@@ -414,19 +433,19 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
                     <h2 class="section-title">Transaction Details</h2>
                     <div class="info-row">
                         <span class="info-label">Type:</span>
-                        <span class="info-value">{$this->getTransactionTypeLabel($transaction)}</span>
+                        <span class="info-value">{$typeLabelForReport}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Status:</span>
-                        <span class="info-value"><span class="status-badge ' . ($transaction->paid ? 'status-paid">Payment Received' : 'status-' . $transaction->status . '">' . $this->getStatusLabel($transaction->status)) . '</span></span>
+                        <span class="info-value"><span class="status-badge {$statusBadgeClass}">{$statusBadgeText}</span></span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Amount:</span>
-                        <span class="info-value">\${number_format($transaction->price, 2)} {$transaction->currency}</span>
+                        <span class="info-value">{$priceDisplay}</span>
                     </div>
                 </div>
 
-                <div class="section">
+                <div class="section">-
                     <h2 class="section-title">Property Information</h2>
                     <div class="info-row">
                         <span class="info-label">Property:</span>
@@ -440,7 +459,7 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
                         <span class="info-label">Type:</span>
                         <span class="info-value">{$property->property_type}</span>
                     </div>
-                    {$this->getRoomDetails($property)}
+                    {$roomDetailsHtml}
                 </div>
 
                 <div class="section">
@@ -470,15 +489,15 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
                     </div>
                 </div>
 
-                {$this->getRentalDates($transaction)}
+                {$rentalDatesHtml}
 
-                {$this->getRulesAndNotes($transaction)}
+                {$rulesNotesHtml}
 
-                {$this->getTimeline($transaction)}
+                {$timelineHtml}
 
                 <div class="footer">
                     <p>This is an official transaction report from Ghorfa Platform</p>
-                    <div class="print-date">Printed on: {now()->format('M d, Y H:i A')}</div>
+                    <div class="print-date">Printed on: {$printedAt}</div>
                 </div>
             </div>
         </body>
@@ -501,14 +520,15 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
      */
     private function getStatusLabel(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'pending' => 'Pending Review',
+            'paid' => 'Paid',
             'confirmed' => 'Confirmed',
             'completed' => 'Completed',
             'cancelled_by_buyer' => 'Cancelled by Buyer',
             'cancelled_by_seller' => 'Cancelled by Seller',
             'refunded' => 'Refunded',
-            default => ucfirst($status),
+            default => ucfirst(str_replace('_', ' ', $status)),
         };
     }
 
