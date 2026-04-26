@@ -747,85 +747,136 @@ function initPropertyShowMap() {
 
 <!-- Rental Request Modal -->
 @auth
-<div id="rentalRequestModal" class="modal-overlay" onclick="if(event.target === this) closeRentalRequestModal()">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Request to Rent</h2>
-            <button class="modal-close" onclick="closeRentalRequestModal()">
-                <i class="fas fa-times"></i>
+<div id="rentalRequestModal" class="trxn-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rentalModalTitle" onclick="if(event.target===this)closeRentalRequestModal()">
+    <div class="trxn-modal" onclick="event.stopPropagation()">
+        <header class="trxn-modal__header trxn-modal__header--rent">
+            <div class="trxn-modal__header-icon">
+                <i class="fas fa-key" aria-hidden="true"></i>
+            </div>
+            <div class="trxn-modal__header-text">
+                <h2 class="trxn-modal__title" id="rentalModalTitle">Request to Rent</h2>
+                <p class="trxn-modal__subtitle">{{ $property->title }}</p>
+            </div>
+            <button class="trxn-modal__close" onclick="closeRentalRequestModal()" aria-label="Close modal" type="button">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
-        </div>
-        <form id="rentalRequestForm">
-            @csrf
-            <input type="hidden" name="property_id" value="{{ $property->id }}">
-            <input type="hidden" name="type" value="rent">
-            
-            <div class="form-group">
-                <label for="start_date">Check-in date <span class="required-asterisk">*</span></label>
-                <input type="date" id="start_date" name="start_date" required min="{{ $property->getMinRentalStartDate() }}" data-min-date="{{ $property->getMinRentalStartDate() }}">
-            </div>
+        </header>
 
-            <div class="form-group">
-                <label for="end_date">End Date</label>
-                <input type="date" id="end_date" name="end_date" required min="{{ $property->getMinRentalStartDate() }}">
-                <span class="form-hint">Both dates are required to define the rental period.</span>
-            </div>
+        <div class="trxn-modal__body">
+            <form id="rentalRequestForm">
+                @csrf
+                <input type="hidden" name="property_id" value="{{ $property->id }}">
+                <input type="hidden" name="type" value="rent">
 
-            <div class="form-group">
-                <label for="rules_accepted">Do you accept the property rules? <span class="required-asterisk">*</span></label>
-                <div class="checkbox-group">
-                    <label class="checkbox-label">
+                <div class="trxn-modal__dates-row">
+                    <div class="trxn-field">
+                        <label class="trxn-field__label" for="start_date">
+                            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                            Check-in date <span class="trxn-required" aria-hidden="true">*</span>
+                        </label>
+                        <input class="trxn-field__input" type="date" id="start_date" name="start_date" required
+                            min="{{ $property->getMinRentalStartDate() }}"
+                            data-min-date="{{ $property->getMinRentalStartDate() }}">
+                    </div>
+                    <div class="trxn-field">
+                        <label class="trxn-field__label" for="end_date">
+                            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                            Check-out date <span class="trxn-required" aria-hidden="true">*</span>
+                        </label>
+                        <input class="trxn-field__input" type="date" id="end_date" name="end_date" required
+                            min="{{ $property->getMinRentalStartDate() }}">
+                        <span class="trxn-field__hint">Both dates define your rental period.</span>
+                    </div>
+                </div>
+
+                <div class="trxn-field">
+                    <label class="trxn-field__label" for="rules_accepted">
+                        <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+                        Property rules <span class="trxn-required" aria-hidden="true">*</span>
+                    </label>
+                    <label class="trxn-checkbox">
                         <input type="checkbox" id="rules_accepted" name="rules_accepted" value="1">
-                        <span>Yes, I accept all property rules</span>
+                        <span class="trxn-checkbox__box" aria-hidden="true"></span>
+                        <span class="trxn-checkbox__text">I have read and accept all property rules</span>
                     </label>
                 </div>
-            </div>
 
-            <div class="form-group rules-exceptions-group" id="rules_exceptions_group">
-                <label for="rules_exceptions">Explain which rules you don't accept <span class="required-asterisk">*</span></label>
-                <textarea id="rules_exceptions" name="rules_exceptions" rows="3" placeholder="Explain which rules you have concerns about..."></textarea>
-                <span class="form-hint">Required if you do not accept all property rules.</span>
-            </div>
+                <div class="trxn-field trxn-field--collapsible" id="rules_exceptions_group">
+                    <label class="trxn-field__label trxn-field__label--warning" for="rules_exceptions">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        Which rules do you not accept? <span class="trxn-required" aria-hidden="true">*</span>
+                    </label>
+                    <textarea class="trxn-field__input trxn-field__textarea" id="rules_exceptions" name="rules_exceptions"
+                        rows="3" placeholder="Describe any rules you have concerns about…"></textarea>
+                    <span class="trxn-field__hint">This is required when you have not accepted all rules.</span>
+                </div>
 
-            <div class="form-group">
-                <label for="notes">Additional Notes (Optional)</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Tell the landlord about yourself..."></textarea>
-            </div>
+                <div class="trxn-field">
+                    <label class="trxn-field__label" for="notes">
+                        <i class="fas fa-comment-alt" aria-hidden="true"></i>
+                        Additional notes <span class="trxn-optional">(optional)</span>
+                    </label>
+                    <textarea class="trxn-field__input trxn-field__textarea" id="notes" name="notes"
+                        rows="3" placeholder="Tell the landlord a little about yourself…"></textarea>
+                </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeRentalRequestModal()">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="submitRentalRequest()">Submit Request</button>
-            </div>
-        </form>
+                <footer class="trxn-modal__footer">
+                    <button type="button" class="trxn-btn trxn-btn--ghost" onclick="closeRentalRequestModal()">Cancel</button>
+                    <button type="button" class="trxn-btn trxn-btn--primary" onclick="submitRentalRequest()">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i> Send request
+                    </button>
+                </footer>
+            </form>
+        </div>
     </div>
 </div>
 @endauth
 
 <!-- Purchase Request Modal -->
 @auth
-<div id="purchaseRequestModal" class="modal-overlay" onclick="if(event.target === this) closePurchaseRequestModal()">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Request to Buy</h2>
-            <button class="modal-close" onclick="closePurchaseRequestModal()">
-                <i class="fas fa-times"></i>
+<div id="purchaseRequestModal" class="trxn-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="purchaseModalTitle" onclick="if(event.target===this)closePurchaseRequestModal()">
+    <div class="trxn-modal" onclick="event.stopPropagation()">
+        <header class="trxn-modal__header trxn-modal__header--buy">
+            <div class="trxn-modal__header-icon">
+                <i class="fas fa-handshake" aria-hidden="true"></i>
+            </div>
+            <div class="trxn-modal__header-text">
+                <h2 class="trxn-modal__title" id="purchaseModalTitle">Request to Buy</h2>
+                <p class="trxn-modal__subtitle">{{ $property->title }}</p>
+            </div>
+            <button class="trxn-modal__close" onclick="closePurchaseRequestModal()" aria-label="Close modal" type="button">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
-        </div>
-        <form id="purchaseRequestForm" action="{{ route('transactions.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="property_id" value="{{ $property->id }}">
-            <input type="hidden" name="type" value="buy">
-            
-            <div class="form-group">
-                <label for="purchase_notes">Additional Notes (Optional)</label>
-                <textarea id="purchase_notes" name="notes" rows="4" placeholder="Tell the landlord about your interest and any questions..."></textarea>
+        </header>
+
+        <div class="trxn-modal__body">
+            <div class="trxn-info-banner">
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                <span>After submission the landlord will review your request and generate a contract for you to approve.</span>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closePurchaseRequestModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Submit Request</button>
-            </div>
-        </form>
+            <form id="purchaseRequestForm" action="{{ route('transactions.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="property_id" value="{{ $property->id }}">
+                <input type="hidden" name="type" value="buy">
+
+                <div class="trxn-field">
+                    <label class="trxn-field__label" for="purchase_notes">
+                        <i class="fas fa-comment-alt" aria-hidden="true"></i>
+                        Message to landlord <span class="trxn-optional">(optional)</span>
+                    </label>
+                    <textarea class="trxn-field__input trxn-field__textarea" id="purchase_notes" name="notes"
+                        rows="4" placeholder="Share your interest, questions, or anything you'd like the landlord to know…"></textarea>
+                </div>
+
+                <footer class="trxn-modal__footer">
+                    <button type="button" class="trxn-btn trxn-btn--ghost" onclick="closePurchaseRequestModal()">Cancel</button>
+                    <button type="submit" class="trxn-btn trxn-btn--primary">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i> Send request
+                    </button>
+                </footer>
+            </form>
+        </div>
     </div>
 </div>
 @endauth

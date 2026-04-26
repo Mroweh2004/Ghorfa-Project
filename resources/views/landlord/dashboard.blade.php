@@ -72,24 +72,6 @@
                 </li>
             </ul>
         </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">QUICK LINKS</div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="{{ route('home') }}" class="nav-link" target="_blank">
-                        <i class="fas fa-home"></i>
-                        <span>View Site</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('list-property') }}" class="nav-link">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>List Property</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
     </nav>
 </aside>
 
@@ -100,6 +82,10 @@
         <div class="header-title">
             <h1>Landlord Dashboard</h1>
             <p>Manage your properties and track your listings</p>
+            <p class="header-stat-subtle">
+                <i class="fas fa-heart" aria-hidden="true"></i>
+                <span>{{ $stats['total_likes'] }} total likes</span>
+            </p>
         </div>
         <div class="header-character">
             <img src="{{ asset('images/character/tie.png') }}" alt="Dashboard" class="dashboard-character">
@@ -108,6 +94,15 @@
 
     <!-- Content Area -->
     <div class="landlord-content" data-mark-section-seen-url="{{ route('landlord.mark-section-seen') }}">
+        @if(session('success'))
+            <div class="landlord-flash landlord-flash--success" role="status">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="landlord-flash landlord-flash--error" role="alert">{{ session('error') }}</div>
+        @endif
+        @if($errors->has('resubmit_notes'))
+            <div class="landlord-flash landlord-flash--error" role="alert">{{ $errors->first('resubmit_notes') }}</div>
+        @endif
         <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card stat-card-primary">
@@ -142,11 +137,11 @@
 
             <div class="stat-card stat-card-info">
                 <div class="stat-icon">
-                    <i class="fas fa-heart"></i>
+                    <i class="fas fa-handshake"></i>
                 </div>
                 <div class="stat-content">
-                    <h3>{{ $stats['total_likes'] }}</h3>
-                    <p>Total Likes</p>
+                    <h3>{{ $activeTransactions->count() }}</h3>
+                    <p>Active Transactions</p>
                 </div>
             </div>
         </div>
@@ -323,7 +318,7 @@
             
 
         <!-- Published Properties Section -->
-        @if($approvedProperties->count() > 0)
+        
         <div id="published-section" class="content-section" data-section-name="published">
             <div class="section-header">
                 <h2>
@@ -345,7 +340,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($approvedProperties as $property)
+                        @forelse($approvedProperties as $property)
                             @php
                                 $primaryImage = $property->images->first();
                                 $imageUrl = $primaryImage ? asset('storage/' . $primaryImage->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop';
@@ -394,12 +389,20 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="6" class="empty-state-cell">
+                                    <div class="dashboard-empty-state">
+                                        <img src="{{ asset('images/character/dashboard-empty.png') }}" alt="No published properties" class="empty-dashboard-character">
+                                        <p class="text-muted">You don't have any published properties yet. Once a listing is approved, it will appear here.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        @endif
 
         <!-- Pending Properties Section -->
         @if($pendingProperties->count() > 0)
@@ -481,7 +484,6 @@
         @endif
 
         <!-- Rejected Properties Section -->
-        @if($rejectedProperties->count() > 0)
         <div id="rejected-section" class="content-section" data-section-name="rejected">
             <div class="section-header">
                 <h2>
@@ -503,7 +505,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($rejectedProperties as $property)
+                        @forelse($rejectedProperties as $property)
                             @php
                                 $primaryImage = $property->images->first();
                                 $imageUrl = $primaryImage ? asset('storage/' . $primaryImage->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop';
@@ -542,22 +544,30 @@
                                     <span class="status-badge status-rejected">Rejected</span>
                                 </td>
                                 <td>
-                                    <div class="table-actions">
-                                        <a href="{{ route('properties.edit', $property->id) }}" class="btn-icon" title="Edit & Resubmit">
+                                    <div class="table-actions table-actions--rejected">
+                                        <button type="button" class="btn-icon btn-icon--primary" title="Rejection details" onclick="openRejectionDetails({{ $property->id }})">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <a href="{{ route('properties.edit', $property->id) }}" class="btn-icon" title="Edit listing">
                                             <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{{ route('properties.show', $property->id) }}" class="btn-icon" title="View">
-                                            <i class="fas fa-eye"></i>
                                         </a>
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="6" class="empty-state-cell">
+                                    <div class="dashboard-empty-state">
+                                        <img src="{{ asset('images/character/dashboard-empty.png') }}" alt="No rejected properties" class="empty-dashboard-character">
+                                        <p class="text-muted">You don't have any rejected properties. Listings that are not approved will show up here.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        @endif
 
         <!-- Empty State -->
         @if($approvedProperties->count() == 0 && $pendingProperties->count() == 0 && $rejectedProperties->count() == 0)
@@ -688,6 +698,21 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('requestDetailsModal').style.display = 'none';
     }
 
+    function openRejectionDetails(propertyId) {
+        var block = document.getElementById('rejection-details-block-' + propertyId);
+        var mount = document.getElementById('rejectionDetailsContent');
+        var modal = document.getElementById('rejectionDetailsModal');
+        if (block && mount && modal) {
+            mount.innerHTML = block.innerHTML;
+            modal.style.display = 'flex';
+        }
+    }
+
+    function closeRejectionDetailsModal() {
+        var modal = document.getElementById('rejectionDetailsModal');
+        if (modal) modal.style.display = 'none';
+    }
+
     function confirmPaymentModal(transactionId) {
         if (confirm('Are you sure you have received the payment from the buyer?')) {
             confirmPayment(transactionId);
@@ -806,10 +831,23 @@ document.addEventListener('DOMContentLoaded', function() {
     window.requestRefund = requestRefund;
     window.generateAndSendContract = generateAndSendContract;
     window.downloadTransactionReport = downloadTransactionReport;
+    window.openRejectionDetails = openRejectionDetails;
+    window.closeRejectionDetailsModal = closeRejectionDetailsModal;
+
+    @if($errors->has('resubmit_notes') && session('resubmit_failed_property_id'))
+    (function () {
+        var rid = {{ (int) session('resubmit_failed_property_id') }};
+        if (rid) {
+            showSection('rejected-section', false);
+            openRejectionDetails(rid);
+        }
+    })();
+    @endif
 
     window.addEventListener('keydown', function(e){
         if(e.key === 'Escape') {
             closeRequestDetailsModal();
+            closeRejectionDetailsModal();
         }
     });
 });
@@ -864,6 +902,25 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <div id="requestDetailsContent">
         </div>
+    </div>
+</div>
+
+@foreach($rejectedProperties as $property)
+<div id="rejection-details-block-{{ $property->id }}" class="rejection-details-block" aria-hidden="true">
+    @include('landlord.partials.rejected-property-details', ['property' => $property])
+</div>
+@endforeach
+
+<!-- Rejected property: details + resubmit -->
+<div id="rejectionDetailsModal" class="modal-overlay" onclick="if(event.target === this) closeRejectionDetailsModal()">
+    <div class="modal-content modal-content--rejection">
+        <div class="modal-header">
+            <h2>Rejected listing</h2>
+            <button type="button" class="modal-close" onclick="closeRejectionDetailsModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="rejectionDetailsContent" class="modal-body--padded"></div>
     </div>
 </div>
 

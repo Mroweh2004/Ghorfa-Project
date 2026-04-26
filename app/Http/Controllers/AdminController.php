@@ -422,6 +422,8 @@ class AdminController extends Controller
                     'status' => 'approved',
                     'approved_at' => now(),
                     'approved_by' => auth()->id(),
+                    'rejection_reason' => null,
+                    'resubmit_notes' => null,
                 ]);
                 
                 // Notify the landlord that their property has been approved
@@ -500,28 +502,24 @@ class AdminController extends Controller
 
     public function rejectProperty(Request $request, Property $property)
     {
-        try {
-            $adminNotes = $request->input('admin_notes');
-            
-            if (empty($adminNotes) || trim($adminNotes) === '') {
-                $adminNotes = null;
-            }
+        $validated = $request->validate([
+            'admin_notes' => ['required', 'string', 'min:5', 'max:5000'],
+        ]);
+        $adminNotes = trim($validated['admin_notes']);
 
+        try {
             DB::transaction(function () use ($property, $adminNotes) {
                 $property->update([
                     'status' => 'rejected',
                     'approved_at' => now(),
                     'approved_by' => auth()->id(),
+                    'rejection_reason' => $adminNotes,
+                    'resubmit_notes' => null,
                 ]);
                 
                 // Notify the landlord that their property has been rejected
                 try {
-                    $rejectionMessage = 'Your property "' . $property->title . '" has been rejected by an admin.';
-                    if ($adminNotes) {
-                        $rejectionMessage .= ' Reason: ' . $adminNotes;
-                    } else {
-                        $rejectionMessage .= ' Please contact support for more information or review your property details and resubmit.';
-                    }
+                    $rejectionMessage = 'Your property "' . $property->title . '" has been rejected by an admin. Reason: ' . $adminNotes;
                     
                     if ($property->user) {
                         $this->createNotification(

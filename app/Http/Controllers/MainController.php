@@ -74,6 +74,16 @@ class MainController extends Controller
 
         return redirect()->route('profileInfo')->with('success', 'Profile photo updated.');
     }
+    function profileProperties()
+    {
+        $properties = Property::where('user_id', auth()->id())
+            ->with(['images'])
+            ->orderByDesc('created_at')
+            ->paginate(12);
+
+        return view('profile.properties', compact('properties'));
+    }
+
     function profileSecurity (){
         return view("profile.security");    
     }

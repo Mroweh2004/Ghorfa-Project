@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use App\Traits\CreatesNotifications;
 
 class LandlordController extends Controller
@@ -126,6 +127,46 @@ class LandlordController extends Controller
         }
         Session::put(self::SESSION_KEYS[$section], now()->toDateTimeString());
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Send a rejected listing back to the admin review queue after the landlord has addressed it.
+     */
+    public function resubmitProperty(Request $request, Property $property)
+    {
+        $user = Auth::user();
+        if ((int) $property->user_id !== (int) $user->id) {
+            abort(403);
+        }
+        if ($property->status !== 'rejected') {
+            return redirect()->route('landlord.dashboard')
+                ->with('error', 'Only rejected listings can be resubmitted for approval.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'resubmit_notes' => ['required', 'string', 'min:15', 'max:5000'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('landlord.dashboard')
+                ->withFragment('rejected-section')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('resubmit_failed_property_id', $property->id);
+        }
+
+        $notes = trim($validator->validated()['resubmit_notes']);
+
+        $property->update([
+            'status' => 'pending',
+            'rejection_reason' => null,
+            'resubmit_notes' => $notes,
+            'approved_at' => null,
+            'approved_by' => null,
+        ]);
+
+        return redirect()->route('landlord.dashboard')
+            ->with('success', 'Your listing has been sent for admin review. You can track it under Pending Approval.');
     }
 
     public function showApplyForm()

@@ -44,10 +44,12 @@ class PropertyController extends Controller
 
         if ($request->filled('location')) {
             $location = $request->input('location');
-            $query->where(function($q) use ($location) {
-                $q->where('country', 'like', "%$location%")
-                  ->orWhere('city', 'like', "%$location%")
-                  ->orWhere('address', 'like', "%$location%");
+            $query->where(function ($q) use ($location) {
+                $q->where('country', 'like', "%{$location}%")
+                  ->orWhere('city', 'like', "%{$location}%")
+                  ->orWhere('address', 'like', "%{$location}%")
+                  ->orWhere('title', 'like', "%{$location}%")
+                  ->orWhere('description', 'like', "%{$location}%");
             });
         }
 

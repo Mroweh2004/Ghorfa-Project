@@ -535,6 +535,12 @@
                                         <div>
                                             <strong>{{ $property->title }}</strong>
                                             <div style="font-size: 0.875rem; color: #64748b;">{{ $property->property_type }}</div>
+                                            @if(filled($property->resubmit_notes))
+                                                <div class="admin-landlord-resubmit-notes" title="Landlord summary after resubmission">
+                                                    <span class="admin-landlord-resubmit-notes__label"><i class="fas fa-comment-alt"></i> Landlord notes</span>
+                                                    <p class="admin-landlord-resubmit-notes__text">{{ $property->resubmit_notes }}</p>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

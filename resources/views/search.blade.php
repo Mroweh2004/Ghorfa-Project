@@ -24,10 +24,10 @@
                     <input type="hidden" name="sort" value="{{ request('sort') }}">
                 @endif
                 <div class="filter-group">
-                    <h3>Location</h3>
+                    <h3>Search</h3>
                     <div class="search-input">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="location" name="location" placeholder="Enter city or area..." value="{{ request('location') }}">
+                        <input type="text" id="location" name="location" placeholder="Location, title, or description..." value="{{ request('location') }}" autocomplete="off">
                     </div>
                 </div>
 

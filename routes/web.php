@@ -72,6 +72,7 @@ Route::middleware(['auth'])->prefix('landlord')->group(function () {
 Route::middleware(['auth', LandlordMiddleware::class])->prefix('landlord')->group(function () {
     Route::get('/dashboard', [LandlordController::class, 'dashboard'])->name('landlord.dashboard');
     Route::post('/mark-section-seen', [LandlordController::class, 'markSectionSeen'])->name('landlord.mark-section-seen');
+    Route::post('/properties/{property}/resubmit', [LandlordController::class, 'resubmitProperty'])->name('landlord.properties.resubmit');
     Route::get('/properties', [LandlordController::class, 'properties'])->name('landlord.properties');
 });
 

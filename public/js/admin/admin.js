@@ -428,8 +428,16 @@ async function handleApproveProperty(propertyId) {
 }
 
 async function handleRejectProperty(propertyId) {
-    const adminNotes = prompt('Please provide a reason for rejection (optional):');
-    
+    const adminNotesRaw = prompt('Rejection reason for the landlord (required, at least 5 characters):');
+    if (adminNotesRaw === null) {
+        return;
+    }
+    const adminNotes = (adminNotesRaw || '').trim();
+    if (adminNotes.length < 5) {
+        showNotification('Please enter a clear rejection reason (at least 5 characters).', 'error');
+        return;
+    }
+
     const button = document.querySelector(`.reject-property-btn[data-property-id="${propertyId}"]`);
     if (button) {
         button.disabled = true;
@@ -446,14 +454,15 @@ async function handleRejectProperty(propertyId) {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                admin_notes: adminNotes || null
+                admin_notes: adminNotes
             })
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to reject property');
+            const fromErrors = data.errors && Object.values(data.errors).flat().join(' ');
+            throw new Error(fromErrors || data.message || 'Failed to reject property');
         }
 
         if (data.success) {

@@ -36,7 +36,9 @@ class Property extends Model
         'user_id',
         'status',
         'approved_at',
-        'approved_by'
+        'approved_by',
+        'rejection_reason',
+        'resubmit_notes',
     ];
 
     public function amenities()
