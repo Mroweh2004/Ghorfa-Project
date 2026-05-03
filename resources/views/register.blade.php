@@ -45,6 +45,7 @@
     </aside>
 
     <div class="auth-main">
+      <p class="auth-mobile-signin">Already have an account? <a href="{{ route('login') }}">Sign in</a></p>
       <div class="register-card">
         @if ($errors->any())
           <div class="alert">

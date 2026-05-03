@@ -1,5 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Home Page')
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/home.css') }}">
+@endpush
+
 @section('content')
 
 @auth
@@ -177,7 +182,8 @@
                 </div>
                 <div class="card">
                     <div class="feature-icon-character">
-                    <img src="{{ asset('images/character/transaction.png') }}" alt="Transactions" class="feature-character">                    </div>
+                        <img src="{{ asset('images/character/transaction.png') }}" alt="Transactions" class="feature-character">
+                    </div>
                     <h3>Transactions Online</h3>
                     <p>Rent or buy through the site—request, and get a full transaction report.</p>
                 </div>

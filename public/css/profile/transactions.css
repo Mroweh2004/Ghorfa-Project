@@ -2,8 +2,34 @@
 
 .my-requests-page {
     max-width: 900px;
+    width: 100%;
+    min-width: 0;
     margin: 0 auto;
     padding: 1.5rem 0;
+    box-sizing: border-box;
+}
+
+.my-requests-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .my-requests-page h2 {
@@ -13,25 +39,33 @@
 
 .my-requests-table {
     width: 100%;
+    min-width: 0;
     border-collapse: collapse;
     background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+    table-layout: auto;
 }
 
 .my-requests-table th {
     text-align: left;
-    padding: 0.875rem 1rem;
+    padding: 0.75rem 0.85rem;
     background: #f8fafc;
     font-weight: 600;
     color: #475569;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
 }
 
 .my-requests-table td {
-    padding: 0.875rem 1rem;
+    padding: 0.75rem 0.85rem;
     border-top: 1px solid #e2e8f0;
+    font-size: 0.75rem;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.my-requests-table td:first-child strong {
+    font-size: 0.75rem;
+    font-weight: 600;
 }
 
 .my-requests-table tr:hover td {
@@ -40,10 +74,11 @@
 
 .my-requests-table .status-badge {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.6875rem;
     font-weight: 500;
+    line-height: 1.25;
 }
 
 .my-requests-table .status-pending {
@@ -74,14 +109,21 @@
 .my-requests-table .view-report-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.4rem 0.75rem;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.6rem;
     background: #0f172a;
     color: #fff;
     border-radius: 8px;
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 0.6875rem;
     font-weight: 500;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.my-requests-table .view-report-btn i {
+    font-size: 0.75rem;
 }
 
 .my-requests-table .view-report-btn:hover {
@@ -103,4 +145,94 @@
 
 .my-requests-page .pagination {
     margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+    .my-requests-page {
+        padding: 1rem 0;
+    }
+
+    .my-requests-table {
+        table-layout: fixed;
+    }
+
+    .my-requests-table th,
+    .my-requests-table td {
+        padding: 0.45rem 0.4rem;
+        font-size: 0.6875rem;
+        vertical-align: top;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .my-requests-table th {
+        font-size: 0.625rem;
+    }
+
+    .my-requests-table td:first-child strong {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+
+    .my-requests-table .status-badge {
+        font-size: 0.5625rem;
+        padding: 0.15rem 0.3rem;
+        max-width: 100%;
+        display: inline-block;
+        line-height: 1.2;
+    }
+
+    .my-requests-table__actions {
+        width: 4.25rem;
+        min-width: 4.25rem;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .my-requests-table .view-report-btn {
+        flex-direction: column;
+        gap: 0.12rem;
+        padding: 0.3rem 0.25rem;
+        font-size: 0.6rem;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    .my-requests-table .view-report-btn i {
+        font-size: 0.65rem;
+    }
+
+    .my-requests-table .view-report-btn__text {
+        display: block;
+        max-width: 3.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 380px) {
+    .my-requests-table .view-report-btn__text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .my-requests-table .view-report-btn {
+        padding: 0.4rem;
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+    }
+
+    .my-requests-table__actions {
+        width: 2.75rem;
+        min-width: 2.75rem;
+    }
 }

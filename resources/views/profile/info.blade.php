@@ -3,44 +3,12 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{asset('css/profile/profile.css')}}">
-<link rel="stylesheet" href="{{asset('css/search.css')}}">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 @endpush
 
 @push('scripts')
 <script src="{{ asset('js/profile/profile.js') }}" defer></script>
-<script src="{{ asset('js/search.js') }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching functionality
-    const navItems = document.querySelectorAll('.nav-item[data-tab]');
-    const tabContents = document.querySelectorAll('.profile-tab-content');
-    
-    navItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetTab = this.getAttribute('data-tab');
-            
-            // Remove active class from all nav items
-            navItems.forEach(nav => nav.classList.remove('active'));
-            
-            // Add active class to clicked item
-            this.classList.add('active');
-            
-            // Hide all tab contents
-            tabContents.forEach(content => content.style.display = 'none');
-            
-            // Show target tab content
-            if (targetTab === 'info') {
-                document.getElementById('infoTab').style.display = 'block';
-            } else if (targetTab === 'favorites') {
-                document.getElementById('favoritesTab').style.display = 'block';
-            }
-        });
-    });
-});
-</script>
 @endpush
 
 @section('content')
@@ -49,27 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="profile-layout-container">
         {{-- Left Sidebar --}}
-        <aside class="profile-sidebar">
-            <nav class="sidebar-nav">
-                <a href="{{ route('profileInfo') }}" class="nav-item {{ request()->has('page') ? '' : 'active' }}" title="Profile Info" data-tab="info">
-                    <i class="fas fa-user"></i>
-                </a>
-                <a href="#" class="nav-item {{ request()->has('page') ? 'active' : '' }}" title="Favorites" data-tab="favorites">
-                    <i class="far fa-heart"></i>
-                </a>
-                <a href="{{ route('profileProperties') }}" class="nav-item" title="Properties">
-                    <i class="fas fa-map-marker-alt"></i>
-                </a>
-                <a href="#" class="nav-item" title="Settings">
-                    <i class="fas fa-cog"></i>
-                </a>
-            </nav>
-        </aside>
+        @include('profile.partials.sidebar-nav')
 
         {{-- Main Content --}}
         <main class="profile-main-content">
-            {{-- Profile Info Tab --}}
-            <div class="profile-tab-content" id="infoTab" style="{{ request()->has('page') ? 'display:none;' : '' }}">
+            <div class="profile-tab-content" id="infoTab">
                 <div class="profile-card-modern">
                     {{-- Gradient Banner --}}
                     <div class="profile-banner">
@@ -254,108 +206,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            {{-- Favorites Tab (same design & theme as search page) --}}
-            <div class="profile-tab-content" id="favoritesTab" style="{{ request()->has('page') ? '' : 'display:none;' }}">
-                <div class="search-page">
-                    <section class="search-results">
-                        <div class="results-header">
-                            <div class="results-count">
-                                <h2>{{ $favorites->total() }} {{ $favorites->total() === 1 ? 'Favorite' : 'Favorites' }}</h2>
-                                <p>Your saved properties</p>
-                            </div>
-                        </div>
-
-                        @if($favorites->count() > 0)
-                        <div class="listings-grid">
-                            @foreach($favorites as $property)
-                            <div class="listing-card" data-price="{{ $property->price }}" data-created="{{ $property->created_at->timestamp }}" data-likes="{{ $property->likedBy()->count() }}">
-                                <div class="listing-image">
-                                    <img src="{{ \App\Services\PropertyImageService::getImageUrl($property) }}" alt="{{ $property->title }}">
-                                    <span class="listing-tag">For {{ $property->listing_type }}</span>
-                                    @if($property->getAvailabilityMessage())
-                                    <span class="listing-tag listing-tag--unavailable" title="{{ $property->getAvailabilityMessage() }}">{{ $property->getAvailabilityMessage() }}</span>
-                                    @endif
-                                    <button 
-                                        class="favorite-btn like-btn" 
-                                        data-property-id="{{ $property->id }}"
-                                        data-liked="true"
-                                    >
-                                        <i class="fa-solid fa-heart"></i>
-                                    </button>
-                                    <span class="like-count" id="like-count-{{ $property->id }}">{{ $property->likedBy()->count() }}</span>
-                                </div>
-                                <button class="setting-btn" aria-label="Options"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
-                                <ul class="setting-list">
-                                    <li><a href="{{ route('properties.show', $property->id) }}">View</a></li>
-                                </ul>
-                                <div class="listing-content">
-                                    <span class="available-from">Listed {{ $property->created_at->diffForHumans() }}</span>
-                                    <h3>{{ $property->title }}</h3>
-                                    <p class="listing-location">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        {{ $property->address }}
-                                    </p>
-                                    <div class="listing-features">
-                                        <span><i class="fas fa-home"></i> {{ $property->property_type }}</span>
-                                        <span><i class="fa-solid fa-person-shelter"></i> {{ $property->room_nb }} Room</span>
-                                        @if($property->bedroom_nb)
-                                            <span><i class="fas fa-bed"></i> {{ $property->bedroom_nb }} Bedrooms</span>
-                                        @endif
-                                        @if($property->bathroom_nb)
-                                            <span><i class="fas fa-bath"></i> {{ $property->bathroom_nb }} Bathrooms</span>
-                                        @endif
-                                        @if($property->area_m3)
-                                            <span><i class="fas fa-ruler-combined"></i> {{ $property->area_m3 }}m²</span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="listing-meta">
-                                    <div class="listing-price">
-                                        <b>${{ $property->price }}</b>@if(($property->listing_type ?? null) === 'rent')/{{ $property->price_duration ?? 'month' }}@endif
-                                    </div>
-                                    <a href="{{ route('properties.show', $property->id) }}" class="view-btn">View Details</a>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-
-                        <div class="pagination">
-                            @if ($favorites->hasPages())
-                                @if ($favorites->onFirstPage())
-                                    <button class="pagination-btn" disabled>Previous</button>
-                                @else
-                                    <a href="{{ $favorites->previousPageUrl() }}" class="pagination-btn">Previous</a>
-                                @endif
-
-                                @foreach ($favorites->getUrlRange(1, $favorites->lastPage()) as $page => $url)
-                                    @if ($page == $favorites->currentPage())
-                                        <button class="pagination-btn active">{{ $page }}</button>
-                                    @else
-                                        <a href="{{ $url }}" class="pagination-btn">{{ $page }}</a>
-                                    @endif
-                                @endforeach
-
-                                @if ($favorites->hasMorePages())
-                                    <a href="{{ $favorites->nextPageUrl() }}" class="pagination-btn">Next</a>
-                                @else
-                                    <button class="pagination-btn" disabled>Next</button>
-                                @endif
-                            @endif
-                        </div>
-                        @else
-                        <div class="no-results">
-                            <div class="no-results-character">
-                                <img src="{{ asset('images/character/search-looking.png') }}" alt="No favorites yet" class="empty-state-character">
-                            </div>
-                            <h3>No favorites yet</h3>
-                            <p>Start exploring and save your favorite properties with the heart button.</p>
-                            <a href="{{ route('search') }}" class="reset-filters-btn">Browse Properties</a>
-                        </div>
-                        @endif
-                    </section>
                 </div>
             </div>
         </main>

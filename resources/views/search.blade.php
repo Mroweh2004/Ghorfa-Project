@@ -105,11 +105,21 @@
         </section>
         
         <section class="search-results">
-            <button class="search-show-btn"><i class="fas fa-search"></i> Show Filters</button>
+            <button class="search-show-btn"><i class="fas fa-search"></i>Filters</button>
             <div class="results-header">
                 <div class="results-count">
                     <h2>{{ $properties->total() }} Rooms Found</h2>
-                    <p>in Lebanon</p>
+                    @php
+                        $listedCountries = $properties->getCollection()
+                            ->pluck('country')
+                            ->filter()
+                            ->unique()
+                            ->values();
+                        $countriesLabel = $listedCountries->isEmpty()
+                            ? 'All locations'
+                            : $listedCountries->join(', ');
+                    @endphp
+                    <p>in {{ $countriesLabel }}</p>
                 </div>
                 <div class="results-sort">
                     <button class="filter-toggle-btn">
@@ -123,7 +133,7 @@
                         <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
                     </select>
                 </div>
-            </div>
+                </div>
 
             
                 @if($properties->count() > 0)

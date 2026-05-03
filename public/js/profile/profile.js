@@ -188,42 +188,72 @@
       const upArrow         = $('.up');
       const downArrow       = $('.down');
       const dropdown        = $('.profile-dropdown');
-      const navProfileImage = $('.nav-profile-image');
-  
+      const profileTrigger  = $('#profile-link');
+
       let dropdownVisible = false;
-  
+
+      function isCompactHeader() {
+        return window.matchMedia('(max-width: 640px)').matches;
+      }
+
+      function syncChevrons() {
+        if (!upArrow || !downArrow) return;
+        if (isCompactHeader()) {
+          upArrow.style.display = 'none';
+          downArrow.style.display = 'none';
+          return;
+        }
+        if (dropdownVisible) {
+          upArrow.style.display = 'none';
+          downArrow.style.display = 'block';
+        } else {
+          upArrow.style.display = 'block';
+          downArrow.style.display = 'none';
+        }
+      }
+
       function showDropdown() {
-        if (!upArrow || !downArrow || !dropdown) return;
-        upArrow.style.display = 'none';
-        downArrow.style.display = 'block';
+        if (!dropdown) return;
         dropdown.style.display = 'flex';
         dropdownVisible = true;
+        syncChevrons();
+        profileTrigger?.setAttribute('aria-expanded', 'true');
       }
-  
+
       function hideDropdown() {
-        if (!upArrow || !downArrow || !dropdown) return;
-        upArrow.style.display = 'block';
-        downArrow.style.display = 'none';
+        if (!dropdown) return;
         dropdown.style.display = 'none';
         dropdownVisible = false;
+        syncChevrons();
+        profileTrigger?.setAttribute('aria-expanded', 'false');
       }
-  
-      // Guard against missing elements
-      if (upArrow && downArrow && dropdown) {
-        upArrow.addEventListener('click', (e) => { e.stopPropagation(); showDropdown(); });
-        downArrow.addEventListener('click', (e) => { e.stopPropagation(); hideDropdown(); });
-        navProfileImage?.addEventListener('click', (e) => {
+
+      if (dropdown && profileTrigger) {
+        profileTrigger.addEventListener('click', (e) => {
+          if (e.target.closest('.up, .down')) return;
           e.stopPropagation();
           dropdownVisible ? hideDropdown() : showDropdown();
         });
-  
-        document.addEventListener('click', (e) => {
-          if (!dropdown.contains(e.target) && e.target !== upArrow && e.target !== downArrow && e.target !== navProfileImage) {
-            hideDropdown();
-          }
+
+        profileTrigger.addEventListener('keydown', (e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          dropdownVisible ? hideDropdown() : showDropdown();
         });
-  
-        hideDropdown(); 
+
+        upArrow?.addEventListener('click', (e) => { e.stopPropagation(); showDropdown(); });
+        downArrow?.addEventListener('click', (e) => { e.stopPropagation(); hideDropdown(); });
+
+        document.addEventListener('click', (e) => {
+          if (!dropdownVisible) return;
+          const t = e.target;
+          if (dropdown.contains(t) || profileTrigger.contains(t)) return;
+          hideDropdown();
+        });
+
+        window.addEventListener('resize', syncChevrons);
+
+        hideDropdown();
       }
     });
   })();

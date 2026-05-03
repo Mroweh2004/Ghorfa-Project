@@ -29,6 +29,9 @@ function initMap() {
         center: { lat: 33.894917, lng: 35.503083 },
         zoom: 10,
         mapTypeId: 'roadmap',
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true,
         styles: [
             {
                 featureType: 'poi',
@@ -215,36 +218,54 @@ function createInfoWindowContent(property) {
 }
 
 function addSearchBox() {
+    const wrap = document.createElement('div');
+    wrap.className = 'map-top-controls';
+
     const input = document.createElement('input');
     input.type = 'text';
-    input.placeholder = 'Search for a location...';
+    input.placeholder = 'Search place…';
     input.className = 'map-search-input';
-    input.style.cssText = `
-        background-color: #fff;
-        border: 2px solid #e5e7eb;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        font-size: 15px;
-        padding: 12px 16px;
-        text-overflow: ellipsis;
-        width: 300px;
-        margin: 12px;
-        transition: all 0.3s ease;
-        font-family: inherit;
-    `;
-    
-    input.addEventListener('focus', function() {
-        this.style.borderColor = '#667eea';
-        this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(0,0,0,0.1)';
-    });
-    
-    input.addEventListener('blur', function() {
-        this.style.borderColor = '#e5e7eb';
-        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-    });
+    input.setAttribute('aria-label', 'Search for a place on the map');
+    input.autocomplete = 'off';
+
+    const typeToggle = document.createElement('div');
+    typeToggle.className = 'map-type-toggle';
+    typeToggle.setAttribute('role', 'group');
+    typeToggle.setAttribute('aria-label', 'Map appearance');
+
+    const makeTypeBtn = (label, mapTypeId) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'map-type-btn';
+        btn.textContent = label;
+        btn.setAttribute('aria-pressed', mapTypeId === 'roadmap' ? 'true' : 'false');
+        btn.addEventListener('click', () => {
+            map.setMapTypeId(mapTypeId);
+            typeToggle.querySelectorAll('.map-type-btn').forEach((b) => {
+                b.classList.toggle('is-active', b === btn);
+                b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+            });
+        });
+        return btn;
+    };
+
+    const btnMap = makeTypeBtn('Map', 'roadmap');
+    const btnSat = makeTypeBtn('Satellite', 'satellite');
+    btnMap.classList.add('is-active');
+
+    typeToggle.appendChild(btnMap);
+    typeToggle.appendChild(btnSat);
+
+    wrap.appendChild(input);
+    wrap.appendChild(typeToggle);
 
     const searchBox = new google.maps.places.SearchBox(input);
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+    const topRight = map.controls[google.maps.ControlPosition.TOP_RIGHT];
+    if (typeof topRight.insertAt === 'function') {
+        topRight.insertAt(0, wrap);
+    } else {
+        topRight.push(wrap);
+    }
 
     searchBox.addListener('places_changed', () => {
         const places = searchBox.getPlaces();
@@ -266,6 +287,48 @@ function clearFilters() {
     }
     const mapRoute = window.mapConfig?.mapRoute || '/map';
     window.location.href = mapRoute;
+}
+
+function initMapFilterSidebar() {
+    const filtersPanel = document.querySelector('.map-filters-enhanced');
+    const toggleBtn = document.querySelector('.map-filter-toggle-btn');
+    const closeBtn = document.querySelector('.map-filter-close-btn');
+    const overlay = document.querySelector('.map-filter-overlay');
+
+    if (!filtersPanel || !toggleBtn || !closeBtn || !overlay) return;
+
+    const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
+
+    const closeFilters = () => {
+        filtersPanel.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    const openFilters = () => {
+        if (!isMobile()) return;
+        filtersPanel.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFilters();
+    });
+
+    closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeFilters();
+    });
+
+    overlay.addEventListener('click', closeFilters);
+
+    window.addEventListener('resize', () => {
+        if (!isMobile()) {
+            closeFilters();
+        }
+    });
 }
 
 async function toggleLike(propertyId, buttonElement) {
@@ -336,3 +399,9 @@ window.addEventListener('resize', () => {
         google.maps.event.trigger(map, 'resize');
     }
 });
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMapFilterSidebar);
+} else {
+    initMapFilterSidebar();
+}

@@ -837,7 +837,11 @@ body {
 }
 
 /* Responsive Modal */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
+    .property-hero {
+        min-height: 320px;
+    }
+
     .image-modal {
         padding: 8px;
     }
@@ -849,7 +853,7 @@ body {
         max-height: 95vh;
     }
 
-    .modal-content {
+    .image-modal .modal-content {
         width: 98%;
         height: 98%;
         max-height: 90vh;
@@ -899,7 +903,11 @@ body {
 }
 
 @media (max-width: 480px) {
-    .modal-content {
+    .property-hero {
+        min-height: 280px;
+    }
+
+    .image-modal .modal-content {
         width: 100%;
         height: 100%;
         border-radius: 0;
@@ -932,7 +940,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .property-layout {
         grid-template-columns: 1fr;
         gap: 30px;
@@ -1661,7 +1669,7 @@ html {
     flex: 1;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
     .request-card-content {
         flex-direction: column;
         text-align: center;
@@ -2049,7 +2057,7 @@ html {
     transform: translateY(0);
 }
 
-@media (max-width: 520px) {
+@media (max-width: 480px) {
     .trxn-modal {
         max-height: 100dvh;
         border-radius: 1rem 1rem 0 0;

@@ -18,6 +18,7 @@ use App\Http\Controllers\TransactionController;
 Route::get( '/', [MainController::class,"homePage"])->name(name: 'home');
 Route::prefix('profile')->middleware('auth')->group(function (): void {
     Route::get('/info', [MainController::class, 'profileInfo'])->name('profileInfo');
+    Route::get('/favorites', [MainController::class, 'profileFavorites'])->name('profileFavorites');
     Route::get('/properties',  [MainController::class, 'profileProperties'])->name('profileProperties');
     Route::get('/security',  [MainController::class, 'profileSecurity'])->name('profileSecurity');
     Route::get('/transactions', [MainController::class, 'profileTransactions'])->name('profile.transactions');

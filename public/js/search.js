@@ -36,6 +36,18 @@ function ShowFilterToggle() {
   const searchFilters = document.querySelector('.search-filters');
   const filterOverlay = document.querySelector('.filter-overlay');
   const filterCloseBtn = document.querySelector('.filter-close-btn');
+  const isMobileView = () => window.matchMedia('(max-width: 640px)').matches;
+
+  function updateShowButtonVisibility() {
+    if (!searchShowBtn) return;
+    if (!isMobileView()) {
+      searchShowBtn.style.display = '';
+      return;
+    }
+
+    const isFilterOpen = searchFilters.classList.contains('active');
+    searchShowBtn.style.display = isFilterOpen ? 'none' : 'flex';
+  }
 
   function closeFilters() {
     searchFilters.classList.remove('active');
@@ -44,6 +56,7 @@ function ShowFilterToggle() {
       filterOverlay.classList.remove('active');
     }
     document.body.style.overflow = 'auto';
+    updateShowButtonVisibility();
   }
 
   function openFilters() {
@@ -53,6 +66,7 @@ function ShowFilterToggle() {
       filterOverlay.classList.add('active');
     }
     document.body.style.overflow = 'hidden';
+    updateShowButtonVisibility();
   }
 
   if (filterToggleBtn && searchFilters) {
@@ -99,6 +113,9 @@ function ShowFilterToggle() {
       openFilters();
     });
   }
+
+  window.addEventListener('resize', updateShowButtonVisibility);
+  updateShowButtonVisibility();
 }
 
 

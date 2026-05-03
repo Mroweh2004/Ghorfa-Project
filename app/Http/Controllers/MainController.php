@@ -23,10 +23,22 @@ class MainController extends Controller
         return view("home", compact('popularCities'));
     }
 
-    function profileInfo(){
+    function profileInfo()
+    {
+        if (request()->query('page')) {
+            return redirect()->route('profileFavorites', ['page' => request()->query('page')]);
+        }
+
+        return view('profile.info');
+    }
+
+    function profileFavorites()
+    {
         $favorites = auth()->user()->likedProperties()->with(['images', 'amenities', 'rules'])->paginate(12);
-        return view("profile.info", compact('favorites'));
-    }    
+
+        return view('profile.favorites', compact('favorites'));
+    }
+
     function updateProfile(Request $request){
         $user = $request->user();
 

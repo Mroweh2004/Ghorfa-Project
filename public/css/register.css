@@ -12,28 +12,31 @@
 }
 
   *{ box-sizing: border-box }
-  html,body{ height:100% }
+  html,body{ min-height: 100% }
+  /* Do not reset body margin — layouts/app sets margin-top for the fixed navbar */
   body{
-    margin: 0;
     font-family: "Inter", sans-serif;
     background: var(--bg);
     color: var(--text);
   }
   
   .auth-wrapper{
-    min-height: 100vh;
+    min-height: calc(100vh - var(--app-header-height, 100px));
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     background: var(--bg);  
-    padding: 40px 18px;
-    margin: 80px 0px;
+    padding: clamp(1rem, 4vw, 2.5rem) clamp(0.75rem, 4vw, 1.25rem);
+    margin-top: calc(var(--app-header-height, 100px) + 0.5rem);
+    margin-bottom: 0;
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
   .auth-shell{
     display:grid;
     grid-template-columns: 1.1fr 1fr;
     gap: 0;
     width: min(1120px, 100%);
+    max-width: 100%;
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--border);
     border-radius: 22px;
@@ -87,8 +90,31 @@
   /* Main (right) */
   .auth-main{
     background: #fff;
-    display:flex; align-items:center; justify-content:center;
+    display:flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
     padding: 28px;
+    min-width: 0;
+  }
+
+  .auth-mobile-signin {
+    display: none;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin: 0 0 1rem 0;
+    order: -1;
+  }
+
+  .auth-mobile-signin a {
+    color: var(--brand);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .auth-mobile-signin a:hover {
+    text-decoration: underline;
   }
   
   .register-card{
@@ -97,12 +123,15 @@
     border-radius: 12px;
     padding: 32px;
     box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
   
   .alert{
-    background: rgba(255,107,107,0.12);
-    border: 1px solid rgba(255,107,107,0.5);
-    color: #ffd2d2;
+    background: rgba(254, 226, 226, 0.95);
+    border: 1px solid rgba(248, 113, 113, 0.65);
+    color: #991b1b;
     padding: 12px 14px;
     border-radius: 12px;
     margin-bottom: 16px;
@@ -114,12 +143,101 @@
     grid-template-columns: 1fr 1fr;
   }
   @media (max-width: 980px){
-    .auth-shell{ grid-template-columns: 1fr }
+    .auth-shell{
+      grid-template-columns: 1fr;
+      border-radius: 16px;
+    }
     .auth-aside{ display:none }
+    .auth-mobile-signin {
+      display: block;
+    }
   }
-  @media (max-width: 490px){
-    .auth-main{
-      margin: 200px 0px;
+
+  @media (max-width: 640px) {
+    .auth-wrapper {
+      margin-top: calc(var(--app-header-height, 56px) + 0.35rem);
+      padding: 0.75rem 0.65rem;
+      padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+      align-items: stretch;
+    }
+
+    .auth-shell {
+      border-radius: 12px;
+    }
+
+    .auth-main {
+      padding: 1rem 0.85rem 1.25rem;
+    }
+
+    .register-card {
+      padding: 1.1rem 0.85rem 1.25rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .grid.two {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .grid.two .form-group {
+      margin-bottom: 14px;
+    }
+
+    .dob-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+
+    .dob-grid select {
+      padding: 0.55rem 0.35rem;
+      font-size: 0.8125rem;
+      min-width: 0;
+    }
+
+    .input-inline {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.25rem;
+    }
+
+    .input-inline .dial {
+      flex: 0 0 auto;
+    }
+
+    .input-inline input {
+      flex: 1 1 140px;
+      min-width: 0;
+      padding: 10px 12px 10px 12px;
+    }
+
+    .profile-image-preview {
+      width: 120px;
+      height: 120px;
+    }
+
+    .profile-image-preview i {
+      font-size: 36px;
+    }
+
+    .register-btn {
+      padding: 12px 14px;
+      font-size: 0.9375rem;
+    }
+
+    .terms {
+      font-size: 11px;
+      line-height: 1.45;
+      padding: 0 0.25rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .toggle-eye {
+      font-size: 16px;
+      min-width: 28px;
+      min-height: 28px;
+      padding: 4px 6px;
     }
   }
   

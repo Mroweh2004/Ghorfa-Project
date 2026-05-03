@@ -28,14 +28,15 @@
                 <a href="{{ route('search') }}" class="view-report-btn">Search properties</a>
             </div>
         @else
+            <div class="my-requests-table-wrap">
             <table class="my-requests-table">
                 <thead>
                     <tr>
-                        <th>Property</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th></th>
+                        <th scope="col">Property</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date</th>
+                        <th scope="col"><span class="visually-hidden">Actions</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,15 +54,16 @@
                             <span class="status-badge status-{{ $status }}">{{ $statusLabel }}</span>
                         </td>
                         <td>{{ $tx->created_at->format('M j, Y') }}</td>
-                        <td>
-                            <a href="{{ route('transactions.show', $tx) }}" class="view-report-btn">
-                                <i class="fas fa-external-link-alt"></i> View report
+                        <td class="my-requests-table__actions">
+                            <a href="{{ route('transactions.show', $tx) }}" class="view-report-btn" aria-label="View report">
+                                <i class="fas fa-external-link-alt" aria-hidden="true"></i><span class="view-report-btn__text">View report</span>
                             </a>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+            </div>
             @if($transactions->hasPages())
                 <div class="pagination">
                     {{ $transactions->links() }}

@@ -2,8 +2,8 @@
     <header class="header">
         <nav class="navbar">
             <div class="logo">
-                <img src="{{ asset('img/logo.png') }}" alt="Ghorfa Logo" width="50px">
-                Ghorfa
+                <img src="{{ asset('img/logo.png') }}" alt="Ghorfa Logo" width="50" height="50">
+                <span class="logo-text">Ghorfa</span>
             </div>
             <ul class="nav-links">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
@@ -35,7 +35,7 @@
                 @if(auth()->user()->isLandlord() || auth()->user()->isAdmin())
                 <a href="{{ route('list-property') }}" class="main-list-btn"><i class="fas fa-plus"></i> List Your Space</a>
                 @endif
-                <div id="profile-link">
+                <div id="profile-link" class="profile-menu-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="true" aria-label="Account menu">
                     <div class="nav-profile-image">
                         @if(Auth::user()->profile_image)
                             <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="Profile Image">       
@@ -67,17 +67,17 @@
     <header class="header">
         <nav class="navbar">
             <div class="logo">
-                <img src="{{ asset('img/logo.png') }}" alt="Ghorfa Logo" width="50px">
-                Ghorfa
+                <img src="{{ asset('img/logo.png') }}" alt="Ghorfa Logo" width="50" height="50">
+                <span class="logo-text">Ghorfa</span>
             </div>
             <ul class="nav-links">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="{{ route('search') }}" class="{{ request()->routeIs('search') ? 'active' : '' }}"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'active' : '' }}"><i class="fas fa-map-marked-alt"></i> Map</a></li>
             </ul>
-            <ul class="nav-links">
-                <li><a href="{{ route('login') }}" class="{{ request()->routeIs('login') ? 'active' : '' }}">Login</a></li>
-                <li><a href="{{ route('register') }}" class="{{ request()->routeIs('register') ? 'active' : '' }}">SignUp</a></li>
+            <ul class="nav-links guest-auth-links">
+                <li><a href="{{ route('login') }}" class="{{ request()->routeIs('login') ? 'active' : '' }}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li><a href="{{ route('register') }}" class="{{ request()->routeIs('register') ? 'active' : '' }}"><i class="fas fa-user-plus"></i> Sign up</a></li>
             </ul>
         </nav>
     </header>
