@@ -13,4 +13,5 @@
             <i class="fas fa-cog"></i>
         </a>
     </nav>
+    
 </aside>

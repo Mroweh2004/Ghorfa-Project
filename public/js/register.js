@@ -41,13 +41,22 @@
             const input = document.getElementById(targetId);
             if (!input) return;
             
+            const icon = this.querySelector('i');
             // Toggle password visibility
             if (input.type === 'password') {
               input.type = 'text';
-              this.textContent = '🙈';
+              if (icon) {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+              }
+              this.setAttribute('aria-label', 'Hide password');
             } else {
               input.type = 'password';
-              this.textContent = '👁';
+              if (icon) {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+              }
+              this.setAttribute('aria-label', 'Show password');
             }
           });
         });

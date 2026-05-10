@@ -239,14 +239,16 @@
 
 @media (max-width: 480px) {
     .requests-table-wrapper,
-    .transactions-table-wrapper {
+    .transactions-table-wrapper,
+    .properties-table-wrapper {
         overflow-x: auto;
         margin-bottom: 20px;
     }
 
     .requests-table,
-    .transactions-table {
-        min-width: 500px;
+    .transactions-table,
+    .properties-table {
+        min-width: 0;
     }
 
     .requests-table th,

@@ -77,7 +77,7 @@
             <div class="form-group">
               <label for="first_name">First Name</label>
               <div class="input-wrap">
-                <span class="input-icon">@</span>
+                <span class="input-icon"><i class="fas fa-user" aria-hidden="true"></i></span>
                 <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" placeholder="e.g. Ali" required>
               </div>
               @error('first_name') <span class="text-danger">{{ $message }}</span> @enderror
@@ -86,7 +86,7 @@
             <div class="form-group">
               <label for="last_name">Last Name</label>
               <div class="input-wrap">
-                <span class="input-icon">@</span>
+                <span class="input-icon"><i class="fas fa-user" aria-hidden="true"></i></span>
                 <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" placeholder="e.g. Ahmad" required>
               </div>
               @error('last_name') <span class="text-danger">{{ $message }}</span> @enderror
@@ -96,9 +96,7 @@
           <div class="form-group">
             <label for="email">Email</label>
             <div class="input-wrap">
-              <span class="input-icon">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z" fill="none"/><path d="M4 8l8 5 8-5"/></svg>
-              </span>
+              <span class="input-icon"><i class="fas fa-envelope" aria-hidden="true"></i></span>
               <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required>
             </div>
             @error('email') <span class="text-danger">{{ $message }}</span> @enderror
@@ -108,11 +106,9 @@
             <div class="form-group">
               <label for="password">Password</label>
               <div class="input-wrap">
-                <span class="input-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10h12v10H6z"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
-                </span>
+                <span class="input-icon"><i class="fas fa-key" aria-hidden="true"></i></span>
                 <input type="password" id="password" name="password" placeholder="Min 8 characters" required>
-                <button type="button" class="toggle-eye" data-target="password" aria-label="Show or hide password">👁</button>
+                <button type="button" class="toggle-eye" data-target="password" aria-label="Show password"><i class="fas fa-eye" aria-hidden="true"></i></button>
               </div>
               <small id="pwHint" class="hint">Use 8+ chars with letters & numbers</small>
               @error('password') <span class="text-danger">{{ $message }}</span> @enderror
@@ -121,11 +117,9 @@
             <div class="form-group">
               <label for="password_confirmation">Confirm Password</label>
               <div class="input-wrap">
-                <span class="input-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10h12v10H6z"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
-                </span>
+                <span class="input-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
                 <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Re-enter password" required>
-                <button type="button" class="toggle-eye" data-target="password_confirmation" aria-label="Show or hide password">👁</button>
+                <button type="button" class="toggle-eye" data-target="password_confirmation" aria-label="Show password"><i class="fas fa-eye" aria-hidden="true"></i></button>
               </div>
               @error('password_confirmation') <span class="text-danger">{{ $message }}</span> @enderror
             </div>

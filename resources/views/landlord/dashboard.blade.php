@@ -75,8 +75,14 @@
     </nav>
 </aside>
 
+<div class="landlord-sidebar-backdrop" id="landlordSidebarBackdrop" aria-hidden="true"></div>
+
 <!-- Main Content Area -->
 <main class="dashboard-main">
+    <button type="button" class="landlord-mobile-nav-toggle" id="landlordMobileNavToggle" aria-controls="landlordSidebar" aria-expanded="false" aria-label="Open dashboard menu">
+        <i class="fas fa-bars" aria-hidden="true"></i>
+        <span>Menu</span>
+    </button>
     <!-- Header -->
     <header class="landlord-header">
         <div class="header-title">
@@ -404,8 +410,7 @@
             </div>
         </div>
 
-        <!-- Pending Properties Section -->
-        @if($pendingProperties->count() > 0)
+        <!-- Pending Properties Section (always present so #pending-section nav works) -->
         <div id="pending-section" class="content-section" data-section-name="pending">
             <div class="section-header">
                 <h2>
@@ -427,7 +432,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($pendingProperties as $property)
+                        @forelse($pendingProperties as $property)
                             @php
                                 $primaryImage = $property->images->first();
                                 $imageUrl = $primaryImage ? asset('storage/' . $primaryImage->path) : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop';
@@ -476,12 +481,20 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="6" class="empty-state-cell">
+                                    <div class="dashboard-empty-state">
+                                        <img src="{{ asset('images/character/dashboard-empty.png') }}" alt="No pending properties" class="empty-dashboard-character">
+                                        <p class="text-muted">You don't have any listings waiting for approval right now.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        @endif
 
         <!-- Rejected Properties Section -->
         <div id="rejected-section" class="content-section" data-section-name="rejected">
@@ -597,6 +610,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     const sections = document.querySelectorAll('.content-section');
 
+    function scrollSectionIntoView(sectionEl) {
+        if (!sectionEl) return;
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    }
+
     function showSection(sectionId, markAsSeen) {
         sections.forEach(s => {
             if (s.id === sectionId) {
@@ -659,7 +681,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const targetSection = document.getElementById(targetId);
                 if (targetSection) {
                     showSection(targetId, true);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    scrollSectionIntoView(targetSection);
+                    if (window.matchMedia('(max-width: 640px)').matches) {
+                        window.setTimeout(function () {
+                            scrollSectionIntoView(targetSection);
+                        }, 380);
+                    }
                 }
             }
         });
@@ -680,6 +707,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const sectionExists = initial && document.getElementById(initial);
         if (sectionExists) {
             showSection(initial, false);
+            if (window.location.hash) {
+                scrollSectionIntoView(document.getElementById(initial));
+            }
         } else if (sections.length > 0) {
             showSection(sections[0].id, false);
         }
@@ -854,25 +884,92 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-// Sidebar collapse behavior
+// Sidebar: desktop collapse + phone drawer
 document.addEventListener('DOMContentLoaded', function () {
   const sidebar = document.getElementById('landlordSidebar');
   const toggle = document.getElementById('sidebarToggle');
   const container = document.querySelector('.main-container');
+  const mobileToggle = document.getElementById('landlordMobileNavToggle');
+  const backdrop = document.getElementById('landlordSidebarBackdrop');
   if (!sidebar || !toggle || !container) return;
 
-  const collapsed = localStorage.getItem('landlordSidebarCollapsed') === '1';
-  if (collapsed) {
-    sidebar.classList.add('collapsed');
-    container.classList.add('sidebar-collapsed');
+  const mqMobile = window.matchMedia('(max-width: 640px)');
+
+  function isMobileNav() {
+    return mqMobile.matches;
   }
 
-  toggle.addEventListener('click', function () {
+  function applyDesktopCollapsedFromStorage() {
+    const collapsed = localStorage.getItem('landlordSidebarCollapsed') === '1';
+    sidebar.classList.toggle('collapsed', collapsed);
+    container.classList.toggle('sidebar-collapsed', collapsed);
+  }
+
+  function syncSidebarForViewport() {
+    if (isMobileNav()) {
+      sidebar.classList.remove('collapsed');
+      container.classList.remove('sidebar-collapsed');
+    } else {
+      applyDesktopCollapsedFromStorage();
+    }
+  }
+
+  function setDrawerOpen(open) {
+    container.classList.toggle('nav-drawer-open', open);
+    document.body.classList.toggle('landlord-drawer-open', open);
+    if (backdrop) {
+      backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+    if (mobileToggle) {
+      mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      mobileToggle.setAttribute('aria-label', open ? 'Close dashboard menu' : 'Open dashboard menu');
+    }
+  }
+
+  function closeMobileDrawer() {
+    setDrawerOpen(false);
+  }
+
+  function toggleMobileDrawer() {
+    setDrawerOpen(!container.classList.contains('nav-drawer-open'));
+  }
+
+  syncSidebarForViewport();
+
+  toggle.addEventListener('click', function (e) {
+    if (isMobileNav()) {
+      e.preventDefault();
+      toggleMobileDrawer();
+      return;
+    }
     sidebar.classList.toggle('collapsed');
     container.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('landlordSidebarCollapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+  });
 
-    const isCollapsed = sidebar.classList.contains('collapsed');
-    localStorage.setItem('landlordSidebarCollapsed', isCollapsed ? '1' : '0');
+  mobileToggle?.addEventListener('click', function () {
+    toggleMobileDrawer();
+  });
+
+  backdrop?.addEventListener('click', closeMobileDrawer);
+
+  sidebar.querySelectorAll('.nav-link').forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (isMobileNav()) {
+        window.setTimeout(closeMobileDrawer, 320);
+      }
+    });
+  });
+
+  mqMobile.addEventListener('change', function () {
+    closeMobileDrawer();
+    syncSidebarForViewport();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && container.classList.contains('nav-drawer-open')) {
+      closeMobileDrawer();
+    }
   });
 });
 </script>
