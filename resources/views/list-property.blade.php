@@ -19,6 +19,40 @@
 </section>
 
 <section class="content-section">
+  @php
+    $listingErrorStep = 1;
+    if (collect($errors->keys())->contains(fn ($key) => str_starts_with($key, 'images'))) {
+        $listingErrorStep = 5;
+    } elseif ($errors->hasAny(['latitude', 'longitude'])) {
+        $listingErrorStep = 2;
+    } elseif ($errors->hasAny(['price', 'price_duration', 'rent_duration_units', 'unit', 'area_m3', 'room_nb', 'bathroom_nb', 'bedroom_nb'])) {
+        $listingErrorStep = 3;
+    } elseif ($errors->hasAny(['amenities', 'rules'])) {
+        $listingErrorStep = 4;
+    }
+  @endphp
+
+  @if(session('success'))
+    <div class="alert alert-success mb-4" role="status">{{ session('success') }}</div>
+  @endif
+
+  @if(session('error'))
+    <div class="alert alert-danger mb-4" role="alert">{!! session('error') !!}</div>
+  @endif
+
+  @if($errors->any())
+    <div class="alert alert-danger mb-4 listing-form-errors" role="alert">
+      <h4>Could not submit your listing</h4>
+      <p>Please fix the issues below, then try again:</p>
+      <ul>
+        @foreach($errors->all() as $error)
+          <li>{{ $error }}</li>
+        @endforeach
+      </ul>
+    </div>
+    <script>window.__listingWizardErrorStep = {{ $listingErrorStep }};</script>
+  @endif
+
   {{-- Progress Indicator --}}
   <div class="wizard-progress">
     <div class="wizard-helper-character">
@@ -48,14 +82,13 @@
     </div>
   </div>
 
-  <form class="listing-form" method="POST" action="{{ route('submit-listing') }}" enctype="multipart/form-data" novalidate>
+  <form class="listing-form" method="POST" action="{{ route('submit-listing') }}" enctype="multipart/form-data" novalidate data-require-coordinates="true" data-wizard-validate-steps="true" data-min-images="1">
     @csrf
     
-    {{-- Debug info --}}
     @if($errors->any())
-      <div class="alert alert-danger mb-4">
-        <h4>Validation Errors:</h4>
-        <ul>
+      <div class="alert alert-danger mb-4" role="alert">
+        <strong>Fix these fields on step {{ $listingErrorStep }}:</strong>
+        <ul class="mb-0">
           @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
           @endforeach
@@ -103,6 +136,7 @@
             maxlength="1200"
             required
           >{{ old('description') }}</textarea>
+          <small id="description-char-count" class="description-char-count">0 / 30 characters minimum</small>
           <small>Be specific: floor, orientation, surroundings, and any rules worth knowing.</small>
           @error('description') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
@@ -402,15 +436,15 @@
               multiple
               class="file-input"
               aria-describedby="images_help"
-              value="{{ old('images') }}"
             >
             <label for="images" class="file-label">
               <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
               Choose Images
             </label>
             <div id="images_help" class="file-info">
-              Add at least 4 clear photos (cover, living room, bedrooms, bathrooms). PNG or JPEG recommended.
+              Add at least 4 clear photos (cover, living room, bedrooms, bathrooms). Large images are compressed automatically before upload while keeping their resolution.
             </div>
+            <div id="image-compress-status" class="image-compress-status" hidden aria-live="polite">Optimizing images…</div>
             <div id="image-previews" class="image-previews" aria-live="polite"></div>
             @if($errors->has('images'))
               <div class="alert alert-danger mt-2">
@@ -429,14 +463,15 @@
         <button type="button" class="wizard-btn wizard-next" id="wizardNext">Next →</button>
         <button type="submit" class="wizard-btn wizard-submit" id="wizardSubmit" style="display:none;">Submit Listing</button>
       </div>
+      <div id="listing-submit-status" class="listing-submit-status" hidden aria-live="polite"></div>
     </div>
   </form>
 </section>
 @endsection
 
 @push('scripts')
-{{-- Google Maps API and Map Initialization --}}
+<script src="{{ asset('js/image-compress.js') }}"></script>
 <script src="{{ asset('js/MapClickService.js') }}"></script>
-<script async src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_browser_key') }}&callback=initPropertyLocationMap&libraries=places"></script>
 <script src="{{ asset('js/list-property.js') }}"></script>
+<script async src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_browser_key') }}&callback=initPropertyLocationMap&libraries=places"></script>
 @endpush

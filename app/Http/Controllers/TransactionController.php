@@ -393,36 +393,202 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Transaction Report - {$transaction->id}</title>
             <style>
+                @page {
+                    size: A4 portrait;
+                    margin: 10mm;
+                }
+
+                :root {
+                    --a4-width: 210mm;
+                    --a4-height: 297mm;
+                    --a4-pad-x: 12mm;
+                    --a4-pad-y: 12mm;
+                }
+
                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; }
-                .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-                .header { border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px; }
-                .header h1 { color: #667eea; font-size: 28px; margin-bottom: 10px; }
-                .header .meta { color: #666; font-size: 14px; }
-                .section { margin-bottom: 30px; }
-                .section-title { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
-                .info-row { display: flex; margin-bottom: 12px; }
-                .info-label { width: 200px; font-weight: 600; color: #666; }
-                .info-value { flex: 1; color: #333; }
-                .info-box { background: #f9f9f9; padding: 15px; border-radius: 6px; border-left: 4px solid #667eea; margin: 10px 0; }
-                .status-badge { display: inline-block; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+
+                html {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-size: 10pt;
+                    color: #333;
+                    line-height: 1.45;
+                    background: #e8edf3;
+                    margin: 0;
+                }
+
+                .report-viewport {
+                    min-height: 100vh;
+                    min-height: 100dvh;
+                    display: flex;
+                    justify-content: center;
+                    align-items: flex-start;
+                    padding: 16px;
+                }
+
+                .a4-scaler { flex-shrink: 0; }
+
+                .a4-page {
+                    width: var(--a4-width);
+                    min-height: var(--a4-height);
+                    max-width: var(--a4-width);
+                    padding: var(--a4-pad-y) var(--a4-pad-x);
+                    background: #fff;
+                    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+                }
+
+                .header {
+                    border-bottom: 2px solid #667eea;
+                    padding-bottom: 10px;
+                    margin-bottom: 14px;
+                }
+
+                .header h1 {
+                    color: #667eea;
+                    font-size: 20pt;
+                    margin-bottom: 6px;
+                    line-height: 1.2;
+                }
+
+                .header .meta { color: #666; font-size: 9pt; }
+
+                .section { margin-bottom: 14px; }
+
+                .section-title {
+                    font-size: 11pt;
+                    font-weight: 700;
+                    color: #333;
+                    margin-bottom: 8px;
+                    padding-bottom: 6px;
+                    border-bottom: 1px solid #e8e8e8;
+                }
+
+                .info-row {
+                    display: flex;
+                    gap: 8px;
+                    margin-bottom: 6px;
+                    align-items: flex-start;
+                }
+
+                .info-label {
+                    width: 34%;
+                    min-width: 90px;
+                    font-weight: 600;
+                    color: #666;
+                    font-size: 9pt;
+                }
+
+                .info-value {
+                    flex: 1;
+                    color: #333;
+                    font-size: 9.5pt;
+                    word-break: break-word;
+                }
+
+                .info-box {
+                    background: #f9f9f9;
+                    padding: 8px 10px;
+                    border-radius: 4px;
+                    border-left: 3px solid #667eea;
+                    margin: 6px 0;
+                    font-size: 9pt;
+                }
+
+                .info-box strong { font-size: 9.5pt; }
+
+                .status-badge {
+                    display: inline-block;
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    font-size: 8pt;
+                    font-weight: 600;
+                }
+
                 .status-pending { background: #fff3cd; color: #856404; }
                 .status-confirmed { background: #d1ecf1; color: #0c5460; }
                 .status-paid { background: #d4edda; color: #155724; }
                 .status-completed { background: #d4edda; color: #155724; }
-                .table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+
+                .table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 8px 0;
+                    font-size: 8.5pt;
+                }
+
+                .table th, .table td {
+                    padding: 5px 6px;
+                    text-align: left;
+                    border-bottom: 1px solid #e0e0e0;
+                }
+
                 .table th { background: #f5f5f5; font-weight: 600; }
-                .footer { text-align: center; color: #999; font-size: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
-                .print-date { text-align: right; color: #999; font-size: 12px; }
+
+                .footer {
+                    text-align: center;
+                    color: #999;
+                    font-size: 8pt;
+                    margin-top: 16px;
+                    padding-top: 10px;
+                    border-top: 1px solid #e0e0e0;
+                }
+
+                .print-date { text-align: right; color: #999; font-size: 8pt; margin-top: 4px; }
+
+                @media screen and (max-width: 900px) {
+                    .report-viewport {
+                        padding: 8px;
+                        overflow-x: hidden;
+                    }
+
+                    .a4-page {
+                        width: min(var(--a4-width), calc(100vw - 16px));
+                        max-width: min(var(--a4-width), calc(100vw - 16px));
+                        min-height: calc(min(var(--a4-width), calc(100vw - 16px)) * 297 / 210);
+                        padding: 5mm 5mm;
+                        font-size: 6.5pt;
+                        line-height: 1.35;
+                    }
+
+                    .header { margin-bottom: 10px; padding-bottom: 6px; }
+                    .header h1 { font-size: 11pt; margin-bottom: 4px; }
+                    .header .meta { font-size: 6pt; }
+                    .section { margin-bottom: 8px; }
+                    .section-title { font-size: 7.5pt; margin-bottom: 5px; padding-bottom: 4px; }
+                    .info-row { margin-bottom: 4px; gap: 4px; }
+                    .info-label { width: 36%; min-width: 0; font-size: 6pt; }
+                    .info-value { font-size: 6.5pt; }
+                    .info-box { padding: 5px 6px; margin: 4px 0; font-size: 6pt; }
+                    .info-box strong { font-size: 6.5pt; }
+                    .status-badge { padding: 2px 5px; font-size: 5.5pt; }
+                    .table { margin: 5px 0; font-size: 6pt; }
+                    .table th, .table td { padding: 3px 4px; }
+                    .footer { margin-top: 10px; padding-top: 6px; font-size: 5.5pt; }
+                    .print-date { font-size: 5.5pt; }
+                }
+
                 @media print {
-                    body { padding: 0; }
-                    .container { padding: 20px; }
+                    body { background: #fff; }
+                    .report-viewport { padding: 0; min-height: auto; }
+                    .a4-page {
+                        width: 100%;
+                        max-width: none;
+                        min-height: auto;
+                        margin: 0;
+                        padding: 0;
+                        box-shadow: none;
+                    }
                 }
             </style>
         </head>
         <body>
-            <div class="container">
+            <div class="report-viewport">
+                <div class="a4-scaler">
+                    <div class="a4-page">
                 <div class="header">
                     <h1>Transaction Report</h1>
                     <div class="meta">Transaction ID: #{$transaction->id}</div>
@@ -445,7 +611,7 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
                     </div>
                 </div>
 
-                <div class="section">-
+                <div class="section">
                     <h2 class="section-title">Property Information</h2>
                     <div class="info-row">
                         <span class="info-label">Property:</span>
@@ -498,6 +664,8 @@ return redirect()->back()->with('success', "Contract generated. The buyer can vi
                 <div class="footer">
                     <p>This is an official transaction report from Ghorfa Platform</p>
                     <div class="print-date">Printed on: {$printedAt}</div>
+                </div>
+                    </div>
                 </div>
             </div>
         </body>

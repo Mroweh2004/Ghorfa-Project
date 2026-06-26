@@ -163,8 +163,18 @@
                         <span class="badge badge-info">{{ $transactionRequests->count() }}</span>
                     </h2>
                 </div>
-                <div class="requests-table-wrapper">
-                    <table class="requests-table">
+                <div class="landlord-table-toolbar" role="search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input
+                        type="search"
+                        class="landlord-table-search"
+                        placeholder="Search requests..."
+                        aria-label="Search rental/purchase requests"
+                        data-table-search-input="requests"
+                    >
+                </div>
+                <div class="requests-table-wrapper landlord-dashboard-table-panel">
+                    <table class="requests-table" data-table-search-table="requests">
                         <thead>
                             <tr>
                                 <th>Buyer</th>
@@ -244,8 +254,18 @@
                         <span class="badge badge-success">{{ $activeTransactions->count() }}</span>
                     </h2>
                 </div>
-                <div class="transactions-table-wrapper">
-                    <table class="transactions-table">
+                <div class="landlord-table-toolbar" role="search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input
+                        type="search"
+                        class="landlord-table-search"
+                        placeholder="Search transactions..."
+                        aria-label="Search active transactions"
+                        data-table-search-input="active"
+                    >
+                </div>
+                <div class="transactions-table-wrapper landlord-dashboard-table-panel">
+                    <table class="transactions-table" data-table-search-table="active">
                         <thead>
                             <tr>
                                 <th>Buyer</th>
@@ -333,8 +353,18 @@
                     <span class="badge badge-success">{{ $approvedProperties->count() }}</span>
                 </h2>
             </div>
-            <div class="properties-table-wrapper">
-                <table class="properties-table">
+            <div class="landlord-table-toolbar" role="search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input
+                    type="search"
+                    class="landlord-table-search"
+                    placeholder="Search published properties..."
+                    aria-label="Search published properties"
+                    data-table-search-input="published"
+                >
+            </div>
+            <div class="properties-table-wrapper landlord-dashboard-table-panel">
+                <table class="properties-table" data-table-search-table="published">
                     <thead>
                         <tr>
                             <th>Property</th>
@@ -419,8 +449,18 @@
                     <span class="badge badge-warning">{{ $pendingProperties->count() }}</span>
                 </h2>
             </div>
-            <div class="properties-table-wrapper">
-                <table class="properties-table">
+            <div class="landlord-table-toolbar" role="search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input
+                    type="search"
+                    class="landlord-table-search"
+                    placeholder="Search pending properties..."
+                    aria-label="Search pending properties"
+                    data-table-search-input="pending"
+                >
+            </div>
+            <div class="properties-table-wrapper landlord-dashboard-table-panel">
+                <table class="properties-table" data-table-search-table="pending">
                     <thead>
                         <tr>
                             <th>Property</th>
@@ -505,8 +545,18 @@
                     <span class="badge badge-danger">{{ $rejectedProperties->count() }}</span>
                 </h2>
             </div>
-            <div class="properties-table-wrapper">
-                <table class="properties-table">
+            <div class="landlord-table-toolbar" role="search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input
+                    type="search"
+                    class="landlord-table-search"
+                    placeholder="Search rejected properties..."
+                    aria-label="Search rejected properties"
+                    data-table-search-input="rejected"
+                >
+            </div>
+            <div class="properties-table-wrapper landlord-dashboard-table-panel">
+                <table class="properties-table" data-table-search-table="rejected">
                     <thead>
                         <tr>
                             <th>Property</th>
@@ -716,16 +766,26 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
 
     // Transaction action modals
+    function setLandlordModalOpen(open) {
+        document.body.classList.toggle('landlord-modal-open', open);
+    }
+
     function openRequestDetails(transactionId) {
         var block = document.getElementById('request-details-block-' + transactionId);
+        var modal = document.getElementById('requestDetailsModal');
+        if (!modal) return;
         if (block) {
             document.getElementById('requestDetailsContent').innerHTML = block.innerHTML;
         }
-        document.getElementById('requestDetailsModal').style.display = 'flex';
+        modal.style.display = 'flex';
+        setLandlordModalOpen(true);
     }
 
     function closeRequestDetailsModal() {
-        document.getElementById('requestDetailsModal').style.display = 'none';
+        var modal = document.getElementById('requestDetailsModal');
+        if (!modal) return;
+        modal.style.display = 'none';
+        setLandlordModalOpen(false);
     }
 
     function openRejectionDetails(propertyId) {
@@ -735,12 +795,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (block && mount && modal) {
             mount.innerHTML = block.innerHTML;
             modal.style.display = 'flex';
+            setLandlordModalOpen(true);
         }
     }
 
     function closeRejectionDetailsModal() {
         var modal = document.getElementById('rejectionDetailsModal');
-        if (modal) modal.style.display = 'none';
+        if (!modal) return;
+        modal.style.display = 'none';
+        setLandlordModalOpen(false);
     }
 
     function confirmPaymentModal(transactionId) {
@@ -822,11 +885,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function generateAndSendContract(transactionId) {
-        // This would typically call an endpoint to generate a PDF contract
-        // and send it to the buyer
-        const contractPath = prompt('Generate contract. Enter file path or leave empty for default:');
-        if (contractPath !== null) {
-            fetch(`/transactions/${transactionId}/generate-contract`, {
+        if (!confirm('Generate the contract and send it to the buyer?')) {
+            return;
+        }
+
+        const contractPath = prompt('Enter contract file path or leave empty for the default:');
+        if (contractPath === null) {
+            return;
+        }
+
+        fetch(`/transactions/${transactionId}/generate-contract`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -844,11 +912,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
                 alert('An error occurred while generating the contract.');
             });
-        }
     }
 
     function downloadTransactionReport(transactionId) {
         window.open(`/transactions/${transactionId}/download-report`, '_blank');
+    }
+
+    function exportRequestDetailsPdf(transactionId) {
+        var url = '/landlord/transactions/' + transactionId + '/export-pdf';
+        fetch(url, {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/pdf' }
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+                var disposition = response.headers.get('Content-Disposition') || '';
+                var match = disposition.match(/filename[^;=\n]*=(?:UTF-8''|")?([^";\n]+)/i);
+                var filename = match ? match[1].replace(/"/g, '') : ('request-' + transactionId + '.pdf');
+                return response.blob().then(function (blob) {
+                    return { blob: blob, filename: filename };
+                });
+            })
+            .then(function (file) {
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file.blob);
+                link.download = file.filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(function () {
+                    URL.revokeObjectURL(link.href);
+                    link.remove();
+                }, 100);
+            })
+            .catch(function () {
+                alert('Could not export the PDF. Please try again.');
+            });
     }
     // expose functions to global scope so inline `onclick` handlers work
     window.openRequestDetails = openRequestDetails;
@@ -861,6 +962,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.requestRefund = requestRefund;
     window.generateAndSendContract = generateAndSendContract;
     window.downloadTransactionReport = downloadTransactionReport;
+    window.exportRequestDetailsPdf = exportRequestDetailsPdf;
     window.openRejectionDetails = openRejectionDetails;
     window.closeRejectionDetailsModal = closeRejectionDetailsModal;
 
@@ -880,6 +982,54 @@ document.addEventListener('DOMContentLoaded', function() {
             closeRejectionDetailsModal();
         }
     });
+
+    // Table search (client-side filtering)
+    function setupDashboardTableSearch(key) {
+        const input = document.querySelector('[data-table-search-input="' + key + '"]');
+        const table = document.querySelector('table[data-table-search-table="' + key + '"]');
+        if (!input || !table) return;
+
+        const rows = table.querySelectorAll('tbody tr');
+        if (!rows || rows.length === 0) return;
+
+        function getEmptyRow() {
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i].querySelector('.empty-state-cell')) return rows[i];
+            }
+            return null;
+        }
+
+        const emptyRow = getEmptyRow();
+
+        input.addEventListener('input', function() {
+            const q = (input.value || '').toLowerCase().trim();
+
+            if (!q) {
+                rows.forEach(tr => { tr.style.display = ''; });
+                return;
+            }
+
+            let anyVisible = false;
+            rows.forEach(tr => {
+                const hasEmptyCell = !!tr.querySelector('.empty-state-cell');
+                if (hasEmptyCell) {
+                    tr.style.display = 'none';
+                    return;
+                }
+
+                const rowText = (tr.textContent || '').toLowerCase();
+                const matches = rowText.indexOf(q) !== -1;
+                tr.style.display = matches ? '' : 'none';
+                if (matches) anyVisible = true;
+            });
+
+            if (emptyRow) {
+                emptyRow.style.display = anyVisible ? 'none' : '';
+            }
+        });
+    }
+
+    ['requests', 'active', 'published', 'pending', 'rejected'].forEach(setupDashboardTableSearch);
 });
 </script>
 
@@ -989,16 +1139,25 @@ document.addEventListener('DOMContentLoaded', function () {
 @endforeach
 
 <!-- Request Details Modal -->
-<div id="requestDetailsModal" class="modal-overlay" onclick="if(event.target === this) closeRequestDetailsModal()">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Request Details</h2>
-            <button class="modal-close" onclick="closeRequestDetailsModal()">
-                <i class="fas fa-times"></i>
+<div
+    id="requestDetailsModal"
+    class="modal-overlay landlord-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="requestDetailsModalTitle"
+    onclick="if(event.target === this) closeRequestDetailsModal()"
+>
+    <div class="landlord-modal__dialog modal-content modal-content--request" role="document" onclick="event.stopPropagation()">
+        <header class="modal-header landlord-modal__header">
+            <div class="landlord-modal__header-text">
+                <h2 id="requestDetailsModalTitle">Request Details</h2>
+                <p class="landlord-modal__subtitle">Review buyer and transaction information</p>
+            </div>
+            <button type="button" class="modal-close landlord-modal__close" onclick="closeRequestDetailsModal()" aria-label="Close request details">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
-        </div>
-        <div id="requestDetailsContent">
-        </div>
+        </header>
+        <div id="requestDetailsContent" class="landlord-modal__body"></div>
     </div>
 </div>
 
@@ -1009,15 +1168,25 @@ document.addEventListener('DOMContentLoaded', function () {
 @endforeach
 
 <!-- Rejected property: details + resubmit -->
-<div id="rejectionDetailsModal" class="modal-overlay" onclick="if(event.target === this) closeRejectionDetailsModal()">
-    <div class="modal-content modal-content--rejection">
-        <div class="modal-header">
-            <h2>Rejected listing</h2>
-            <button type="button" class="modal-close" onclick="closeRejectionDetailsModal()">
-                <i class="fas fa-times"></i>
+<div
+    id="rejectionDetailsModal"
+    class="modal-overlay landlord-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="rejectionDetailsModalTitle"
+    onclick="if(event.target === this) closeRejectionDetailsModal()"
+>
+    <div class="landlord-modal__dialog modal-content modal-content--rejection" role="document" onclick="event.stopPropagation()">
+        <header class="modal-header landlord-modal__header">
+            <div class="landlord-modal__header-text">
+                <h2 id="rejectionDetailsModalTitle">Rejected listing</h2>
+                <p class="landlord-modal__subtitle">Review feedback and resubmit your property</p>
+            </div>
+            <button type="button" class="modal-close landlord-modal__close" onclick="closeRejectionDetailsModal()" aria-label="Close rejected listing details">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
-        </div>
-        <div id="rejectionDetailsContent" class="modal-body--padded"></div>
+        </header>
+        <div id="rejectionDetailsContent" class="landlord-modal__body"></div>
     </div>
 </div>
 

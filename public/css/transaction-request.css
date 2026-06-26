@@ -162,9 +162,12 @@
     color: #333;
 }
 
-.modal-content form,
-.request-details-content {
+.modal-content form {
     padding: 20px;
+}
+
+.landlord-modal__body .request-details-content {
+    padding: 0;
 }
 
 .form-group {

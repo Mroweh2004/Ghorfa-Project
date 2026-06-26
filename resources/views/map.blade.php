@@ -102,13 +102,19 @@
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_browser_key') }}&callback=initMap&libraries=places"></script>
 
 <script>
-    initializeProperties(@json($properties));
+    initializeProperties(@json($properties->map(function ($property) {
+        return array_merge($property->toArray(), [
+            'is_liked' => auth()->check() && $property->isLikedBy(auth()->id()),
+        ]);
+    })));
 
     window.mapConfig = {
         reverseGeocodeEndpoint: '{{ route("map.reverse-geocode") }}',
         storageUrl: '{{ asset("storage") }}',
         placeholderUrl: '{{ asset("img/no_image.jpg") }}',
-        mapRoute: '{{ route("map") }}'
+        mapRoute: '{{ route("map") }}',
+        isAuthenticated: @json(auth()->check()),
+        loginUrl: @json(route('login')),
     };
 
     setTimeout(function() {

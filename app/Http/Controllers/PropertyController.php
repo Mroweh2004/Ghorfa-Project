@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GeocodingService;
+use App\Services\PropertyImageCompressor;
 use App\Traits\CreatesNotifications;
 use App\Traits\LogsActivity;
 
@@ -311,7 +312,7 @@ class PropertyController extends Controller
             if ($request->hasFile('images')) {
                 $hasPrimary = $property->images()->where('is_primary', true)->exists();
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('property-images', 'public');
+                    $path = PropertyImageCompressor::store($image);
                     PropertyImage::create([
                         'property_id' => $property->id,
                         'path'        => $path,
@@ -368,17 +369,6 @@ class PropertyController extends Controller
                 ->with('error', 'Only landlords and admins can list properties. <a href="' . route('landlord.apply') . '">Become a Landlord</a>');
         }
 
-        if (!$request->hasFile('images')) {
-            Log::error('No images uploaded');
-            return back()->withErrors(['images' => 'Please upload at least one image.'])->withInput();
-        }
-
-        $imageFiles = $request->file('images');
-        if (empty($imageFiles) || count($imageFiles) < 1) {
-            Log::error('Images array is empty');
-            return back()->withErrors(['images' => 'Please upload at least one image.'])->withInput();
-        }
-
         try {
             $validated = $request->validate([
                 'title'         => 'required|string|max:255',
@@ -404,7 +394,7 @@ class PropertyController extends Controller
                 'latitude'      => 'required|numeric|between:-90,90',
                 'longitude'     => 'required|numeric|between:-180,180',
                 'images'        => 'required|array|min:1',
-                'images.*'      => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'images.*'      => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
                 'amenities'     => 'nullable|array',
                 'amenities.*'   => 'integer|exists:amenities,id',
                 'rules'         => 'nullable|array',
@@ -413,7 +403,30 @@ class PropertyController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed:', $e->errors());
             Log::error('Request data:', $request->except(['images', 'password']));
-            return back()->withErrors($e->errors())->withInput();
+
+            return back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', 'Please fix the highlighted errors below and submit again.');
+        }
+
+        if (!$request->hasFile('images')) {
+            Log::error('No images uploaded after validation', [
+                'files' => array_keys($request->allFiles()),
+            ]);
+
+            return back()
+                ->withErrors(['images' => 'Please upload at least one image.'])
+                ->withInput()
+                ->with('error', 'Your photos did not upload. Please choose them again and submit.');
+        }
+
+        $imageFiles = $request->file('images');
+        if (empty($imageFiles) || count($imageFiles) < 1) {
+            return back()
+                ->withErrors(['images' => 'Please upload at least one image.'])
+                ->withInput()
+                ->with('error', 'Your photos did not upload. Please choose them again and submit.');
         }
 
         DB::beginTransaction();
@@ -501,7 +514,7 @@ class PropertyController extends Controller
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {
-                    $path = $image->store('property-images', 'public');
+                    $path = PropertyImageCompressor::store($image);
                     PropertyImage::create([
                         'property_id' => $property->id,
                         'path'        => $path,
@@ -511,7 +524,13 @@ class PropertyController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('search')->with('success', 'Property listed successfully!');
+
+            return redirect()
+                ->route('profileProperties')
+                ->with(
+                    'success',
+                    'Your listing was submitted successfully and is pending admin approval. It will appear in search results once approved.'
+                );
         } catch (\Throwable $e) {
             DB::rollBack();
 
@@ -542,7 +561,11 @@ class PropertyController extends Controller
     public function like(Property $property)
     {
         $user = Auth::user();
-        
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
         if ($property->likedBy()->where('user_id', $user->id)->exists()) {
             $property->likedBy()->detach($user->id);
             $status = 'unliked';

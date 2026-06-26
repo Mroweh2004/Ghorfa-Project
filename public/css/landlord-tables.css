@@ -219,6 +219,22 @@
         text-align: center;
     }
 
+    /* Landlord dashboard: avatar left of name on phone */
+    .landlord-dashboard-table-panel .request-buyer-cell,
+    .landlord-dashboard-table-panel .transaction-buyer-cell {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: left;
+        gap: 0.5rem;
+    }
+
+    .landlord-dashboard-table-panel .transaction-buyer-cell strong {
+        min-width: 0;
+        flex: 1;
+    }
+
     .buyer-avatar,
     .buyer-avatar-placeholder {
         width: 35px;
@@ -248,7 +264,7 @@
     .requests-table,
     .transactions-table,
     .properties-table {
-        min-width: 0;
+        min-width: 36rem;
     }
 
     .requests-table th,

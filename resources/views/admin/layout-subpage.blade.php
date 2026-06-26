@@ -20,5 +20,7 @@
             @yield('content')
         </div>
     </main>
+
+    @include('partials.mobile-nav')
 </body>
 </html>

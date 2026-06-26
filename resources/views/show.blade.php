@@ -235,9 +235,11 @@
                     @auth
                     <div class="like-section">
                         <button
+                            type="button"
                             class="like-btn"
                             data-property-id="{{ $property->id }}"
                             data-liked="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
+                            aria-pressed="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
                         >
                             <i class="fa-{{ $property->isLikedBy(auth()->id()) ? 'solid' : 'regular' }} fa-heart"></i>
                             <span>{{ $property->isLikedBy(auth()->id()) ? 'Liked' : 'Like' }}</span>

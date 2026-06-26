@@ -149,88 +149,6 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Like functionality
-function initLikeButton() {
-    const likeBtn = document.querySelector('.like-btn');
-    if (likeBtn) {
-        likeBtn.addEventListener('click', async function() {
-            const propertyId = this.getAttribute('data-property-id');
-            const heartIcon = this.querySelector('i');
-            const likeText = this.querySelector('span');
-            const likeCount = document.querySelector('.like-count');
-            
-            // Add loading state
-            this.classList.add('loading');
-            this.disabled = true;
-            
-            try {
-                const response = await fetch(`/properties/${propertyId}/like`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const data = await response.json();
-                
-                if (data.status === 'liked') {
-                    heartIcon.className = 'fa-solid fa-heart';
-                    likeText.textContent = 'Liked';
-                    this.setAttribute('data-liked', 'true');
-                    
-                    // Add animation effect
-                    this.style.transform = 'scale(1.1)';
-                    setTimeout(() => {
-                        this.style.transform = 'scale(1)';
-                    }, 200);
-                } else {
-                    heartIcon.className = 'fa-regular fa-heart';
-                    likeText.textContent = 'Like';
-                    this.setAttribute('data-liked', 'false');
-                }
-                
-                if (likeCount) {
-                    likeCount.textContent = `${data.count} likes`;
-                }
-            } catch (error) {
-                console.error('Error toggling like:', error);
-                
-                // Show error message to user
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = 'Failed to update like. Please try again.';
-                errorMsg.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #ff6b6b;
-                    color: white;
-                    padding: 15px 20px;
-                    border-radius: 10px;
-                    z-index: 1000;
-                    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
-                `;
-                document.body.appendChild(errorMsg);
-                
-                // Remove error message after 3 seconds
-                setTimeout(() => {
-                    errorMsg.remove();
-                }, 3000);
-            } finally {
-                // Remove loading state
-                this.classList.remove('loading');
-                this.disabled = false;
-            }
-        });
-    }
-}
-
 // Contact button functionality
 function initContactButtons() {
     const contactBtns = document.querySelectorAll('.contact-btn');
@@ -448,7 +366,9 @@ function initActionButtons() {
 
 // Initialize all functionality when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    initLikeButton();
+    if (typeof window.initLikeButtons === 'function') {
+        window.initLikeButtons();
+    }
     initContactButtons();
     initBackButton();
     initGallerySlider();

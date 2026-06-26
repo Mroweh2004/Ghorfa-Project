@@ -78,8 +78,12 @@ class Property extends Model
     /**
      * Check if a specific user has liked this property
      */
-    public function isLikedBy($userId)
+    public function isLikedBy($userId): bool
     {
+        if (!$userId) {
+            return false;
+        }
+
         return $this->likedBy()->where('user_id', $userId)->exists();
     }
 

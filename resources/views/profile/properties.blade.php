@@ -25,12 +25,23 @@
                         </div>
                     </div>
 
+                    @if(session('success'))
+                        <div class="alert alert-success mb-4" role="status">{{ session('success') }}</div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="alert alert-danger mb-4" role="alert">{!! session('error') !!}</div>
+                    @endif
+
                     <div class="listings-grid">
                         @foreach($properties as $property)
                             <div class="listing-card" data-price="{{ $property->price }}" data-created="{{ $property->created_at->timestamp }}">
                                 <div class="listing-image">
                                     <img src="{{ \App\Services\PropertyImageService::getImageUrl($property) }}" alt="{{ $property->title }}">
                                     <span class="listing-tag">For {{ $property->listing_type }}</span>
+                                    @if($property->status !== 'approved')
+                                        <span class="listing-tag listing-tag--status">{{ ucfirst($property->status) }}</span>
+                                    @endif
                                     @if($property->getAvailabilityMessage())
                                         <span class="listing-tag listing-tag--unavailable" title="{{ $property->getAvailabilityMessage() }}">{{ $property->getAvailabilityMessage() }}</span>
                                     @endif

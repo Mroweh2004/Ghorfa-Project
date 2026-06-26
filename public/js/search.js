@@ -125,6 +125,14 @@ function ShowFilterToggle() {
 function ShowSettingslist() {
   const lists = document.querySelectorAll('.setting-list');
 
+  const setCardMenuState = (card, isOpen) => {
+    if (!card) {
+      return;
+    }
+
+    card.classList.toggle('menu-open', isOpen);
+  };
+
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.setting-btn');
     const anyList = e.target.closest('.setting-list');
@@ -136,11 +144,17 @@ function ShowSettingslist() {
       const card = btn.closest('.listing-card');
       const list = card ? card.querySelector('.setting-list') : null;
 
-      lists.forEach(l => {
-        if (l !== list) l.classList.remove('active');
+      lists.forEach((l) => {
+        if (l !== list) {
+          l.classList.remove('active');
+          setCardMenuState(l.closest('.listing-card'), false);
+        }
       });
 
-      if (list) list.classList.toggle('active');
+      if (list) {
+        list.classList.toggle('active');
+        setCardMenuState(card, list.classList.contains('active'));
+      }
       return;
     }
 
@@ -149,7 +163,10 @@ function ShowSettingslist() {
       return;
     }
 
-    lists.forEach(l => l.classList.remove('active'));
+    lists.forEach((l) => {
+      l.classList.remove('active');
+      setCardMenuState(l.closest('.listing-card'), false);
+    });
   });
 }
 
@@ -213,27 +230,15 @@ function initPropertySort(selectId = 'sort-options') {
 }
 
 /* =========================
-   Login redirect buttons
-========================= */
-function initLoginButtons() {
-  const loginButtons = document.querySelectorAll('.favorite-btn[data-login-url]');
-  loginButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const loginUrl = button.getAttribute('data-login-url');
-      window.location.href = loginUrl;
-    });
-  });
-}
-
-/* =========================
    Boot
 ========================= */
 function initSearchPage() {
   ShowFilterToggle();
   ShowSettingslist();
   initPropertySort();
-  initLikeButtons();
-  initLoginButtons();
+  if (typeof window.initLikeButtons === 'function') {
+    window.initLikeButtons();
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -242,68 +247,3 @@ if (document.readyState === 'loading') {
   initSearchPage();
 }
 
-/* =========================
-   Like functionality
-========================= */
-function initLikeButtons() {
-  const likeButtons = document.querySelectorAll(".like-btn");
-  
-  likeButtons.forEach(button => {
-    button.addEventListener("click", async (e) => {
-      e.preventDefault();
-      
-      const propertyId = button.getAttribute("data-property-id");
-      const heartIcon = button.querySelector("i");
-      
-      try {
-        let response = await fetch(`/properties/${propertyId}/like`, {
-          method: "POST",
-          headers: {
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-          }
-        });
-
-        let data = await response.json();
-        
-        const likeCountElement = document.getElementById(`like-count-${propertyId}`);
-        if (likeCountElement) {
-          likeCountElement.textContent = data.count;
-        }
-
-        if (data.status === "liked") {
-          heartIcon.className = "fa-solid fa-heart";
-          button.setAttribute("data-liked", "true");
-        } else {
-          heartIcon.className = "fa-regular fa-heart";
-          button.setAttribute("data-liked", "false");
-          
-          const card = button.closest('.listing-card');
-          if (card && window.location.pathname.includes('/favorites')) {
-            card.style.animation = 'fadeOut 0.3s ease-out';
-            setTimeout(() => {
-              card.remove();
-              const remainingCards = document.querySelectorAll('.listing-card');
-              if (remainingCards.length === 0) {
-                location.reload();
-              }
-            }, 300);
-          }
-        }
-
-        const card = button.closest('.listing-card');
-        if (card) {
-          card.setAttribute('data-likes', data.count);
-        }
-
-        const sortSelect = document.getElementById('sort-options');
-        if (sortSelect && (sortSelect.value === 'recommended' || sortSelect.value === '')) {
-          initPropertySort();
-        }
-      } catch (error) {
-        console.error("Error toggling like:", error);
-      }
-    });
-  });
-}

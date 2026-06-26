@@ -47,7 +47,7 @@ Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logou
 Route::post('/submit-listing', [PropertyController::class, 'submitListing'])->name('submit-listing')->middleware(['auth', LandlordMiddleware::class]);
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
-Route::post('/properties/{property}/like', [PropertyController::class, 'like'])->name('property.like');
+Route::post('/properties/{property}/like', [PropertyController::class, 'like'])->name('property.like')->middleware('auth');
 
 // Review routes
 Route::post('/properties/{property}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store')->middleware('auth');
@@ -75,6 +75,7 @@ Route::middleware(['auth', LandlordMiddleware::class])->prefix('landlord')->grou
     Route::post('/mark-section-seen', [LandlordController::class, 'markSectionSeen'])->name('landlord.mark-section-seen');
     Route::post('/properties/{property}/resubmit', [LandlordController::class, 'resubmitProperty'])->name('landlord.properties.resubmit');
     Route::get('/properties', [LandlordController::class, 'properties'])->name('landlord.properties');
+    Route::get('/transactions/{transaction}/export-pdf', [LandlordController::class, 'exportRequestPdf'])->name('landlord.transactions.export-pdf');
 });
 
 //----------------Admin Routes-------------------

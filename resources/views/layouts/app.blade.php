@@ -2420,6 +2420,7 @@
     @stack('scripts')
     
     {{-- Auth-specific scripts --}}
+    <script src="{{ asset('js/likes.js') }}" defer></script>
     @auth
     <script src="{{ asset('js/notifications.js') }}"></script>
     @endauth

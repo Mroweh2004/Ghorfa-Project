@@ -4,14 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminRuleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $rules = Rule::query()->orderBy('name')->paginate(25);
+        $search = Str::limit(trim((string) $request->query('search', '')), 255);
 
-        return view('admin.rules.index', compact('rules'));
+        $rules = Rule::query()
+            ->when($search !== '', static function ($query) use ($search) {
+                $likeTerm = '%' . addcslashes($search, '\\%_') . '%';
+                $query->where('name', 'like', $likeTerm);
+            })
+            ->orderBy('name')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.rules.index', compact('rules', 'search'));
     }
 
     public function create()

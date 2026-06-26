@@ -47,6 +47,13 @@ function initMap() {
         disableAutoPan: false
     });
 
+    infoWindow.addListener('domready', () => {
+        const root = document.querySelector('.gm-style-iw-d .property-info');
+        if (root && typeof window.initLikeButtons === 'function') {
+            window.initLikeButtons(root);
+        }
+    });
+
     // Add markers for each property
     addPropertyMarkers();
 
@@ -196,6 +203,13 @@ function createInfoWindowContent(property) {
         imageUrl = placeholderUrl;
     }
 
+    const isAuth = Boolean(window.mapConfig?.isAuthenticated);
+    const loginUrl = window.mapConfig?.loginUrl || '/login';
+    const isLiked = Boolean(property.is_liked);
+    const likeButton = isAuth
+        ? `<button type="button" class="btn-like like-btn" data-property-id="${property.id}" data-liked="${isLiked ? 'true' : 'false'}" aria-pressed="${isLiked ? 'true' : 'false'}"><i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> ${isLiked ? 'Liked' : 'Like'}</button>`
+        : `<button type="button" class="btn-like favorite-btn" data-login-url="${loginUrl}"><i class="fa-regular fa-heart"></i> Like</button>`;
+
     return `
         <div class="property-info">
             <img src="${imageUrl}" alt="${property.title || 'Property image'}">
@@ -210,7 +224,7 @@ function createInfoWindowContent(property) {
                 </div>
                 <div class="property-actions">
                     <a href="/properties/${property.id}" class="btn-view">View Details</a>
-                    <button class="btn-like" onclick="toggleLike(${property.id}, this)">❤️ Like</button>
+                    ${likeButton}
                 </div>
             </div>
         </div>
@@ -329,68 +343,6 @@ function initMapFilterSidebar() {
             closeFilters();
         }
     });
-}
-
-async function toggleLike(propertyId, buttonElement) {
-    if (!buttonElement) {
-        console.error('Button element not provided');
-        return;
-    }
-
-    // Check if user is authenticated
-    const csrfToken = document.querySelector('meta[name="csrf-token"]');
-    if (!csrfToken) {
-        alert('Please log in to like properties');
-        return;
-    }
-
-    // Add loading state
-    buttonElement.disabled = true;
-    buttonElement.style.opacity = '0.6';
-    const originalText = buttonElement.textContent;
-    buttonElement.textContent = '...';
-
-    try {
-        const response = await fetch(`/properties/${propertyId}/like`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken.content,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                alert('Please log in to like properties');
-                return;
-            }
-            throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-
-        if (data.status === 'liked') {
-            buttonElement.textContent = '❤️ Liked';
-            buttonElement.style.background = '#dc2626';
-        } else {
-            buttonElement.textContent = '❤️ Like';
-            buttonElement.style.background = '#ef4444';
-        }
-
-        buttonElement.style.transform = 'scale(1.1)';
-        setTimeout(() => {
-            buttonElement.style.transform = 'scale(1)';
-        }, 200);
-
-    } catch (error) {
-        console.error('Error toggling like:', error);
-        alert('Failed to like property. Please try again.');
-        buttonElement.textContent = originalText;
-    } finally {
-        buttonElement.disabled = false;
-        buttonElement.style.opacity = '1';
-    }
 }
 
 // Handle window resize

@@ -601,6 +601,7 @@
   
   #property-location-map{
     width: 100% !important;
+    min-height: 450px;
     height: 450px;
     border-radius: 12px;
     border: 2px solid var(--border);
@@ -1327,6 +1328,32 @@
   .image-previews .remove-btn:active { 
     transform: scale(0.95);
   }
+
+  .image-previews.is-compressing {
+    opacity: 0.75;
+    pointer-events: none;
+  }
+
+  .image-compress-status {
+    margin-top: 10px;
+    font-size: 0.875rem;
+    color: #2563eb;
+    font-weight: 500;
+  }
+
+  .image-previews .thumb-size-hint {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(17, 24, 39, 0.72);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.4;
+    pointer-events: none;
+  }
   
   
   /* =========================
@@ -1891,6 +1918,85 @@
   
   .wizard-submit:hover {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  }
+
+  .wizard-next:disabled,
+  .wizard-next.is-disabled,
+  .wizard-submit:disabled,
+  .wizard-submit.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .wizard-step-errors {
+    margin-bottom: 1rem;
+  }
+
+  .wizard-step-errors ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .wizard-field-error,
+  .form-input .wizard-field-error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+  }
+
+  #rent_duration_units.wizard-field-error {
+    outline: 2px solid #dc2626;
+    outline-offset: 4px;
+    border-radius: 10px;
+  }
+
+  .wizard-inline-error {
+    display: block;
+    margin-top: 0.35rem;
+  }
+
+  .description-char-count {
+    display: block;
+    margin-top: 0.35rem;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .description-char-count.is-valid {
+    color: #059669;
+  }
+
+  .description-char-count.is-invalid {
+    color: #dc2626;
+  }
+
+  .listing-submit-status {
+    margin-top: 0.75rem;
+    text-align: right;
+    color: #2563eb;
+    font-weight: 600;
+  }
+
+  .listing-form-errors ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  .listing-form-errors h4 {
+    margin: 0 0 0.35rem;
+  }
+
+  .listing-form-errors p {
+    margin: 0;
+  }
+
+  .alert-success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
   }
   
   /* =========================

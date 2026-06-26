@@ -251,6 +251,7 @@
 
 .listing-image {
     position: relative;
+    z-index: 2;
     height: 160px;          /* normalized image height */
     overflow: hidden;
     background-color: #f3f4f6;
@@ -329,7 +330,7 @@
     position: absolute;
     background-color: #ffffff;
     min-width: 140px;
-    z-index: 2147483647 !important;
+    z-index: 20;
     top: 3rem;
     right: 0.875rem;
     border-radius: 6px;
@@ -338,6 +339,18 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
     border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.listing-card.menu-open,
+.listing-card:has(.setting-list.active) {
+    z-index: 40;
+    overflow: visible;
+}
+
+.listing-card.menu-open .listing-image,
+.listing-card:has(.setting-list.active) .listing-image {
+    overflow: visible;
+    z-index: 25;
 }
 
 .setting-list.active {
@@ -428,6 +441,18 @@
     color: #dc2626;
 }
 
+.favorite-btn.is-loading,
+.like-btn.is-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.listing-card--removing {
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
 /* --- FIX: let content grow and keep meta at bottom --- */
 .listing-content {
     padding: 0.75rem 1rem;
@@ -437,6 +462,7 @@
     flex-direction: column;
     position: relative;
     z-index: 1;
+    isolation: isolate;
 }
 
 .listing-price {
@@ -513,6 +539,8 @@
     margin-top: auto;
     padding: 1.25rem 1.5rem;
     border-top: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 1;
 }
 
 .view-btn {

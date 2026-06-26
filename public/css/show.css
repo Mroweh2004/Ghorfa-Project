@@ -541,6 +541,11 @@ body {
     background-color: #dc2626;
 }
 
+.like-btn.is-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .like-btn[data-liked="true"]:hover {
     background-color: #b91c1c;
 }

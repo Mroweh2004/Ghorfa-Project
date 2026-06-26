@@ -4,14 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Amenity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminAmenityController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $amenities = Amenity::query()->orderBy('name')->paginate(25);
+        $search = Str::limit(trim((string) $request->query('search', '')), 255);
 
-        return view('admin.amenities.index', compact('amenities'));
+        $amenities = Amenity::query()
+            ->when($search !== '', static function ($query) use ($search) {
+                $likeTerm = '%' . addcslashes($search, '\\%_') . '%';
+                $query->where('name', 'like', $likeTerm);
+            })
+            ->orderBy('name')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.amenities.index', compact('amenities', 'search'));
     }
 
     public function create()

@@ -428,15 +428,11 @@ async function handleApproveProperty(propertyId) {
 }
 
 async function handleRejectProperty(propertyId) {
-    const adminNotesRaw = prompt('Rejection reason for the landlord (required, at least 5 characters):');
+    const adminNotesRaw = prompt('Optional rejection reason for the landlord (leave blank if none):');
     if (adminNotesRaw === null) {
         return;
     }
     const adminNotes = (adminNotesRaw || '').trim();
-    if (adminNotes.length < 5) {
-        showNotification('Please enter a clear rejection reason (at least 5 characters).', 'error');
-        return;
-    }
 
     const button = document.querySelector(`.reject-property-btn[data-property-id="${propertyId}"]`);
     if (button) {
@@ -541,7 +537,14 @@ function MoveBetweenSections(){
     });
     
     const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
-    
+
+    function mountAdminSearchInSection(sectionEl) {
+        const wrap = document.querySelector('.admin-dashboard-search');
+        const anchor = sectionEl && sectionEl.querySelector('[data-admin-search-anchor]');
+        if (!wrap || !anchor) return;
+        anchor.appendChild(wrap);
+    }
+
     function showSection(sectionId, markAsSeen) {
         sections.forEach(section => {
             section.style.display = 'none';
@@ -552,6 +555,7 @@ function MoveBetweenSections(){
         if (targetSection) {
             targetSection.style.display = 'block';
             targetSection.classList.add('active');
+            mountAdminSearchInSection(targetSection);
             if (markAsSeen) {
                 const multi = targetSection.getAttribute('data-mark-sections');
                 if (multi) {
@@ -571,6 +575,25 @@ function MoveBetweenSections(){
         const activeLink = document.querySelector(`.nav-link[href="${sectionId}"]`);
         if (activeLink) {
             activeLink.parentElement.classList.add('active');
+        }
+
+        const adminContent = document.querySelector('.admin-content');
+        if (adminContent) {
+            adminContent.scrollTop = 0;
+        }
+
+        // Dashboard is metrics/charts only — hide search (it only filters tables / activity lists)
+        const searchWrap = document.querySelector('.admin-dashboard-search');
+        if (searchWrap) {
+            const onDashboard = sectionId === '#dashboard-section';
+            searchWrap.hidden = onDashboard;
+            searchWrap.setAttribute('aria-hidden', onDashboard ? 'true' : 'false');
+            if (onDashboard) {
+                const inp = document.getElementById('adminSearch');
+                if (inp && document.activeElement === inp) {
+                    inp.blur();
+                }
+            }
         }
     }
 
@@ -626,7 +649,6 @@ function MoveBetweenSections(){
                 targetSection.querySelectorAll('.activity-list li').forEach(li => {
                     li.style.display = '';
                 });
-                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
@@ -726,6 +748,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("keydown", (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+            const wrap = document.querySelector('.admin-dashboard-search');
+            if (wrap && wrap.hidden) {
+                return;
+            }
             e.preventDefault();
             input.focus();
         }

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use App\Services\RequestDetailsPdfExporter;
 use App\Traits\CreatesNotifications;
 
 class LandlordController extends Controller
@@ -117,8 +118,41 @@ class LandlordController extends Controller
     }
 
     /**
-     * Mark a dashboard section as seen so the nav badge for that section is cleared.
+     * Export request details as a PDF document.
      */
+    public function exportRequestPdf(Transaction $transaction, RequestDetailsPdfExporter $exporter)
+    {
+        $transaction->load(['user', 'property.rules', 'property.amenities']);
+
+        $property = $transaction->property;
+        if (!$property || (int) $property->user_id !== (int) Auth::id()) {
+            abort(403, 'You do not have access to this request.');
+        }
+
+        try {
+            $path = $exporter->export($transaction);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()
+                ->route('landlord.dashboard')
+                ->with('error', 'Could not export the request PDF. Please try again.');
+        }
+
+        $filename = 'request-' . $transaction->id . '.pdf';
+
+        return response()->download(
+            $path,
+            $filename,
+            [
+                'Content-Type' => 'application/pdf',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate',
+                'Pragma' => 'no-cache',
+            ],
+            'attachment'
+        )->deleteFileAfterSend(true);
+    }
+
     public function markSectionSeen(Request $request)
     {
         $section = $request->input('section');

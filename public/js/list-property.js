@@ -43,6 +43,7 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
 
     const removedExisting = new Set();
     const hiddenInputs = new Map();
+    const compressStatus = document.getElementById('image-compress-status');
 
     if (removeContainer) {
       const presetInputs = Array.from(
@@ -71,24 +72,48 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
     input.style.padding = '0';
     input.style.margin = '-1px';
 
-    input.addEventListener('change', () => {
+    input.addEventListener('change', async () => {
       const picked = Array.from(input.files || []);
+      if (!picked.length) {
+        return;
+      }
 
-      const all = [...currentFiles];
-      picked.forEach((file) => {
-        const duplicate = all.some((existing) =>
-          existing.name === file.name &&
-          existing.size === file.size &&
-          existing.lastModified === file.lastModified
-        );
-        if (!duplicate) {
-          all.push(file);
-        }
-      });
+      container.classList.add('is-compressing');
+      if (compressStatus) {
+        compressStatus.hidden = false;
+      }
+
+      try {
+        const processed = typeof window.compressImageFiles === 'function'
+          ? await window.compressImageFiles(picked)
+          : picked;
+
+        const all = [...currentFiles];
+        processed.forEach((file) => {
+          const duplicate = all.some((existing) =>
+            existing.name === file.name &&
+            existing.size === file.size &&
+            existing.lastModified === file.lastModified
+          );
+          if (!duplicate) {
+            all.push(file);
+          }
+        });
 
       currentFiles = all;
       renderPreviews();
       syncInputFiles();
+      container.dispatchEvent(new CustomEvent('wizard-field-changed', { bubbles: true }));
+      } catch (error) {
+        console.error('Failed to process images:', error);
+        alert('Could not process one or more images. Please try different files.');
+      } finally {
+        container.classList.remove('is-compressing');
+        if (compressStatus) {
+          compressStatus.hidden = true;
+        }
+        syncInputFiles();
+      }
     });
 
     function ensureRemovalInput(id) {
@@ -166,6 +191,7 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
           removedExisting.add(img.id);
           ensureRemovalInput(img.id);
           renderPreviews();
+          container.dispatchEvent(new CustomEvent('wizard-field-changed', { bubbles: true }));
         });
 
         wrap.appendChild(imageEl);
@@ -196,6 +222,10 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
         btn.setAttribute('aria-label', `Remove ${file.name}`);
         btn.innerHTML = '&times;';
 
+        const sizeHint = document.createElement('span');
+        sizeHint.className = 'thumb-size-hint';
+        sizeHint.textContent = formatFileSize(file.size);
+
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -206,18 +236,147 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
           }
           renderPreviews();
           syncInputFiles();
+          container.dispatchEvent(new CustomEvent('wizard-field-changed', { bubbles: true }));
         });
 
         wrap.appendChild(img);
+        wrap.appendChild(sizeHint);
         wrap.appendChild(btn);
         container.appendChild(wrap);
       });
     }
 
+    function formatFileSize(bytes) {
+      if (!Number.isFinite(bytes) || bytes <= 0) {
+        return '';
+      }
+
+      if (bytes < 1024 * 1024) {
+        return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+      }
+
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
     function syncInputFiles() {
-      const dt = new DataTransfer();
-      currentFiles.forEach((file) => dt.items.add(file));
-      input.files = dt.files;
+      if (!currentFiles.length) {
+        return false;
+      }
+
+      try {
+        const dt = new DataTransfer();  
+        currentFiles.forEach((file) => {
+          if (file instanceof File) {
+            dt.items.add(file);
+          }
+        });
+        input.files = dt.files;
+        return input.files.length > 0;
+      } catch (error) {
+        console.warn('Could not sync image files to the file input:', error);
+        return false;
+      }
+    }
+
+    function appendListingFormFields(targetForm, sourceForm, { skipFileInputs = true } = {}) {
+      Array.from(sourceForm.elements).forEach((element) => {
+        if (!element.name || element.disabled) {
+          return;
+        }
+
+        if (skipFileInputs && element.type === 'file') {
+          return;
+        }
+
+        if (element.type === 'checkbox' || element.type === 'radio') {
+          if (!element.checked) {
+            return;
+          }
+
+          const hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = element.name;
+          hidden.value = element.value;
+          targetForm.appendChild(hidden);
+          return;
+        }
+
+        if (element.tagName === 'SELECT' && element.multiple) {
+          Array.from(element.selectedOptions).forEach((option) => {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = element.name;
+            hidden.value = option.value;
+            targetForm.appendChild(hidden);
+          });
+          return;
+        }
+
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = element.name;
+        hidden.value = element.value;
+        targetForm.appendChild(hidden);
+      });
+    }
+
+    function submitFormWithImageFiles() {
+      const fieldName = input.name || 'images[]';
+      const submitBtn = form.querySelector('[type="submit"]');
+      const statusEl = document.getElementById('listing-submit-status');
+
+      const showStatus = (message) => {
+        if (!statusEl) {
+          return;
+        }
+
+        statusEl.textContent = message;
+        statusEl.hidden = !message;
+      };
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
+
+      showStatus('Submitting your listing…');
+      syncInputFiles();
+
+      if (input.files && input.files.length > 0) {
+        form.__submittingWithImages = true;
+        form.submit();
+        return;
+      }
+
+      const tempForm = document.createElement('form');
+      tempForm.method = 'POST';
+      tempForm.action = form.action;
+      tempForm.enctype = 'multipart/form-data';
+      tempForm.style.display = 'none';
+
+      appendListingFormFields(tempForm, form);
+
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.name = fieldName;
+      fileInput.multiple = true;
+
+      const transfer = new DataTransfer();
+      currentFiles.forEach((file) => {
+        if (file instanceof File) {
+          transfer.items.add(file);
+        }
+      });
+      fileInput.files = transfer.files;
+      tempForm.appendChild(fileInput);
+
+      document.body.appendChild(tempForm);
+      tempForm.submit();
+    }
+
+    if (form) {
+      form.__syncPropertyImages = syncInputFiles;
+      form.__getPropertyImageFileCount = () => currentFiles.length;
+      form.__submitPropertyImagesWithForm = submitFormWithImageFiles;
     }
 
     // Initial render to show any existing images
@@ -231,83 +390,147 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
   }
   
   /* =================== Property Location Map =================== */
-let propertyLocationMap;
-let propertyMapClickService;
+let propertyLocationMap = null;
+let propertyMapClickService = null;
+let mapsApiLoaded = false;
 
-function initPropertyLocationMap() {
-    const mapElement = document.getElementById('property-location-map');
-    
-    if (!mapElement) {
-        console.error('Property location map element not found');
-        return;
-    }
+function isLocationStepVisible() {
+  const step2 = document.querySelector('.wizard-content[data-step="2"]');
+  if (!step2) {
+    return !!document.getElementById('property-location-map');
+  }
 
-    const mapContainer = mapElement.closest('[data-reverse-geocode-endpoint]');
-    const reverseGeocodeEndpoint = mapContainer?.dataset.reverseGeocodeEndpoint || '/map/reverse-geocode';
-
-    const oldLat = parseFloat(document.getElementById('latitude')?.value) || 33.894917;
-    const oldLng = parseFloat(document.getElementById('longitude')?.value) || 35.503083;
-
-    propertyLocationMap = new google.maps.Map(mapElement, {
-        center: { lat: oldLat, lng: oldLng },
-        zoom: 13,
-        mapTypeId: 'roadmap'
-    });
-
-    if (document.getElementById('latitude')?.value && document.getElementById('longitude')?.value) {
-        new google.maps.Marker({
-            position: { lat: oldLat, lng: oldLng },
-            map: propertyLocationMap,
-            title: 'Selected Location'
-        });
-        updateCoordinatesStatus(oldLat, oldLng, true);
-    }
-
-    propertyMapClickService = new MapClickService(propertyLocationMap, {
-        showMarker: true,
-        showInfoWindow: true,
-        enableReverseGeocoding: true,
-        reverseGeocodeEndpoint: reverseGeocodeEndpoint
-    });
-
-    propertyMapClickService.onClick((coordinates) => {
-        document.getElementById('latitude').value = coordinates.latitude;
-        document.getElementById('longitude').value = coordinates.longitude;
-        updateCoordinatesStatus(coordinates.latitude, coordinates.longitude, true);
-    });
-
-    const enableButton = document.getElementById('enableMapClick');
-    const statusSpan = document.getElementById('coordinatesStatus');
-    
-    if (enableButton) {
-        enableButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (propertyMapClickService.isEnabled) {
-                propertyMapClickService.disable();
-                enableButton.textContent = '📍 Enable Map Click';
-                enableButton.style.background = '#3b82f6';
-                enableButton.classList.remove('active');
-                if (statusSpan) statusSpan.textContent = '';
-            } else {
-                propertyMapClickService.enable();
-                enableButton.textContent = '✓ Click Mode Active';
-                enableButton.style.background = '#10b981';
-                enableButton.classList.add('active');
-                if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
-            }
-        });
-
-        if (!document.getElementById('latitude')?.value || !document.getElementById('longitude')?.value) {
-            propertyMapClickService.enable();
-            enableButton.textContent = '✓ Click Mode Active';
-            enableButton.style.background = '#10b981';
-            enableButton.classList.add('active');
-            if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
-        }
-    }
-
-    addAddressSearchBox();
+  return window.getComputedStyle(step2).display !== 'none';
 }
+
+function refreshPropertyLocationMap() {
+  if (!propertyLocationMap || typeof google === 'undefined' || !google.maps) {
+    return;
+  }
+
+  const center = propertyLocationMap.getCenter();
+  google.maps.event.trigger(propertyLocationMap, 'resize');
+  if (center) {
+    propertyLocationMap.setCenter(center);
+  }
+}
+
+function buildPropertyLocationMap() {
+  if (propertyLocationMap) {
+    refreshPropertyLocationMap();
+    return;
+  }
+
+  const mapElement = document.getElementById('property-location-map');
+  if (!mapElement) {
+    return;
+  }
+
+  const mapContainer = mapElement.closest('[data-reverse-geocode-endpoint]');
+  const reverseGeocodeEndpoint = mapContainer?.dataset.reverseGeocodeEndpoint || '/map/reverse-geocode';
+
+  const oldLat = parseFloat(document.getElementById('latitude')?.value) || 33.894917;
+  const oldLng = parseFloat(document.getElementById('longitude')?.value) || 35.503083;
+
+  propertyLocationMap = new google.maps.Map(mapElement, {
+    center: { lat: oldLat, lng: oldLng },
+    zoom: 13,
+    mapTypeId: 'roadmap',
+  });
+
+  if (document.getElementById('latitude')?.value && document.getElementById('longitude')?.value) {
+    new google.maps.Marker({
+      position: { lat: oldLat, lng: oldLng },
+      map: propertyLocationMap,
+      title: 'Selected Location',
+    });
+    updateCoordinatesStatus(oldLat, oldLng, true);
+  }
+
+  propertyMapClickService = new MapClickService(propertyLocationMap, {
+    showMarker: true,
+    showInfoWindow: true,
+    enableReverseGeocoding: true,
+    reverseGeocodeEndpoint: reverseGeocodeEndpoint,
+  });
+
+  propertyMapClickService.onClick((coordinates) => {
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    if (latInput) {
+      latInput.value = coordinates.latitude;
+      latInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (lngInput) {
+      lngInput.value = coordinates.longitude;
+      lngInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    updateCoordinatesStatus(coordinates.latitude, coordinates.longitude, true);
+  });
+
+  const enableButton = document.getElementById('enableMapClick');
+  const statusSpan = document.getElementById('coordinatesStatus');
+
+  if (enableButton && enableButton.dataset.mapBound !== '1') {
+    enableButton.dataset.mapBound = '1';
+
+    enableButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (propertyMapClickService.isEnabled) {
+        propertyMapClickService.disable();
+        enableButton.textContent = '📍 Enable Map Click';
+        enableButton.style.background = '#3b82f6';
+        enableButton.classList.remove('active');
+        if (statusSpan) statusSpan.textContent = '';
+      } else {
+        propertyMapClickService.enable();
+        enableButton.textContent = '✓ Click Mode Active';
+        enableButton.style.background = '#10b981';
+        enableButton.classList.add('active');
+        if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
+      }
+    });
+
+    if (!document.getElementById('latitude')?.value || !document.getElementById('longitude')?.value) {
+      propertyMapClickService.enable();
+      enableButton.textContent = '✓ Click Mode Active';
+      enableButton.style.background = '#10b981';
+      enableButton.classList.add('active');
+      if (statusSpan) statusSpan.textContent = 'Click anywhere on the map to set location';
+    }
+  }
+
+  addAddressSearchBox();
+}
+
+function ensurePropertyLocationMap() {
+  if (!mapsApiLoaded || typeof google === 'undefined' || !google.maps) {
+    return false;
+  }
+
+  if (!isLocationStepVisible()) {
+    return false;
+  }
+
+  buildPropertyLocationMap();
+  refreshPropertyLocationMap();
+  return !!propertyLocationMap;
+}
+
+function schedulePropertyLocationMapRefresh() {
+  requestAnimationFrame(() => {
+    ensurePropertyLocationMap();
+    setTimeout(refreshPropertyLocationMap, 120);
+    setTimeout(refreshPropertyLocationMap, 400);
+  });
+}
+
+window.initPropertyLocationMap = function initPropertyLocationMapCallback() {
+  mapsApiLoaded = true;
+  ensurePropertyLocationMap();
+};
+
+window.initEditPropertyLocationMap = window.initPropertyLocationMap;
 
 function updateCoordinatesStatus(lat, lng, isSet) {
     const statusSpan = document.getElementById('coordinatesStatus');
@@ -368,24 +591,264 @@ function validatePropertyLocation() {
     const form = document.querySelector('.listing-form');
     if (!form) return;
 
+    const requireCoordinates = form.dataset.requireCoordinates === 'true';
+
     form.addEventListener('submit', function(e) {
         const lat = document.getElementById('latitude')?.value;
         const lng = document.getElementById('longitude')?.value;
-        
-        if (!lat || !lng) {
-            e.preventDefault();
-            alert('Please set the property location by clicking on the map.');
-            const enableButton = document.getElementById('enableMapClick');
-            if (enableButton) {
-                enableButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                if (!propertyMapClickService || !propertyMapClickService.isEnabled) {
-                    enableButton.click();
-                }
+
+        if (lat && lng) {
+            return;
+        }
+
+        if (!requireCoordinates) {
+            const confirmed = confirm(
+                'No location coordinates set. The system will try to geocode from address. Continue anyway?'
+            );
+            if (!confirmed) {
+                e.preventDefault();
             }
-            return false;
+            return;
+        }
+
+        e.preventDefault();
+        alert('Please set the property location by clicking on the map.');
+        const enableButton = document.getElementById('enableMapClick');
+        if (enableButton) {
+            enableButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (!propertyMapClickService || !propertyMapClickService.isEnabled) {
+                enableButton.click();
+            }
         }
     });
 }
+
+  /* ============================ Wizard Step Validation ============================ */
+  function wizardValidationEnabled() {
+    const form = document.querySelector('.listing-form');
+    return form?.dataset.wizardValidateSteps === 'true';
+  }
+
+  function markWizardFieldInvalid(field, message) {
+    if (!field) {
+      return;
+    }
+
+    field.classList.add('wizard-field-error');
+    field.setAttribute('aria-invalid', 'true');
+
+    const wrapper = field.closest('.form-input') || field.parentElement;
+    if (!wrapper) {
+      return;
+    }
+
+    let hint = wrapper.querySelector('.wizard-inline-error');
+    if (!hint) {
+      hint = document.createElement('small');
+      hint.className = 'wizard-inline-error text-danger';
+      wrapper.appendChild(hint);
+    }
+
+    hint.textContent = message;
+  }
+
+  function clearWizardStepErrors(stepEl) {
+    if (!stepEl) {
+      return;
+    }
+
+    stepEl.querySelectorAll('.wizard-field-error').forEach((field) => {
+      field.classList.remove('wizard-field-error');
+      field.removeAttribute('aria-invalid');
+    });
+
+    stepEl.querySelectorAll('.wizard-inline-error').forEach((hint) => hint.remove());
+
+    const summary = stepEl.querySelector('.wizard-step-errors');
+    if (summary) {
+      summary.hidden = true;
+      summary.innerHTML = '';
+    }
+  }
+
+  function showWizardStepErrors(stepEl, messages) {
+    if (!stepEl || !messages.length) {
+      return;
+    }
+
+    let summary = stepEl.querySelector('.wizard-step-errors');
+    if (!summary) {
+      summary = document.createElement('div');
+      summary.className = 'wizard-step-errors alert alert-danger';
+      summary.setAttribute('role', 'alert');
+      stepEl.insertBefore(summary, stepEl.firstChild);
+    }
+
+    summary.innerHTML = `<ul>${messages.map((message) => `<li>${message}</li>`).join('')}</ul>`;
+    summary.hidden = false;
+  }
+
+  function isValidNumericField(field, { min = 0 } = {}) {
+    if (!field) {
+      return false;
+    }
+
+    const raw = String(field.value ?? '').trim();
+    if (raw === '') {
+      return false;
+    }
+
+    const value = Number(raw);
+    return !Number.isNaN(value) && value >= min;
+  }
+
+  function isRentListing() {
+    const listingType = document.getElementById('listing_type');
+    return listingType?.value === 'rent';
+  }
+
+  function hasSelectValue(select) {
+    if (!select) {
+      return false;
+    }
+
+    const value = String(select.value ?? '').trim();
+    return value !== '';
+  }
+
+  function validateStepNativeFields(stepEl, addError) {
+    const fields = stepEl.querySelectorAll('input:not([type="hidden"]):not([type="file"]), select, textarea');
+
+    fields.forEach((field) => {
+      if (!field.checkValidity()) {
+        const message = field.validationMessage || 'Please complete this field.';
+        addError(field, message);
+      }
+    });
+  }
+
+  function getWizardImageCount() {
+    return document.querySelectorAll('#image-previews .thumb').length;
+  }
+
+  function validateWizardStep(step, { silent = false } = {}) {
+    const stepEl = document.querySelector(`.wizard-content[data-step="${step}"]`);
+    if (!stepEl) {
+      return { valid: true, firstInvalid: null, messages: [] };
+    }
+
+    if (!silent) {
+      clearWizardStepErrors(stepEl);
+    }
+
+    const fieldErrors = [];
+    const messages = [];
+
+    const addError = (field, message) => {
+      messages.push(message);
+      fieldErrors.push({ field, message });
+      if (!silent) {
+        markWizardFieldInvalid(field, message);
+      }
+    };
+
+    if (step === 1) {
+      validateStepNativeFields(stepEl, addError);
+    }
+
+    if (step === 2) {
+      const latitude = document.getElementById('latitude');
+      const longitude = document.getElementById('longitude');
+      const latValue = String(latitude?.value ?? '').trim();
+      const lngValue = String(longitude?.value ?? '').trim();
+
+      if (!latValue || !lngValue) {
+        addError(latitude, 'Please set the property location on the map.');
+      }
+    }
+
+    if (step === 3) {
+      const price = stepEl.querySelector('#price');
+      const unit = stepEl.querySelector('#unit');
+      const priceDuration = stepEl.querySelector('#price_duration');
+      const area = stepEl.querySelector('#area_m3');
+      const rooms = stepEl.querySelector('#room_nb');
+      const bathrooms = stepEl.querySelector('#bathroom_nb');
+      const bedrooms = stepEl.querySelector('#bedroom_nb');
+
+      if (!isValidNumericField(price)) {
+        addError(price, 'Enter a valid price.');
+      }
+
+      if (!unit?.value) {
+        addError(unit, 'Please choose a currency unit.');
+      }
+
+      if (isRentListing()) {
+        if (!priceDuration?.value) {
+          addError(priceDuration, 'Choose a price duration.');
+        }
+
+        const rentUnits = stepEl.querySelectorAll('input[name="rent_duration_units[]"]:checked');
+        if (!rentUnits.length) {
+          const rentGrid = stepEl.querySelector('#rent_duration_units');
+          addError(rentGrid, 'Select at least one accepted rent duration.');
+        }
+      }
+
+      if (!isValidNumericField(area)) {
+        addError(area, 'Enter the property area.');
+      }
+
+      if (!isValidNumericField(rooms)) {
+        addError(rooms, 'Enter the number of rooms.');
+      }
+
+      if (!isValidNumericField(bathrooms)) {
+        addError(bathrooms, 'Enter the number of bathrooms.');
+      }
+
+      if (!isValidNumericField(bedrooms)) {
+        addError(bedrooms, 'Enter the number of bedrooms.');
+      }
+    }
+
+    if (step === 5) {
+      const minImages = Number(document.querySelector('.listing-form')?.dataset.minImages || 1);
+      if (getWizardImageCount() < minImages) {
+        const imagesInput = document.getElementById('images');
+        addError(imagesInput, `Please keep or upload at least ${minImages} image${minImages === 1 ? '' : 's'}.`);
+      }
+    }
+
+    if (!silent) {
+      showWizardStepErrors(stepEl, [...new Set(messages)]);
+    }
+
+    return {
+      valid: fieldErrors.length === 0,
+      firstInvalid: fieldErrors[0]?.field || null,
+      messages,
+    };
+  }
+
+  function ensurePropertyImagesOnSubmit(event) {
+    const form = event.currentTarget || event.target;
+
+    if (form.__submittingWithImages) {
+      return;
+    }
+
+    const fileCount = form.__getPropertyImageFileCount?.() || 0;
+
+    if (!fileCount) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    form.__submitPropertyImagesWithForm?.();
+  }
 
   /* ============================ Simple Wizard ============================ */
   function initWizard() {
@@ -407,6 +870,51 @@ function validatePropertyLocation() {
     };
     
     if (!prevBtn || !nextBtn || !submitBtn) return;
+
+    const form = document.querySelector('.listing-form');
+
+    function updateWizardNextState(step) {
+      if (!wizardValidationEnabled()) {
+        nextBtn.disabled = false;
+        submitBtn.disabled = false;
+        nextBtn.classList.remove('is-disabled');
+        submitBtn.classList.remove('is-disabled');
+        return;
+      }
+
+      // Keep Next clickable — show errors when the user tries to advance.
+      nextBtn.disabled = false;
+      nextBtn.classList.remove('is-disabled');
+
+      if (step === totalSteps) {
+        const result = validateWizardStep(step, { silent: true });
+        submitBtn.disabled = !result.valid;
+        submitBtn.classList.toggle('is-disabled', !result.valid);
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('is-disabled');
+      }
+    }
+
+    function tryAdvanceStep() {
+      if (!wizardValidationEnabled()) {
+        return true;
+      }
+
+      const result = validateWizardStep(currentStep);
+      if (!result.valid) {
+        if (result.firstInvalid) {
+          if (typeof result.firstInvalid.focus === 'function') {
+            result.firstInvalid.focus({ preventScroll: true });
+          }
+          result.firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        updateWizardNextState(currentStep);
+        return false;
+      }
+
+      return true;
+    }
     
     function showStep(step) {
       // Hide all steps
@@ -448,22 +956,28 @@ function validatePropertyLocation() {
         helperAvatar.src = stepMessages[step].image;
       }
       
-      // Trigger map resize on step 2
-      if (step === 2 && window.map) {
-        setTimeout(() => {
-          google.maps.event.trigger(window.map, 'resize');
-        }, 100);
+      // Initialize or refresh the map when the location step becomes visible.
+      if (step === 2) {
+        schedulePropertyLocationMapRefresh();
       }
+
+      updateWizardNextState(step);
       
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
     nextBtn.addEventListener('click', () => {
-      if (currentStep < totalSteps) {
-        currentStep++;
-        showStep(currentStep);
+      if (currentStep >= totalSteps) {
+        return;
       }
+
+      if (!tryAdvanceStep()) {
+        return;
+      }
+
+      currentStep++;
+      showStep(currentStep);
     });
     
     prevBtn.addEventListener('click', () => {
@@ -486,7 +1000,45 @@ function validatePropertyLocation() {
     });
     
     // Initialize
-    showStep(1);
+    if (window.__listingWizardErrorStep) {
+      currentStep = Number(window.__listingWizardErrorStep) || 1;
+    }
+    showStep(currentStep);
+
+    if (form) {
+      const handleFieldChange = () => {
+        if (!wizardValidationEnabled()) {
+          return;
+        }
+
+        const stepEl = document.querySelector(`.wizard-content[data-step="${currentStep}"]`);
+        clearWizardStepErrors(stepEl);
+        updateWizardNextState(currentStep);
+      };
+
+      form.addEventListener('input', handleFieldChange);
+      form.addEventListener('change', handleFieldChange);
+      form.addEventListener('wizard-field-changed', handleFieldChange);
+
+      form.addEventListener('submit', (event) => {
+        if (wizardValidationEnabled()) {
+          for (let step = 1; step <= totalSteps; step += 1) {
+            const result = validateWizardStep(step);
+            if (!result.valid) {
+              event.preventDefault();
+              currentStep = step;
+              showStep(step);
+              if (result.firstInvalid) {
+                result.firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+              return;
+            }
+          }
+        }
+
+        ensurePropertyImagesOnSubmit(event);
+      });
+    }
   }
 
   /* ============================ Price Auto-Calculation ============================ */
@@ -542,12 +1094,32 @@ function validatePropertyLocation() {
     });
   }
 
+  /* ============================ Description counter ============================ */
+  function initDescriptionCounter() {
+    const description = document.getElementById('description');
+    const counter = document.getElementById('description-char-count');
+    if (!description || !counter) {
+      return;
+    }
+
+    const update = () => {
+      const length = description.value.trim().length;
+      counter.textContent = `${length} / 30 characters minimum`;
+      counter.classList.toggle('is-valid', length >= 30);
+      counter.classList.toggle('is-invalid', length > 0 && length < 30);
+    };
+
+    description.addEventListener('input', update);
+    update();
+  }
+
   /* ============================ Init ============================ */
   function initListProperty() {
     console.log('Initializing list property page...');
     setupImagePreview('images', 'image-previews');
     validatePropertyLocation();
     initPriceAutoCalculation();
+    initDescriptionCounter();
     initWizard();
   }
 

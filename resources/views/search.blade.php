@@ -146,16 +146,18 @@
                         
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                         @auth
-                            <button 
-                                class="favorite-btn like-btn" 
+                            <button
+                                type="button"
+                                class="favorite-btn like-btn"
                                 data-property-id="{{ $property->id }}"
                                 data-liked="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
+                                aria-pressed="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
                             >
                                 <i class="fa-{{ $property->isLikedBy(auth()->id()) ? 'solid' : 'regular' }} fa-heart"></i>
                             </button>
                             <span class="like-count" id="like-count-{{ $property->id }}">{{ $property->likedBy()->count() }}</span>
                         @else
-                            <button class="favorite-btn" data-login-url="{{ route('login') }}">
+                            <button type="button" class="favorite-btn" data-login-url="{{ route('login') }}">
                                 <i class="fa-regular fa-heart"></i>
                             </button>
                         @endauth

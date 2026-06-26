@@ -132,7 +132,6 @@
 
 .nav-section {
   margin-bottom: 1rem;
-  left : 1rem;
 }
 
 .nav-section-title {
@@ -241,11 +240,15 @@
 
 /* Header */
 .landlord-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
   background: var(--primary-gradient);
   color: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .header-title h1 {
@@ -397,6 +400,45 @@
 .badge-danger  { background: #fee2e2; color: #991b1b; }
 
 /* =========================================================
+   TABLE TOOLBARS (Search)
+   ========================================================= */
+
+.landlord-table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.25rem 0 0.7rem;
+}
+
+.landlord-table-toolbar i {
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.landlord-table-search {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  outline: none;
+  box-shadow: none;
+}
+
+.landlord-table-search::placeholder {
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.landlord-table-search:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.22);
+}
+
+/* =========================================================
    TABLES
    ========================================================= */
 
@@ -407,6 +449,182 @@
   -webkit-overflow-scrolling: touch;
   border-radius: 10px;
   max-width: 100%;
+}
+
+/* Fixed table panel size (wrapper only — columns stay auto-sized) */
+.landlord-dashboard-table-panel {
+  --landlord-row-h: 76px;
+  --landlord-cell-py: 0.5rem;
+  --landlord-cell-px: 0.85rem;
+  --landlord-thumb: 60px;
+  --landlord-avatar: 40px;
+  width: 100%;
+  height: min(460px, 70vh);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Uniform row + cell content size (matches property tables) */
+.landlord-dashboard-table-panel .requests-table tbody tr:not(:has(.empty-state-cell)),
+.landlord-dashboard-table-panel .transactions-table tbody tr:not(:has(.empty-state-cell)),
+.landlord-dashboard-table-panel .properties-table tbody tr:not(:has(.empty-state-cell)) {
+  height: var(--landlord-row-h);
+}
+
+.landlord-dashboard-table-panel .requests-table th,
+.landlord-dashboard-table-panel .transactions-table th,
+.landlord-dashboard-table-panel .properties-table th {
+  padding: 0.65rem var(--landlord-cell-px);
+}
+
+.landlord-dashboard-table-panel .requests-table td:not(.empty-state-cell),
+.landlord-dashboard-table-panel .transactions-table td:not(.empty-state-cell),
+.landlord-dashboard-table-panel .properties-table td:not(.empty-state-cell) {
+  padding: var(--landlord-cell-py) var(--landlord-cell-px);
+  height: var(--landlord-row-h);
+  max-height: var(--landlord-row-h);
+  overflow: hidden;
+  box-sizing: border-box;
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.landlord-dashboard-table-panel .property-table-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  max-height: calc(var(--landlord-row-h) - (var(--landlord-cell-py) * 2));
+}
+
+.landlord-dashboard-table-panel .property-table-image {
+  width: var(--landlord-thumb);
+  height: var(--landlord-thumb);
+  flex-shrink: 0;
+}
+
+.landlord-dashboard-table-panel .property-table-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.landlord-dashboard-table-panel .property-table-info strong {
+  font-size: 0.9rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.landlord-dashboard-table-panel .property-table-details {
+  font-size: 0.78rem;
+  gap: 0.5rem;
+}
+
+.landlord-dashboard-table-panel .property-price-cell {
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.landlord-dashboard-table-panel .request-buyer-cell,
+.landlord-dashboard-table-panel .transaction-buyer-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  max-height: calc(var(--landlord-row-h) - (var(--landlord-cell-py) * 2));
+}
+
+.landlord-dashboard-table-panel .buyer-avatar,
+.landlord-dashboard-table-panel .buyer-avatar-placeholder {
+  width: var(--landlord-avatar);
+  height: var(--landlord-avatar);
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.landlord-dashboard-table-panel .request-buyer-cell > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.landlord-dashboard-table-panel .request-buyer-cell strong,
+.landlord-dashboard-table-panel .transaction-buyer-cell strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.landlord-dashboard-table-panel .transaction-buyer-cell strong {
+  flex: 1;
+}
+
+.landlord-dashboard-table-panel .request-buyer-cell small {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landlord-dashboard-table-panel .requests-table td:nth-child(2) strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 16rem;
+}
+
+.landlord-dashboard-table-panel .transactions-table td:nth-child(2) {
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 16rem;
+}
+
+.landlord-dashboard-table-panel .status-badge,
+.landlord-dashboard-table-panel .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  white-space: nowrap;
+}
+
+.landlord-dashboard-table-panel .request-actions,
+.landlord-dashboard-table-panel .transaction-actions,
+.landlord-dashboard-table-panel .table-actions {
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+}
+
+.landlord-dashboard-table-panel .btn-icon {
+  width: 34px;
+  height: 34px;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.landlord-dashboard-table-panel .btn-sm {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.landlord-dashboard-table-panel .empty-state-cell {
+  height: auto;
+  max-height: none;
+  padding: 2rem 1rem !important;
+  overflow: visible;
 }
 
 .requests-table,
@@ -676,60 +894,139 @@
   margin-bottom: 1.5rem;
 }
 
-/* Modal */
+/* =========================================================
+   MODALS
+   ========================================================= */
+
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
   z-index: 2000;
   align-items: center;
   justify-content: center;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  background: rgba(15, 23, 42, 0.55);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
+body.landlord-modal-open {
+  overflow: hidden;
 }
 
-.modal-header {
+.landlord-modal__dialog {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  width: min(100%, 44rem);
+  max-height: min(88vh, 52rem);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+  animation: landlordModalIn 0.28s ease;
+}
+
+.landlord-modal__dialog.modal-content--rejection {
+  width: min(100%, 34rem);
+  max-height: min(90vh, 44rem);
+}
+
+@keyframes landlordModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes landlordModalInMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landlord-modal__header,
+.modal-header.landlord-modal__header {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 1.5rem;
+  flex-shrink: 0;
+  gap: 1rem;
+  padding: 1.15rem 1.35rem;
   border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #f8fafc 0%, var(--card) 100%);
 }
 
-.modal-header h2 {
+.landlord-modal__header-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.landlord-modal__header h2,
+.modal-header.landlord-modal__header h2 {
   margin: 0;
-  font-size: 1.5rem;
-  color: var(--text);
+  font-size: 1.25rem;
+  line-height: 1.3;
   font-weight: 900;
+  color: var(--text);
 }
 
-.modal-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #94a3b8;
-  font-size: 1.5rem;
+.landlord-modal__subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-light);
+}
+
+.landlord-modal__close {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
-  transition: color 0.2s ease;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.modal-close:hover { color: #1e293b; }
-
-.modal-content--rejection {
-  max-width: 520px;
+.landlord-modal__close:hover {
+  background: #667eea;
+  border-color: #667eea;
+  color: #fff;
 }
 
-.modal-body--padded {
-  padding: 1.25rem 1.5rem 1.5rem;
+.landlord-modal__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.15rem 1.35rem 1.35rem;
+}
+
+.landlord-modal__body .request-details-content,
+.landlord-modal__body .rejected-property-modal-body {
+  padding: 0;
+}
+
+.landlord-modal__body .request-details-title {
+  display: none;
 }
 
 .rejected-property-modal-hero {
@@ -737,6 +1034,7 @@
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .rejected-property-modal-image {
@@ -940,9 +1238,19 @@
 }
 
 .request-details-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem 1.25rem;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.75rem;
+}
+
+.request-details-grid td {
+  width: 50%;
+  vertical-align: top;
+  padding-right: 1.25rem;
+}
+
+.request-details-grid .request-detail-item {
+  padding: 0;
 }
 
 .request-detail-item {
@@ -969,8 +1277,20 @@
 }
 
 .request-detail-item--full {
-  grid-column: 1 / -1;
   margin-top: 0.5rem;
+}
+
+.rules-amenities-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 0.5rem;
+}
+
+.rules-amenities-table td {
+  width: 50%;
+  vertical-align: top;
+  padding-right: 1.5rem;
 }
 
 .request-detail-status {
@@ -1088,16 +1408,10 @@
   color: #64748b;
 }
 
-@media (max-width: 640px) {
-  .request-detail-rules-amenities-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .request-details-actions {
   display: flex;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 0.75rem;
   margin-top: 1.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid #e2e8f0;
@@ -1123,12 +1437,6 @@
 .transaction-report-reject-form .form-control {
   width: 180px;
   display: inline-block;
-}
-
-@media (max-width: 640px) {
-  .request-details-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Tooltip */
@@ -1164,96 +1472,91 @@
   }
 
   .landlord-header {
+    flex-direction: column;
+    text-align: center;
     padding: 1.5rem;
   }
 
   .header-title h1 {
     font-size: 1.5rem;
   }
+
+  .dashboard-character {
+    width: 100px;
+  }
+
+  .empty-dashboard-character {
+    width: 120px;
+  }
 }
 
-/* ============================
-   LANDLORD DASHBOARD CHARACTER STYLES
-   ============================ */
+@media (min-width: 1024px) {
+  .landlord-modal__dialog.modal-content--request {
+    width: min(100%, 52rem);
+  }
 
-.landlord-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
+  .request-details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
+  }
+
+  .request-details-actions {
+    justify-content: flex-start;
+  }
 }
+
+/* =========================================================
+   CHARACTERS & EMPTY STATES
+   ========================================================= */
 
 .header-character {
-    flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .dashboard-character {
-    width: 140px;
-    height: auto;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
-    animation: float 3s ease-in-out infinite;
+  width: 140px;
+  height: auto;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+  animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-/* Empty State Character */
 .empty-state-cell {
-    padding: 3rem 2rem !important;
+  padding: 3rem 2rem !important;
 }
 
 .dashboard-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .empty-dashboard-character {
-    width: 160px;
-    height: auto;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
-    animation: confusedFloat 3s ease-in-out infinite;
+  width: 160px;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+  animation: confusedFloat 3s ease-in-out infinite;
 }
 
 @keyframes confusedFloat {
-    0%, 100% {
-        transform: translateY(0px) rotate(0deg);
-    }
-    50% {
-        transform: translateY(-12px) rotate(-3deg);
-    }
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-3deg); }
 }
 
 .dashboard-empty-state p {
-    margin: 0;
-    font-size: 1rem;
+  margin: 0;
+  font-size: 1rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .landlord-header {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .dashboard-character {
-        width: 100px;
-    }
-    
-    .empty-dashboard-character {
-        width: 120px;
-    }
-}
-
-/* ---------- Phone layout (≤640px) ---------- */
+/* =========================================================
+   MOBILE NAV (≤640px)
+   ========================================================= */
 .landlord-mobile-nav-toggle {
   display: none;
   align-items: center;
@@ -1426,6 +1729,15 @@ body.landlord-drawer-open {
     margin-bottom: 0.75rem;
   }
 
+  .landlord-table-toolbar {
+    margin: 0.2rem 0 0.6rem;
+  }
+
+  .landlord-table-search {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
   .section-header {
     margin-bottom: 0.85rem;
     padding-bottom: 0.65rem;
@@ -1443,118 +1755,172 @@ body.landlord-drawer-open {
     padding: 0.15rem 0.45rem;
   }
 
+  .requests-table-wrapper,
+  .transactions-table-wrapper,
+  .properties-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-inline: -0.25rem;
+    padding-inline: 0.25rem;
+    scrollbar-gutter: stable;
+  }
+
+  .requests-table,
+  .transactions-table,
+  .properties-table {
+    width: 100%;
+    min-width: 36rem;
+    font-size: clamp(0.68rem, 2.8vw, 0.75rem);
+  }
+
   .requests-table th,
   .requests-table td,
   .transactions-table th,
   .transactions-table td,
   .properties-table th,
   .properties-table td {
-    padding: 0.55rem 0.45rem;
-    font-size: 0.75rem;
+    padding: clamp(0.4rem, 1.5vw, 0.55rem) clamp(0.35rem, 1.2vw, 0.45rem);
+    white-space: nowrap;
+    vertical-align: middle;
   }
 
   .requests-table th,
   .transactions-table th,
   .properties-table th {
-    font-size: 0.65rem;
+    font-size: clamp(0.6rem, 2.4vw, 0.65rem);
     letter-spacing: 0.03em;
   }
 
-  .property-table-cell {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
+  /* Keep same content dimensions as desktop inside fixed panels */
+  .landlord-dashboard-table-panel {
+    --landlord-row-h: 76px;
+    --landlord-thumb: 60px;
+    --landlord-avatar: 40px;
   }
 
-  .property-table-image {
-    width: 48px;
-    height: 48px;
+  .landlord-dashboard-table-panel .property-table-image {
+    width: var(--landlord-thumb);
+    height: var(--landlord-thumb);
   }
 
-  .property-table-info strong {
+  .landlord-dashboard-table-panel .buyer-avatar,
+  .landlord-dashboard-table-panel .buyer-avatar-placeholder {
+    width: var(--landlord-avatar);
+    height: var(--landlord-avatar);
+  }
+
+  .landlord-dashboard-table-panel .requests-table td:not(.empty-state-cell),
+  .landlord-dashboard-table-panel .transactions-table td:not(.empty-state-cell),
+  .landlord-dashboard-table-panel .properties-table td:not(.empty-state-cell) {
+    padding: var(--landlord-cell-py, 0.5rem) var(--landlord-cell-px, 0.85rem);
+    height: var(--landlord-row-h);
+    max-height: var(--landlord-row-h);
     font-size: 0.8rem;
-    -webkit-line-clamp: 2;
   }
 
-  .property-table-details {
+  .landlord-dashboard-table-panel .status-badge,
+  .landlord-dashboard-table-panel .badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .landlord-dashboard-table-panel .btn-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.8rem;
+  }
+
+  .landlord-dashboard-table-panel .btn-sm {
     font-size: 0.7rem;
+    padding: 0.35rem 0.55rem;
+  }
+
+  .landlord-dashboard-table-panel .request-buyer-cell,
+  .landlord-dashboard-table-panel .transaction-buyer-cell {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
     gap: 0.5rem;
   }
 
-  .property-price-cell {
-    font-size: 0.8rem;
-  }
-
-  .status-badge {
-    font-size: 0.6rem;
-    padding: 0.2rem 0.45rem;
-    letter-spacing: 0.03em;
-  }
-
-  .request-actions,
-  .transaction-actions,
-  .table-actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.4rem;
-  }
-
-  .btn-sm {
-    width: 100%;
-    justify-content: center;
-    padding: 0.45rem 0.65rem;
-    font-size: 0.72rem;
-  }
-
-  .btn-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 0.85rem;
-  }
-
-  .request-buyer-cell,
-  .transaction-buyer-cell {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.45rem;
-  }
-
-  .buyer-avatar,
-  .buyer-avatar-placeholder {
-    width: 32px;
-    height: 32px;
-    font-size: 0.9rem;
-  }
-
-  .empty-state-cell {
-    padding: 1.5rem 0.75rem !important;
+  .landlord-dashboard-table-panel .transaction-buyer-cell strong {
+    min-width: 0;
+    flex: 1;
   }
 
   .dashboard-empty-state p {
     font-size: 0.875rem;
   }
 
-  .modal-content {
-    width: min(100%, calc(100vw - 1.25rem));
-    max-height: min(90vh, 100dvh);
-    margin: 0.5rem;
+  .landlord-modal {
+    align-items: flex-end;
+    padding: 0;
   }
 
-  .modal-header {
-    padding: 1rem;
+  .landlord-modal__dialog {
+    width: 100%;
+    max-height: min(92dvh, 100dvh);
+    border-radius: 16px 16px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    animation: landlordModalInMobile 0.3s ease;
   }
 
-  .modal-header h2 {
+  .landlord-modal__header {
+    padding: 1rem 1rem 0.85rem;
+  }
+
+  .landlord-modal__header h2 {
     font-size: 1.1rem;
+  }
+
+  .landlord-modal__subtitle {
+    font-size: 0.8rem;
+  }
+
+  .landlord-modal__body {
+    padding: 0.85rem 1rem max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .rejected-property-modal-hero {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .rejected-property-modal-image {
+    width: 72px;
+    height: 72px;
+  }
+
+  .rejected-property-modal-title {
+    font-size: 1rem;
+  }
+
+  .request-details-grid,
+  .request-detail-rules-amenities-grid {
+    grid-template-columns: 1fr;
   }
 
   .request-details-actions {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .request-details-actions .btn,
+  .request-details-actions .request-details-action-form {
+    width: 100%;
   }
 
   .request-details-actions .btn:last-child {
     margin-left: 0;
+  }
+
+  .rejected-property-modal-actions .btn {
+    width: 100%;
   }
 
   .transaction-report-actions {

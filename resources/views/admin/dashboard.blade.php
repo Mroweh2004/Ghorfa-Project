@@ -16,10 +16,13 @@
     @include('partials.nav')
 
     <div class="admin-wrapper">
-        <aside class="admin-sidebar" id="adminSidebar">
+        <div id="adminSidebarBackdrop" class="admin-sidebar-backdrop" role="presentation" aria-hidden="true"></div>
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Admin menu">
             <div class="sidebar-header">
-                
-                <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+                <button type="button" class="admin-sidebar-close" id="adminSidebarClose" aria-label="Close menu">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -94,14 +97,6 @@
             </div>
 
             <main class="admin-content">
-                <div class="admin-dashboard-search" role="search">
-                    <label class="admin-search-sr-only" for="adminSearch">Search the visible dashboard section</label>
-                    <div class="admin-dashboard-search-inner">
-                        <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="search" id="adminSearch" name="admin_search" autocomplete="off" placeholder="Search current section…">
-                        <kbd class="admin-search-kbd" title="Focus search">Ctrl K</kbd>
-                    </div>
-                </div>
 <div class="admin-dashboard">
     <div class="dashboard-content" data-pending-applications-route="{{ route('admin.pending-applications') }}" data-mark-section-seen-url="{{ route('admin.mark-section-seen') }}">
 
@@ -163,7 +158,7 @@
                     <h4 class="admin-overview-group__title" id="overview-users-heading">
                         <i class="fas fa-users"></i> Users &amp; roles
                     </h4>
-                    <div class="admin-overview-grid">
+                    <div class="admin-overview-grid admin-overview-grid--platform-totals">
                         <div class="overview-tile">
                             <span class="overview-tile__icon"><i class="fas fa-user-friends"></i></span>
                             <span class="overview-tile__value">{{ number_format($overview['clients']) }}</span>
@@ -193,6 +188,17 @@
                     </div>
                 </section>
 
+            </div>
+
+            <div class="admin-dashboard-search-anchor" data-admin-search-anchor>
+                <div class="admin-dashboard-search" role="search">
+                    <label class="admin-search-sr-only" for="adminSearch">Search the visible dashboard section</label>
+                    <div class="admin-dashboard-search-inner">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input type="search" id="adminSearch" name="admin_search" autocomplete="off" placeholder="Search current section…">
+                        <kbd class="admin-search-kbd" title="Focus search">Ctrl K</kbd>
+                    </div>
+                </div>
             </div>
 
             <h3 class="dashboard-subtitle"><i class="fas fa-chart-line"></i> Trends (last {{ count($chartData['labels']) }} days)</h3>
@@ -249,6 +255,7 @@
                         </div>
                     </div>
                 </section>
+                <div class="admin-dashboard-search-anchor" data-admin-search-anchor></div>
                 <div class="applications-table">
                     <table>
                         <thead>
@@ -409,60 +416,63 @@
         </div>
 
     <!-- User Management Section -->
-    <div id="users-section" class="content-section" data-section-name="users">
+    <div id="users-section" class="content-section content-section--stable-table" data-section-name="users">
                 <div class="section-header">
                     <h2>
                         <i class="fas fa-user-cog"></i>
                         User Management
                     </h2>
                 </div>
+                <div class="admin-dashboard-search-anchor" data-admin-search-anchor></div>
                 <div class="users-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Created At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($users as $user)
-                            <tr>
-                                <td>{{ $user->id }}</td>
-                                <td>{{ $user->name }}</td>
-                                <td>{{ $user->email }}</td>
-                                <td>
-                                    <span class="role-badge role-{{ $user->role }}">
-                                        {{ ucfirst($user->role) }}
-                                    </span>
-                                </td>
-                                <td>{{ $user->created_at->format('M d, Y') }}</td>
-                                <td>
-                                    <a href="{{ route('admin.users.show', $user) }}" class="btn btn-info btn-sm admin-view-user-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.35rem;">
-                                        <i class="fas fa-eye"></i> View
-                                    </a>
-                                    <form action="{{ route('admin.users.delete', $user) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="empty-state-cell">
-                                    <i class="fas fa-users"></i>
-                                    No users found
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                    <div class="users-table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($users as $user)
+                                <tr>
+                                    <td>{{ $user->id }}</td>
+                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->email }}</td>
+                                    <td>
+                                        <span class="role-badge role-{{ $user->role }}">
+                                            {{ ucfirst($user->role) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $user->created_at->format('M d, Y') }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.users.show', $user) }}" class="btn btn-info btn-sm admin-view-user-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.35rem;">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <form action="{{ route('admin.users.delete', $user) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">
+                                        <i class="fas fa-users"></i>
+                                        No users found
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="pagination-wrapper">
                         {{ $users->links() }}
                     </div>
@@ -507,6 +517,7 @@
                     </div>
                 </div>
             </section>
+            <div class="admin-dashboard-search-anchor" data-admin-search-anchor></div>
             <div class="properties-table">
                 <table>
                     <thead>
@@ -624,6 +635,7 @@
                     </div>
                 </div>
             </section>
+            <div class="admin-dashboard-search-anchor" data-admin-search-anchor></div>
 
             <h3 class="dashboard-subtitle"><i class="fas fa-list"></i> All transactions</h3>
             <p class="dashboard-lead dashboard-lead--compact">Buyer or renter ↔ landlord for each property. Use <strong>Open</strong> for the full deal workspace (admin can view any transaction).</p>
@@ -734,6 +746,7 @@
                     Recent Activities
                 </h2>
             </div>
+            <div class="admin-dashboard-search-anchor" data-admin-search-anchor></div>
             <ul class="activity-list">
                 @if($recentActivities->count() > 0)
                     @foreach($recentActivities as $activity)
@@ -798,23 +811,81 @@
     <script src="{{ asset('js/notifications.js') }}"></script>
     @endauth
     <script>
-        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-            document.getElementById('adminSidebar').classList.toggle('collapsed');
-        });
+        (function () {
+            var sidebar = document.getElementById('adminSidebar');
+            var backdrop = document.getElementById('adminSidebarBackdrop');
+            var openBtn = document.getElementById('mobileMenuToggle');
+            var closeBtn = document.getElementById('adminSidebarClose');
+            var mqDrawer = typeof window.matchMedia !== 'undefined'
+                ? window.matchMedia('(max-width: 1024px)')
+                : { matches: false };
 
-        document.getElementById('mobileMenuToggle')?.addEventListener('click', function() {
-            document.getElementById('adminSidebar').classList.toggle('mobile-open');
-        });
+            function isDrawerMode() {
+                return mqDrawer.matches;
+            }
 
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
+            function setSidebarDrawerOpen(open) {
+                if (!sidebar) return;
+                sidebar.classList.toggle('mobile-open', !!open);
+                if (backdrop) {
+                    if (open && isDrawerMode()) {
+                        backdrop.classList.add('is-visible');
+                        backdrop.setAttribute('aria-hidden', 'false');
+                    } else {
+                        backdrop.classList.remove('is-visible');
+                        backdrop.setAttribute('aria-hidden', 'true');
+                    }
+                }
+                document.body.classList.toggle('admin-sidebar-drawer-open', !!open && isDrawerMode());
+            }
+
+            function closeSidebarDrawer() {
+                setSidebarDrawerOpen(false);
+            }
+
+            function toggleSidebarDrawer() {
+                if (!sidebar) return;
+                setSidebarDrawerOpen(!sidebar.classList.contains('mobile-open'));
+            }
+
+            document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+                if (!sidebar) return;
+                if (isDrawerMode()) return;
+                sidebar.classList.toggle('collapsed');
+            });
+
+            openBtn?.addEventListener('click', toggleSidebarDrawer);
+
+            closeBtn?.addEventListener('click', function (e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                closeSidebarDrawer();
+            });
+
+            backdrop?.addEventListener('click', function () {
+                closeSidebarDrawer();
+            });
+
+            function onMqDrawerChange() {
+                if (!isDrawerMode()) closeSidebarDrawer();
+            }
+            if (typeof mqDrawer.addEventListener === 'function') {
+                mqDrawer.addEventListener('change', onMqDrawerChange);
+            } else if (typeof mqDrawer.addListener === 'function') {
+                mqDrawer.addListener(onMqDrawerChange);
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && sidebar && sidebar.classList.contains('mobile-open')) {
+                    closeSidebarDrawer();
                 }
             });
-        });
+
+            document.querySelectorAll('.admin-sidebar .nav-link[href^="#"]').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (isDrawerMode()) closeSidebarDrawer();
+                });
+            });
+        })();
 
         document.addEventListener('DOMContentLoaded', function () {
             const d = window.__ADMIN_CHART_DATA__;
@@ -951,5 +1022,7 @@
             }
         });
     </script>
+
+    @include('partials.mobile-nav')
 </body>
 </html>

@@ -5,7 +5,7 @@
         <li><a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'active' : '' }}"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Map</a></li>
         @auth
             @if(auth()->user()->role === 'admin')
-                <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-cog" aria-hidden="true"></i> Admin</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}"><i class="fas fa-cog" aria-hidden="true"></i> Admin</a></li>
             @endif
         @endauth
     </ul>

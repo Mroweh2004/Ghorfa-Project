@@ -82,6 +82,7 @@ main:not(.profile-main-content):not(.dashboard-main) {
     display: flex;
     flex-direction: column;
     height: 100%;
+    position: relative;
 }
 
 .listing-card:hover {
@@ -91,6 +92,7 @@ main:not(.profile-main-content):not(.dashboard-main) {
 
 .listing-image {
     position: relative;
+    z-index: 2;
     height: 200px;          /* normalized image height */
     overflow: hidden;
 }
@@ -150,14 +152,27 @@ main:not(.profile-main-content):not(.dashboard-main) {
     position: absolute;
     background-color: white;
     min-width: 120px;
-    z-index: 5;
+    z-index: 20;
     top: 3rem;
     right: 1rem;
     border-radius: 8px;
     display: none;
     flex-direction: column;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.listing-card.menu-open,
+.listing-card:has(.setting-list.active) {
+    z-index: 40;
+    overflow: visible;
+}
+
+.listing-card.menu-open .listing-image,
+.listing-card:has(.setting-list.active) .listing-image {
+    overflow: visible;
+    z-index: 25;
 }
 
 .setting-list.active {
@@ -248,6 +263,8 @@ main:not(.profile-main-content):not(.dashboard-main) {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
 }
 
 .listing-price {
@@ -303,6 +320,8 @@ main:not(.profile-main-content):not(.dashboard-main) {
     margin-top: auto;    /* pushes it to the bottom */
    padding: 1rem 0.5rem ;
     border-top: 1px solid rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1;
 }
 
 .view-btn {

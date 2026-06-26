@@ -503,9 +503,9 @@ class AdminController extends Controller
     public function rejectProperty(Request $request, Property $property)
     {
         $validated = $request->validate([
-            'admin_notes' => ['required', 'string', 'min:5', 'max:5000'],
+            'admin_notes' => ['nullable', 'string', 'max:5000'],
         ]);
-        $adminNotes = trim($validated['admin_notes']);
+        $adminNotes = trim($validated['admin_notes'] ?? '') ?: null;
 
         try {
             DB::transaction(function () use ($property, $adminNotes) {
@@ -519,7 +519,10 @@ class AdminController extends Controller
                 
                 // Notify the landlord that their property has been rejected
                 try {
-                    $rejectionMessage = 'Your property "' . $property->title . '" has been rejected by an admin. Reason: ' . $adminNotes;
+                    $rejectionMessage = 'Your property "' . $property->title . '" has been rejected by an admin.';
+                    if ($adminNotes) {
+                        $rejectionMessage .= ' Reason: ' . $adminNotes;
+                    }
                     
                     if ($property->user) {
                         $this->createNotification(
