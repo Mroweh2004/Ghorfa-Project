@@ -14,29 +14,38 @@
 
 @section('content')
 <main class="property-show-page">
-    <!-- Hero Section with Main Image -->
-    <section class="property-hero">
-        <div class="hero-image-container">
-            @php
-                $heroImage = \App\Services\PropertyImageService::getImageUrl($property);
-            @endphp
-            <img src="{{ $heroImage }}" alt="{{ $property->title }}" class="hero-image">
-            <div class="image-overlay">
-                <div class="property-badge">
-                    <span class="badge-text">{{ $property->listing_type }}</span>
-                </div>
-                @if($property->getAvailabilityMessage())
-                <div class="property-badge property-badge--unavailable">
-                    <span class="badge-text">{{ $property->getAvailabilityMessage() }}</span>
-                </div>
-                @endif
-                <div class="image-counter">
-                    <i class="fas fa-images"></i>
-                    <span>{{ $property->images->count() }} photos</span>
+    @if($property->images->count() > 0)
+    <section class="property-hero-gallery" aria-label="Property photos">
+        <div class="gallery-slider gallery-slider--hero">
+            <div class="gallery-slider-viewport">
+                <div class="gallery-slider-track" id="galleryTrack">
+                    @foreach($property->images as $image)
+                        @php $imgUrl = Storage::url($image->path); @endphp
+                        <div class="gallery-slide">
+                            <img src="{{ $imgUrl }}" alt="Property photo {{ $loop->iteration }}" class="gallery-image" onclick="openImageModal('{{ $imgUrl }}')">
+                        </div>
+                    @endforeach
                 </div>
             </div>
+            @if($property->images->count() > 1)
+            <button type="button" class="gallery-arrow gallery-prev" id="galleryPrev" aria-label="Previous photo">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button type="button" class="gallery-arrow gallery-next" id="galleryNext" aria-label="Next photo">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="gallery-dots" id="galleryDots"></div>
+            @endif
         </div>
     </section>
+    @else
+    <section class="property-hero-gallery property-hero-gallery--empty" aria-label="No photos">
+        <div class="no-image-placeholder">
+            <i class="fas fa-image" aria-hidden="true"></i>
+            <p>No photos available</p>
+        </div>
+    </section>
+    @endif
 
     <!-- Property Details Section -->
     <section class="property-details">
@@ -103,34 +112,6 @@
                         <h3>Description</h3>
                         <p>{{ $property->description }}</p>
                     </div>
-
-                    <!-- Image Gallery Slider -->
-                    @if($property->images->count() > 0)
-                    <div class="property-gallery">
-                        <h3>Photos <span class="gallery-count">({{ $property->images->count() }})</span></h3>
-                        <div class="gallery-slider">
-                            <div class="gallery-slider-viewport">
-                                <div class="gallery-slider-track" id="galleryTrack">
-                                    @foreach($property->images as $image)
-                                        @php $imgUrl = Storage::url($image->path); @endphp
-                                        <div class="gallery-slide">
-                                            <img src="{{ $imgUrl }}" alt="Property photo {{ $loop->iteration }}" class="gallery-image" onclick="openImageModal('{{ $imgUrl }}')">
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                            @if($property->images->count() > 1)
-                            <button type="button" class="gallery-arrow gallery-prev" id="galleryPrev" aria-label="Previous photo">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button type="button" class="gallery-arrow gallery-next" id="galleryNext" aria-label="Next photo">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                            <div class="gallery-dots" id="galleryDots"></div>
-                            @endif
-                        </div>
-                    </div>
-                    @endif
 
                     <!-- Reviews Section -->
                     <div class="reviews-section">
