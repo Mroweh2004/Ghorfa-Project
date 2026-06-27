@@ -4,11 +4,15 @@ namespace App\Services;
 
 use App\Models\Transaction;
 use App\Models\Property;
+use App\Models\User;
+use App\Traits\CreatesNotifications;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
 class TransactionWorkflowService
 {
+    use CreatesNotifications;
+
     /**
      * Validate if a property is available for rental during specified dates
      */
@@ -59,7 +63,7 @@ class TransactionWorkflowService
             ]);
         }
 
-        return Transaction::create([
+        $transaction = Transaction::create([
             'user_id' => $userId,
             'property_id' => $propertyId,
             'type' => 'rent',
@@ -72,6 +76,10 @@ class TransactionWorkflowService
             'rules_exceptions' => $rulesExceptions,
             'notes' => $notes,
         ]);
+
+        $this->notifyNewTransactionRequest($transaction, $property);
+
+        return $transaction;
     }
 
     /**
@@ -84,7 +92,7 @@ class TransactionWorkflowService
     ): Transaction {
         $property = Property::findOrFail($propertyId);
 
-        return Transaction::create([
+        $transaction = Transaction::create([
             'user_id' => $userId,
             'property_id' => $propertyId,
             'type' => 'buy',
@@ -93,6 +101,10 @@ class TransactionWorkflowService
             'status' => 'pending',
             'notes' => $notes,
         ]);
+
+        $this->notifyNewTransactionRequest($transaction, $property);
+
+        return $transaction;
     }
 
     /**
@@ -109,7 +121,20 @@ class TransactionWorkflowService
 
         // TODO: Implement actual PDF generation and storage
         // For now, we just store the path
-        return $transaction->generateContract($filePath);
+        $result = $transaction->generateContract($filePath);
+
+        if ($result) {
+            $transaction->loadMissing('property', 'user');
+            $propertyTitle = $transaction->property?->title ?? 'a property';
+            $this->notifyBuyer(
+                $transaction,
+                'transaction',
+                'Contract Ready for Review',
+                'A contract is ready for "' . $propertyTitle . '". Please review and approve it.'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -123,7 +148,21 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->approveBuyerContract();
+        $result = $transaction->approveBuyerContract();
+
+        if ($result) {
+            $transaction->loadMissing('property', 'user');
+            $propertyTitle = $transaction->property?->title ?? 'your property';
+            $buyerName = $transaction->user?->name ?? 'The buyer';
+            $this->notifyLandlord(
+                $transaction,
+                'transaction',
+                'Buyer Approved Contract',
+                $buyerName . ' approved the contract for "' . $propertyTitle . '".'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -137,10 +176,24 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->update([
+        $result = $transaction->update([
             'status' => 'cancelled_by_buyer',
             'cancel_reason' => $reason,
         ]);
+
+        if ($result) {
+            $transaction->loadMissing('property', 'user');
+            $propertyTitle = $transaction->property?->title ?? 'your property';
+            $buyerName = $transaction->user?->name ?? 'The buyer';
+            $this->notifyLandlord(
+                $transaction,
+                'reject',
+                'Contract Rejected',
+                $buyerName . ' rejected the contract for "' . $propertyTitle . '".'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -154,7 +207,26 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->toConfirmed();
+        $result = $transaction->toConfirmed();
+
+        if ($result) {
+            $transaction->loadMissing('property', 'user');
+            $propertyTitle = $transaction->property?->title ?? 'the property';
+            $this->notifyBuyer(
+                $transaction,
+                'transaction',
+                'Transaction Confirmed',
+                'Your request for "' . $propertyTitle . '" has been confirmed.'
+            );
+            $this->notifyLandlord(
+                $transaction,
+                'transaction',
+                'Transaction Confirmed',
+                'The request for "' . $propertyTitle . '" has been confirmed.'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -168,7 +240,20 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->confirmSellerPayment();
+        $result = $transaction->confirmSellerPayment();
+
+        if ($result) {
+            $transaction->loadMissing('property');
+            $propertyTitle = $transaction->property?->title ?? 'the property';
+            $this->notifyBuyer(
+                $transaction,
+                'transaction',
+                'Payment Confirmed',
+                'The landlord confirmed payment for "' . $propertyTitle . '".'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -182,7 +267,17 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->toCompleted();
+        $result = $transaction->toCompleted();
+
+        if ($result) {
+            $transaction->loadMissing('property');
+            $propertyTitle = $transaction->property?->title ?? 'the property';
+            $message = 'The transaction for "' . $propertyTitle . '" is now complete.';
+            $this->notifyBuyer($transaction, 'approve', 'Transaction Completed', $message);
+            $this->notifyLandlord($transaction, 'approve', 'Transaction Completed', $message);
+        }
+
+        return $result;
     }
 
     /**
@@ -196,7 +291,21 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->cancelByBuyer($reason);
+        $result = $transaction->cancelByBuyer($reason);
+
+        if ($result) {
+            $transaction->loadMissing('property', 'user');
+            $propertyTitle = $transaction->property?->title ?? 'your property';
+            $buyerName = $transaction->user?->name ?? 'The buyer';
+            $this->notifyLandlord(
+                $transaction,
+                'reject',
+                'Request Cancelled',
+                $buyerName . ' cancelled the request for "' . $propertyTitle . '".'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -210,7 +319,20 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->cancelBySeller($reason);
+        $result = $transaction->cancelBySeller($reason);
+
+        if ($result) {
+            $transaction->loadMissing('property');
+            $propertyTitle = $transaction->property?->title ?? 'the property';
+            $this->notifyBuyer(
+                $transaction,
+                'reject',
+                'Request Cancelled by Landlord',
+                'The landlord cancelled the request for "' . $propertyTitle . '".'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -225,7 +347,20 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->requestRefund($reason);
+        $result = $transaction->requestRefund($reason);
+
+        if ($result) {
+            $transaction->loadMissing('property');
+            $propertyTitle = $transaction->property?->title ?? 'the property';
+            $this->notifyBuyer(
+                $transaction,
+                'transaction',
+                'Refund Requested',
+                'The landlord requested a refund for "' . $propertyTitle . '".'
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -240,7 +375,64 @@ class TransactionWorkflowService
             ]);
         }
 
-        return $transaction->confirmRefund();
+        $result = $transaction->confirmRefund();
+
+        if ($result) {
+            $transaction->loadMissing('property');
+            $propertyTitle = $transaction->property?->title ?? 'your property';
+            $this->notifyLandlord(
+                $transaction,
+                'transaction',
+                'Refund Confirmed',
+                'The buyer confirmed the refund for "' . $propertyTitle . '".'
+            );
+        }
+
+        return $result;
+    }
+
+    private function notifyNewTransactionRequest(Transaction $transaction, Property $property): void
+    {
+        $transaction->loadMissing('user');
+        $propertyTitle = $property->title ?? 'a property';
+        $buyerName = $transaction->user?->name ?? 'A user';
+        $typeLabel = $transaction->type === 'rent' ? 'rental' : 'purchase';
+
+        $this->notifyLandlord(
+            $transaction,
+            'pending',
+            'New ' . ucfirst($typeLabel) . ' Request',
+            $buyerName . ' sent a ' . $typeLabel . ' request for "' . $propertyTitle . '".'
+        );
+
+        User::where('role', 'admin')->each(function (User $admin) use ($transaction, $buyerName, $propertyTitle, $typeLabel) {
+            $this->createNotification(
+                $admin,
+                'pending',
+                'New ' . ucfirst($typeLabel) . ' Request',
+                $buyerName . ' sent a ' . $typeLabel . ' request for "' . $propertyTitle . '".',
+                $transaction
+            );
+        });
+    }
+
+    private function notifyLandlord(Transaction $transaction, string $type, string $title, string $message): void
+    {
+        $transaction->loadMissing('property.user');
+        $landlord = $transaction->property?->user;
+
+        if ($landlord) {
+            $this->createNotification($landlord, $type, $title, $message, $transaction);
+        }
+    }
+
+    private function notifyBuyer(Transaction $transaction, string $type, string $title, string $message): void
+    {
+        $transaction->loadMissing('user');
+
+        if ($transaction->user) {
+            $this->createNotification($transaction->user, $type, $title, $message, $transaction);
+        }
     }
 
     /**

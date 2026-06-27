@@ -893,7 +893,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (contractPath === null) {
             return;
         }
-
+ 
         fetch(`/transactions/${transactionId}/generate-contract`, {
                 method: 'POST',
                 headers: {
@@ -965,6 +965,19 @@ document.addEventListener('DOMContentLoaded', function() {
     window.exportRequestDetailsPdf = exportRequestDetailsPdf;
     window.openRejectionDetails = openRejectionDetails;
     window.closeRejectionDetailsModal = closeRejectionDetailsModal;
+
+    (function handleNotificationDeepLink() {
+        const params = new URLSearchParams(window.location.search);
+        const openRequestId = params.get('open_request');
+        if (!openRequestId) return;
+        const id = parseInt(openRequestId, 10);
+        if (!id) return;
+        window.setTimeout(function () {
+            if (typeof window.openRequestDetails === 'function') {
+                window.openRequestDetails(id);
+            }
+        }, 450);
+    })();
 
     @if($errors->has('resubmit_notes') && session('resubmit_failed_property_id'))
     (function () {

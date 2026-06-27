@@ -99,6 +99,7 @@ Route::middleware(['web', 'auth', AdminMiddleware::class])->prefix('admin')->gro
 //----------------Notification Routes-------------------
 Route::middleware(['auth'])->prefix('notifications')->group(function () {
     Route::get('/', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/history', [NotificationController::class, 'history'])->name('notifications.history');
     Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
     Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');

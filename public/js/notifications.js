@@ -38,7 +38,7 @@
     async function fetchNotifications() {
         try {
             const token = getCSRFToken();
-            const response = await fetch('/notifications', {
+            const response = await fetch('/notifications?limit=8', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -107,6 +107,8 @@
             'approve': 'fa-check-circle',
             'reject': 'fa-times-circle',
             'pending': 'fa-clock',
+            'review': 'fa-star',
+            'transaction': 'fa-file-contract',
         };
         return icons[type] || 'fa-bell';
     }
@@ -117,6 +119,8 @@
             'approve': '#10b981',
             'reject': '#ef4444',
             'pending': '#f59e0b',
+            'review': '#f59e0b',
+            'transaction': '#3b82f6',
         };
         return colors[type] || '#6b7280';
     }
@@ -148,8 +152,11 @@
             return;
         }
 
-        notificationList.innerHTML = notifications.map(notif => `
-            <div class="notification-item ${notif.read ? '' : 'unread'}" data-notification-id="${notif.id}">
+        notificationList.innerHTML = notifications.map(notif => {
+            const hasUrl = Boolean(notif.url);
+            const clickableClass = hasUrl ? ' notification-item--clickable' : '';
+            return `
+            <div class="notification-item ${notif.read ? '' : 'unread'}${clickableClass}" data-notification-id="${notif.id}"${hasUrl ? ` data-url="${escapeHtml(notif.url)}"` : ''} role="${hasUrl ? 'link' : 'listitem'}">
                 <div class="notification-icon" style="background: ${getNotificationColor(notif.type)}20; color: ${getNotificationColor(notif.type)};">
                     <i class="fas ${getNotificationIcon(notif.type)}"></i>
                 </div>
@@ -160,12 +167,17 @@
                 </div>
                 ${!notif.read ? '<div class="notification-unread-dot"></div>' : ''}
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         notificationList.querySelectorAll('.notification-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', async () => {
                 const notificationId = item.dataset.notificationId;
-                markAsRead(notificationId);
+                const url = item.dataset.url;
+                await markAsRead(notificationId);
+                if (url) {
+                    window.location.href = url;
+                }
             });
         });
     }
@@ -196,7 +208,12 @@
                     const dot = item.querySelector('.notification-unread-dot');
                     if (dot) dot.remove();
                 }
-                await fetchUnreadCount();
+                const data = await response.json().catch(() => ({}));
+                if (typeof data.unread_count === 'number') {
+                    updateNotificationBadge(data.unread_count);
+                } else {
+                    await fetchUnreadCount();
+                }
             }
         } catch (error) {
             console.error('Error marking notification as read:', error);
@@ -222,7 +239,8 @@
                     const dot = item.querySelector('.notification-unread-dot');
                     if (dot) dot.remove();
                 });
-                await fetchUnreadCount();
+                const data = await response.json().catch(() => ({}));
+                updateNotificationBadge(typeof data.unread_count === 'number' ? data.unread_count : 0);
             }
         } catch (error) {
             console.error('Error marking all as read:', error);

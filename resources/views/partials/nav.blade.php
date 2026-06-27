@@ -28,7 +28,7 @@
                             <div class="notification-loading">Loading notifications...</div>
                         </div>
                         <div class="notification-footer">
-                            <a href="#" id="viewAllNotifications">View all notifications</a>
+                            <a href="{{ route('notifications.history') }}" id="viewAllNotifications">View more</a>
                         </div>
                     </div>
                 </div>

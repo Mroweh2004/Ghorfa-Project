@@ -6,6 +6,7 @@ use App\Models\Rule;
 use App\Models\Amenity;
 use App\Models\Property;
 use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\PropertyImage;
 use Illuminate\Support\Facades\DB;
@@ -524,6 +525,17 @@ class PropertyController extends Controller
             }
 
             DB::commit();
+
+            $landlord = Auth::user();
+            User::where('role', 'admin')->each(function (User $admin) use ($property, $landlord) {
+                $this->createNotification(
+                    $admin,
+                    'pending',
+                    'New Property Listing',
+                    $landlord->name . ' submitted "' . $property->title . '" for approval.',
+                    $property
+                );
+            });
 
             return redirect()
                 ->route('profileProperties')

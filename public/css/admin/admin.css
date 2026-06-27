@@ -1,3 +1,10 @@
+/* Highlight row when arriving from a notification deep link */
+.notification-highlight-row {
+    outline: 2px solid #3b82f6;
+    background: #eff6ff !important;
+    transition: background 0.3s ease, outline 0.3s ease;
+}
+
 /* Admin Portal Styles - Modern Design */
 
 /* Reset and Base */

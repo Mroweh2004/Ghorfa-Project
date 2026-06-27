@@ -199,6 +199,16 @@ class LandlordController extends Controller
             'approved_by' => null,
         ]);
 
+        User::where('role', 'admin')->each(function (User $admin) use ($property, $user, $notes) {
+            $this->createNotification(
+                $admin,
+                'pending',
+                'Property Resubmitted',
+                $user->name . ' resubmitted "' . $property->title . '" for approval.' . ($notes ? ' Note: ' . $notes : ''),
+                $property
+            );
+        });
+
         return redirect()->route('landlord.dashboard')
             ->with('success', 'Your listing has been sent for admin review. You can track it under Pending Approval.');
     }

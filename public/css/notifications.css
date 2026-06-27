@@ -5,6 +5,7 @@
 .notification-bell-container {
     position: relative;
     margin-right: 0.5rem;
+    flex-shrink: 0;
 }
 
 .notification-bell {
@@ -54,15 +55,18 @@
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 380px;
-    max-height: 500px;
+    left: auto;
+    width: min(22rem, calc(100vw - 1.5rem));
+    max-width: 22rem;
+    max-height: min(28rem, calc(100dvh - var(--app-header-height, 72px) - 6rem));
     background: white;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     display: none;
     flex-direction: column;
-    z-index: 1000;
+    z-index: 1200;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .notification-dropdown.active {
@@ -107,9 +111,14 @@
 }
 
 .notification-list {
-    max-height: 400px;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(18rem, calc(100dvh - var(--app-header-height, 72px) - 11rem));
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0.5rem 0;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 .notification-list::-webkit-scrollbar {
@@ -148,6 +157,18 @@
     border-left-color: #3b82f6;
 }
 
+.notification-item--clickable {
+    cursor: pointer;
+}
+
+.notification-item--clickable:hover {
+    background: #f3f4f6;
+}
+
+.notification-item--clickable.unread:hover {
+    background: #dbeafe;
+}
+
 .notification-icon {
     width: 40px;
     height: 40px;
@@ -178,6 +199,14 @@
     line-height: 1.4;
     margin-bottom: 0.25rem;
     word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+.notification-dropdown .notification-message {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .notification-time {
@@ -230,28 +259,39 @@
     color: #3b82f6;
     text-decoration: none;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0;
+}
+
+.notification-footer a::after {
+    content: '\f054';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.65rem;
 }
 
 .notification-footer a:hover {
     text-decoration: underline;
 }
 
-@media (max-width: 768px) {
-    .notification-dropdown {
-        width: min(320px, calc(100vw - 1.25rem));
-        max-width: calc(100vw - 1rem);
-        right: 0;
-        left: auto;
-    }
-}
-
+/* Phone only: wider panel anchored to the left */
 @media (max-width: 640px) {
     .notification-dropdown {
-        width: min(360px, calc(100vw - 0.75rem));
-        max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 0.75rem);
-        right: 0;
-        left: auto;
+        position: fixed;
+        top: calc(var(--app-header-height, 56px) + 0.5rem);
+        left: max(0.5rem, env(safe-area-inset-left, 0px));
+        right: auto;
+        width: 75vw;
+        max-width: 75vw;
+        max-height: min(72dvh, calc(100dvh - var(--app-header-height, 56px) - 5.5rem));
+    }
+
+    .notification-list {
+        max-height: min(52dvh, calc(100dvh - var(--app-header-height, 56px) - 10.5rem));
     }
 
     .notification-header {
@@ -266,10 +306,340 @@
 
     .mark-all-read-btn {
         font-size: 0.8125rem;
+        padding: 0.3rem 0.5rem;
     }
 
     .notification-item {
         padding: 0.75rem 1rem;
     }
+
+    .notification-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+        margin-right: 0.65rem;
+    }
+
+    .notification-unread-dot {
+        top: 0.85rem;
+        right: 0.85rem;
+    }
+
+    .notification-footer {
+        padding: 0.65rem 1rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    }
 }
 
+/* =========================
+   Notifications history page
+========================= */
+
+.notifications-history-page {
+    min-height: calc(100vh - var(--app-header-height, 72px));
+    min-height: calc(100dvh - var(--app-header-height, 72px));
+    background: #f8fafc;
+    padding: 1.25rem clamp(0.75rem, 4vw, 1.5rem) calc(5rem + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+}
+
+.notifications-history {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.notifications-history__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.notifications-history__header h1 {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.35rem, 4vw, 1.75rem);
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.notifications-history__subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9375rem;
+}
+
+.notifications-history__mark-all {
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.notifications-history__mark-all:hover {
+    background: #dbeafe;
+}
+
+.notifications-history__search {
+    margin-bottom: 0.85rem;
+}
+
+.notifications-history__search-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.notifications-history__search-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.45rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.notifications-history__search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 0.55rem;
+    color: #9ca3af;
+    font-size: 0.95rem;
+}
+
+.notifications-history__search-input {
+    flex: 1 1 12rem;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.9375rem;
+    color: #111827;
+    font-family: inherit;
+}
+
+.notifications-history__search-input:focus {
+    outline: none;
+}
+
+.notifications-history__search-input::placeholder {
+    color: #9ca3af;
+}
+
+.notifications-history__search-submit,
+.notifications-history__search-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.notifications-history__search-submit {
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+}
+
+.notifications-history__search-submit:hover {
+    background: #1d4ed8;
+}
+
+.notifications-history__search-clear {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #4b5563;
+}
+
+.notifications-history__search-clear:hover {
+    background: #f3f4f6;
+}
+
+.notifications-history__meta {
+    margin: 0 0 1rem;
+    font-size: 0.8125rem;
+    color: #6b7280;
+}
+
+.notifications-history__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.notification-history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+a.notification-history-item:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.1);
+}
+
+.notification-history-item.unread {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    border-left: 3px solid #3b82f6;
+}
+
+.notification-history-item__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.notification-history-item .notification-time {
+    margin-top: 0.15rem;
+}
+
+.notifications-history__empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    color: #9ca3af;
+}
+
+.notifications-history__empty i {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.notifications-history__empty-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.notifications-history__pagination {
+    margin-top: 1.25rem;
+    display: flex;
+    justify-content: center;
+}
+
+.notifications-pagination.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.notifications-pagination .pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.notifications-pagination .pagination-btn:hover:not(:disabled):not(.active) {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.notifications-pagination .pagination-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.notifications-pagination .pagination-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .notifications-history-page {
+        padding-top: 1rem;
+    }
+
+    .notification-history-item {
+        padding: 0.85rem 0.9rem;
+    }
+
+    .notifications-history__header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .notifications-history__mark-all {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .notifications-history__search-row {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.65rem;
+    }
+
+    .notifications-history__search-icon {
+        display: none;
+    }
+
+    .notifications-history__search-input {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f9fafb;
+    }
+
+    .notifications-history__search-submit,
+    .notifications-history__search-clear {
+        width: 100%;
+    }
+}

@@ -668,6 +668,33 @@ function MoveBetweenSections(){
             showSection(window.location.hash, false);
         }
     });
+
+    highlightNotificationTarget();
+}
+
+function highlightNotificationTarget() {
+    const params = new URLSearchParams(window.location.search);
+    const propertyId = params.get('highlight_property');
+    const applicationId = params.get('highlight_application');
+    let row = null;
+
+    if (propertyId) {
+        row = document.querySelector(`tr[data-property-id="${propertyId}"]`);
+    } else if (applicationId) {
+        row = document.querySelector(`tr[data-application-id="${applicationId}"]`);
+    }
+
+    if (!row) {
+        return;
+    }
+
+    window.setTimeout(function () {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.classList.add('notification-highlight-row');
+        window.setTimeout(function () {
+            row.classList.remove('notification-highlight-row');
+        }, 3500);
+    }, 350);
 }
 
 window.handleApproveProperty = handleApproveProperty;
