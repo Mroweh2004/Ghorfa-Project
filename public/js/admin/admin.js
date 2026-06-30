@@ -653,26 +653,62 @@ function MoveBetweenSections(){
         });
     });
     
-    // Initial load / hash: show section but do not mark as seen
-    if (window.location.hash) {
-        showSection(window.location.hash, false);
-    } else {
-        const firstSection = sections[0];
-        if (firstSection) {
-            showSection('#' + firstSection.id, false);
+    function resolveDashboardSection(hash) {
+        if (!hash || !hash.startsWith('#')) {
+            return { sectionId: null, subsectionId: null };
         }
-    }
-    
-    window.addEventListener('hashchange', function() {
-        if (window.location.hash) {
-            showSection(window.location.hash, false);
-        }
-    });
 
-    highlightNotificationTarget();
+        const el = document.querySelector(hash);
+        if (!el) {
+            return { sectionId: hash, subsectionId: null };
+        }
+
+        if (el.classList.contains('content-section')) {
+            return { sectionId: hash, subsectionId: null };
+        }
+
+        const parent = el.closest('.content-section');
+        if (parent && parent.id) {
+            return { sectionId: '#' + parent.id, subsectionId: hash };
+        }
+
+        return { sectionId: hash, subsectionId: null };
+    }
+
+    function scrollToSubsection(subsectionId) {
+        if (!subsectionId) return;
+        const el = document.querySelector(subsectionId);
+        if (!el) return;
+        window.setTimeout(function () {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+    }
+
+    function activateSectionFromUrl() {
+        const resolved = resolveDashboardSection(window.location.hash);
+        if (resolved.sectionId) {
+            showSection(resolved.sectionId, false);
+            if (resolved.subsectionId) {
+                scrollToSubsection(resolved.subsectionId);
+            }
+        } else {
+            const firstSection = sections[0];
+            if (firstSection) {
+                showSection('#' + firstSection.id, false);
+            }
+        }
+        highlightNotificationTarget();
+    }
+
+    activateSectionFromUrl();
+
+    window.addEventListener('hashchange', function() {
+        activateSectionFromUrl();
+    });
 }
 
-function highlightNotificationTarget() {
+function highlightNotificationTarget(attempt) {
+    attempt = attempt || 0;
     const params = new URLSearchParams(window.location.search);
     const propertyId = params.get('highlight_property');
     const applicationId = params.get('highlight_application');
@@ -682,9 +718,20 @@ function highlightNotificationTarget() {
         row = document.querySelector(`tr[data-property-id="${propertyId}"]`);
     } else if (applicationId) {
         row = document.querySelector(`tr[data-application-id="${applicationId}"]`);
+        if (attempt === 0) {
+            const panel = document.getElementById('applications-section');
+            if (panel) {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
     }
 
     if (!row) {
+        if ((propertyId || applicationId) && attempt < 25) {
+            window.setTimeout(function () {
+                highlightNotificationTarget(attempt + 1);
+            }, 200);
+        }
         return;
     }
 
@@ -694,7 +741,7 @@ function highlightNotificationTarget() {
         window.setTimeout(function () {
             row.classList.remove('notification-highlight-row');
         }, 3500);
-    }, 350);
+    }, attempt === 0 ? 350 : 50);
 }
 
 window.handleApproveProperty = handleApproveProperty;

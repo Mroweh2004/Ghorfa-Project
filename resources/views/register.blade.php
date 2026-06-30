@@ -58,6 +58,12 @@
           </div>
         @endif
 
+        @if (session('error'))
+          <div class="alert">
+            {{ session('error') }}
+          </div>
+        @endif
+
         <form action="{{ route('submit.register') }}" method="POST" enctype="multipart/form-data" novalidate>
           @csrf
           

@@ -258,7 +258,13 @@ class LandlordController extends Controller
             'document_type' => 'required|in:national_id,trade_license',
             'document_number' => 'required|string|max:255',
             'document_front' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'document_back' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'document_back' => [
+                \Illuminate\Validation\Rule::requiredIf(fn () => $request->input('document_type') === 'national_id'),
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:5120',
+            ],
             'face_photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'notes' => 'nullable|string',
         ]);
@@ -279,7 +285,9 @@ class LandlordController extends Controller
             $application = LandlordApplication::create($validated);
             $dir = 'landlord-applications/'.$application->id;
             $frontPath = $request->file('document_front')->store($dir, 'public');
-            $backPath = $request->file('document_back')->store($dir, 'public');
+            $backPath = $request->hasFile('document_back')
+                ? $request->file('document_back')->store($dir, 'public')
+                : null;
             $facePath = $request->file('face_photo')->store($dir, 'public');
             $application->update([
                 'document_front_path' => $frontPath,

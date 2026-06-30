@@ -90,7 +90,7 @@ class NotificationUrlResolver
     {
         if ($notifiable instanceof LandlordApplication) {
             if ($viewer->role === 'admin') {
-                return route('admin.dashboard') . '?highlight_application=' . $notifiable->id . '#applications-section';
+                return route('admin.dashboard') . '?highlight_application=' . $notifiable->id . '#landlords-section';
             }
 
             return route('landlord.dashboard');

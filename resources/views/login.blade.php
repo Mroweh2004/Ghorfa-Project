@@ -76,6 +76,12 @@
                     </div>
                 @endif
 
+                @if (session('error'))
+                    <div class="alert">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <form action="{{ route('submit.login') }}" method="POST" class="login-form" novalidate>
                     @csrf
 

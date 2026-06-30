@@ -5,16 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use function Laravel\Prompts\alert;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Unique;
 
 class AuthenticationController extends Controller
 {
     /*----------------------------login_______________*/
-    function loginPage(){
-        return view("login");
+    function loginPage(Request $request){
+        $request->session()->regenerateToken();
+
+        return view('login');
     }
     function  submitLogin(Request $request){
         $incomingFields = $request->validate([
@@ -39,8 +39,10 @@ class AuthenticationController extends Controller
     }
 
 /*--------------------------------Register-------------------*/
-    function registerPage(){
-        return view("register");
+    function registerPage(Request $request){
+        $request->session()->regenerateToken();
+
+        return view('register');
     }
 
     function submitRegister(Request $request){
@@ -88,6 +90,8 @@ class AuthenticationController extends Controller
         }
 
         Auth::login($user);
+        $request->session()->regenerate();
+
         return redirect()->route('home');
     }
 }

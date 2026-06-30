@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/csrf.js') }}" defer></script>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/admin.css') }}">
@@ -288,10 +289,12 @@
                                     </td>
                                     <td>{{ $application->verificationNumber() ?? '—' }}</td>
                                     <td>
-                                        @if($application->document_front_path && $application->document_back_path)
+                                        @if($application->document_front_path)
                                             <a href="{{ asset('storage/'.$application->document_front_path) }}" target="_blank" rel="noopener noreferrer">Front</a>
-                                            <span class="admin-app-doc-sep">·</span>
-                                            <a href="{{ asset('storage/'.$application->document_back_path) }}" target="_blank" rel="noopener noreferrer">Back</a>
+                                            @if($application->document_back_path)
+                                                <span class="admin-app-doc-sep">·</span>
+                                                <a href="{{ asset('storage/'.$application->document_back_path) }}" target="_blank" rel="noopener noreferrer">Back</a>
+                                            @endif
                                             @if($application->face_photo_path)
                                                 <span class="admin-app-doc-sep">·</span>
                                                 <a href="{{ asset('storage/'.$application->face_photo_path) }}" target="_blank" rel="noopener noreferrer">Face</a>

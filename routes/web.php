@@ -43,6 +43,10 @@ Route::post('/register', [AuthenticationController::class, 'submitRegister'])->n
 
 Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+})->middleware('web')->name('csrf.token');
+
 //---------------Properties Routes--------------
 Route::post('/submit-listing', [PropertyController::class, 'submitListing'])->name('submit-listing')->middleware(['auth', LandlordMiddleware::class]);
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
