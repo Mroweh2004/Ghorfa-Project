@@ -61,19 +61,25 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
     let currentFiles = [];
     const objectUrlMap = new Map();
 
-    input.style.position = 'absolute';
-    input.style.width = '1px';
-    input.style.height = '1px';
-    input.style.overflow = 'hidden';
-    input.style.clip = 'rect(0 0 0 0)';
-    input.style.whiteSpace = 'nowrap';
-    input.style.clipPath = 'inset(50%)';
-    input.style.border = '0';
-    input.style.padding = '0';
-    input.style.margin = '-1px';
+    function hideFileInput(fileInput) {
+      if (!fileInput) return;
+      fileInput.classList.add('file-input--sr-only');
+    }
 
-    input.addEventListener('change', async () => {
-      const picked = Array.from(input.files || []);
+    function uniqueCaptureFile(file) {
+      const genericName = !file.name || /^image\d*\.(jpe?g|png|webp)$/i.test(file.name);
+      if (!genericName) {
+        return file;
+      }
+
+      const ext = file.type === 'image/png' ? 'png' : (file.type === 'image/webp' ? 'webp' : 'jpg');
+      return new File([file], `photo-${Date.now()}.${ext}`, {
+        type: file.type || `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+        lastModified: Date.now(),
+      });
+    }
+
+    async function processPickedFiles(picked) {
       if (!picked.length) {
         return;
       }
@@ -84,9 +90,10 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
       }
 
       try {
+        const normalized = picked.map((file) => uniqueCaptureFile(file));
         const processed = typeof window.compressImageFiles === 'function'
-          ? await window.compressImageFiles(picked)
-          : picked;
+          ? await window.compressImageFiles(normalized)
+          : normalized;
 
         const all = [...currentFiles];
         processed.forEach((file) => {
@@ -100,10 +107,10 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
           }
         });
 
-      currentFiles = all;
-      renderPreviews();
-      syncInputFiles();
-      container.dispatchEvent(new CustomEvent('wizard-field-changed', { bubbles: true }));
+        currentFiles = all;
+        renderPreviews();
+        syncInputFiles();
+        container.dispatchEvent(new CustomEvent('wizard-field-changed', { bubbles: true }));
       } catch (error) {
         console.error('Failed to process images:', error);
         alert('Could not process one or more images. Please try different files.');
@@ -114,7 +121,23 @@ function setupImagePreview(inputId = 'images', containerId = 'image-previews') {
         }
         syncInputFiles();
       }
-    });
+    }
+
+    function bindFilePicker(fileInput) {
+      if (!fileInput) {
+        return;
+      }
+
+      hideFileInput(fileInput);
+      fileInput.addEventListener('change', async () => {
+        const picked = Array.from(fileInput.files || []);
+        fileInput.value = '';
+        await processPickedFiles(picked);
+      });
+    }
+
+    bindFilePicker(input);
+    bindFilePicker(document.getElementById('images_camera'));
 
     function ensureRemovalInput(id) {
       if (!removeContainer || hiddenInputs.has(id)) return;
@@ -904,10 +927,7 @@ function validatePropertyLocation() {
       const result = validateWizardStep(currentStep);
       if (!result.valid) {
         if (result.firstInvalid) {
-          if (typeof result.firstInvalid.focus === 'function') {
-            result.firstInvalid.focus({ preventScroll: true });
-          }
-          result.firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          focusWizardField(result.firstInvalid);
         }
         updateWizardNextState(currentStep);
         return false;
@@ -915,8 +935,121 @@ function validatePropertyLocation() {
 
       return true;
     }
+
+    const stepFocusSelectors = {
+      1: '#title',
+      2: '#enableMapClick',
+      3: '#price',
+      4: '.amenities-grid input[type="checkbox"]',
+      5: 'label[for="images"]',
+    };
+
+    function isWizardFieldVisible(el) {
+      if (!el) {
+        return false;
+      }
+
+      if (el.closest('.is-hidden')) {
+        return false;
+      }
+
+      const style = window.getComputedStyle(el);
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    }
+
+    function focusWizardField(el) {
+      if (!el || !isWizardFieldVisible(el)) {
+        return;
+      }
+
+      if (el.type === 'file') {
+        const label = document.querySelector(`label[for="${el.id}"]`);
+        if (label) {
+          if (!label.hasAttribute('tabindex')) {
+            label.setAttribute('tabindex', '-1');
+          }
+          el = label;
+        }
+      }
+
+      try {
+        el.focus({ preventScroll: true });
+      } catch {
+        el.focus();
+      }
+
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function getWizardStepFocusTarget(stepEl, step) {
+      if (!stepEl) {
+        return null;
+      }
+
+      const explicit = stepEl.dataset.focusTarget;
+      if (explicit) {
+        const explicitEl = stepEl.querySelector(explicit) || document.querySelector(explicit);
+        if (explicitEl && isWizardFieldVisible(explicitEl)) {
+          return explicitEl;
+        }
+      }
+
+      const preferred = stepFocusSelectors[step];
+      if (preferred) {
+        const preferredEl = stepEl.querySelector(preferred);
+        if (preferredEl && isWizardFieldVisible(preferredEl)) {
+          return preferredEl;
+        }
+      }
+
+      const focusableSelectors = [
+        'input:not([type="hidden"]):not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        'button:not([disabled])',
+        'label.file-label',
+      ];
+
+      for (const selector of focusableSelectors) {
+        const candidates = stepEl.querySelectorAll(selector);
+        for (const candidate of candidates) {
+          if (!isWizardFieldVisible(candidate)) {
+            continue;
+          }
+
+          if (candidate.type === 'file' && candidate.classList.contains('file-input--sr-only')) {
+            const fileLabel = stepEl.querySelector(`label[for="${candidate.id}"]`);
+            if (fileLabel) {
+              return fileLabel;
+            }
+            continue;
+          }
+
+          return candidate;
+        }
+      }
+
+      return null;
+    }
+
+    function focusWizardStepField(step, stepEl) {
+      const delay = step === 2 ? 320 : 120;
+
+      window.setTimeout(() => {
+        const target = getWizardStepFocusTarget(stepEl, step);
+        if (!target) {
+          return;
+        }
+
+        if (target.matches('label.file-label') && !target.hasAttribute('tabindex')) {
+          target.setAttribute('tabindex', '-1');
+        }
+
+        focusWizardField(target);
+      }, delay);
+    }
     
-    function showStep(step) {
+    function showStep(step, { focusField = true } = {}) {
       // Hide all steps
       document.querySelectorAll('.wizard-content').forEach(el => {
         el.style.display = 'none';
@@ -963,8 +1096,12 @@ function validatePropertyLocation() {
 
       updateWizardNextState(step);
       
-      // Scroll to top
+      // Scroll to top, then focus the first field in this step.
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (focusField && currentContent) {
+        focusWizardStepField(step, currentContent);
+      }
     }
     
     nextBtn.addEventListener('click', () => {
@@ -1027,9 +1164,9 @@ function validatePropertyLocation() {
             if (!result.valid) {
               event.preventDefault();
               currentStep = step;
-              showStep(step);
+              showStep(step, { focusField: false });
               if (result.firstInvalid) {
-                result.firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                focusWizardField(result.firstInvalid);
               }
               return;
             }
@@ -1039,6 +1176,47 @@ function validatePropertyLocation() {
         ensurePropertyImagesOnSubmit(event);
       });
     }
+  }
+
+  function syncRentOnlyFields() {
+    const isRent = isRentListing();
+
+    document.querySelectorAll('.rent-only-fields, .rent-only-block, .rent-only-label').forEach((el) => {
+      el.classList.toggle('is-hidden', !isRent);
+    });
+
+    const durationSelect = document.getElementById('price_duration');
+    if (durationSelect) {
+      durationSelect.disabled = !isRent;
+    }
+
+    document.querySelectorAll('input[name="rent_duration_units[]"]').forEach((checkbox) => {
+      checkbox.disabled = !isRent;
+    });
+
+    ['price_per_day', 'price_per_week', 'price_per_month', 'price_per_year'].forEach((id) => {
+      const input = document.getElementById(id);
+      if (input) {
+        input.disabled = !isRent;
+      }
+    });
+
+    const priceInput = document.getElementById('price');
+    if (priceInput) {
+      priceInput.placeholder = isRent
+        ? 'e.g. 750 (monthly)'
+        : 'e.g. 145000 (total sale price)';
+    }
+  }
+
+  function initListingTypeRentToggle() {
+    const listingType = document.getElementById('listing_type');
+    if (!listingType) {
+      return;
+    }
+
+    listingType.addEventListener('change', syncRentOnlyFields);
+    syncRentOnlyFields();
   }
 
   /* ============================ Price Auto-Calculation ============================ */
@@ -1057,6 +1235,10 @@ function validatePropertyLocation() {
     const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
 
     function recalc() {
+      if (!isRentListing()) {
+        return;
+      }
+
       const raw = String(priceInput.value ?? '').trim();
       const base = parseFloat(raw);
       const unit = durationSelect.value;
@@ -1119,6 +1301,7 @@ function validatePropertyLocation() {
     setupImagePreview('images', 'image-previews');
     validatePropertyLocation();
     initPriceAutoCalculation();
+    initListingTypeRentToggle();
     initDescriptionCounter();
     initWizard();
   }

@@ -147,7 +147,7 @@ class PropertyController extends Controller
             }
         }
         
-        $property->load(['images', 'reviews.user']);
+        $property->load(['images', 'reviews.user', 'landlord']);
         
         $avgRating = $property->average_rating;
         $reviewsCount = $property->reviews_count;
@@ -433,9 +433,16 @@ class PropertyController extends Controller
         DB::beginTransaction();
 
         try {
-            $validated['user_id'] = Auth::id();
+            $user = Auth::user();
+            $isAdminListing = $user->isAdmin();
+
+            $validated['user_id'] = $user->id;
             $validated['unit_id'] = $validated['unit'] ?? null;
-            $validated['status'] = 'pending'; // New properties require admin approval
+            $validated['status'] = $isAdminListing ? 'approved' : 'pending';
+            if ($isAdminListing) {
+                $validated['approved_at'] = now();
+                $validated['approved_by'] = $user->id;
+            }
             unset($validated['unit']);
 
             // Store accepted rent duration units as comma-separated string for SET column
@@ -510,7 +517,11 @@ class PropertyController extends Controller
                 'property_created',
                 "New property '{$property->title}' was created",
                 $property,
-                ['property_id' => $property->id, 'property_title' => $property->title, 'status' => 'pending']
+                [
+                    'property_id' => $property->id,
+                    'property_title' => $property->title,
+                    'status' => $property->status,
+                ]
             );
 
             if ($request->hasFile('images')) {
@@ -526,23 +537,25 @@ class PropertyController extends Controller
 
             DB::commit();
 
-            $landlord = Auth::user();
-            User::where('role', 'admin')->each(function (User $admin) use ($property, $landlord) {
-                $this->createNotification(
-                    $admin,
-                    'pending',
-                    'New Property Listing',
-                    $landlord->name . ' submitted "' . $property->title . '" for approval.',
-                    $property
-                );
-            });
+            if (!$isAdminListing) {
+                User::where('role', 'admin')->each(function (User $admin) use ($property, $user) {
+                    $this->createNotification(
+                        $admin,
+                        'pending',
+                        'New Property Listing',
+                        $user->name . ' submitted "' . $property->title . '" for approval.',
+                        $property
+                    );
+                });
+            }
+
+            $successMessage = $isAdminListing
+                ? 'Property listed successfully. It is now live and visible in search results.'
+                : 'Your listing was submitted successfully and is pending admin approval. It will appear in search results once approved.';
 
             return redirect()
                 ->route('profileProperties')
-                ->with(
-                    'success',
-                    'Your listing was submitted successfully and is pending admin approval. It will appear in search results once approved.'
-                );
+                ->with('success', $successMessage);
         } catch (\Throwable $e) {
             DB::rollBack();
 
@@ -585,7 +598,7 @@ class PropertyController extends Controller
             $property->likedBy()->attach($user->id);
             $status = 'liked';
             
-            if ($property->user_id !== $user->id) {
+            if ($property->user_id !== $user->id && $property->user) {
                 $this->createNotification(
                     $property->user,
                     'like',

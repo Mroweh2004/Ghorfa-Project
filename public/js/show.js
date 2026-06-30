@@ -9,9 +9,15 @@ let totalImages = 0;
 
 // Image Modal Functions
 function openImageModal(imageSrc) {
-    // Get all image sources from the gallery
-    const galleryImages = document.querySelectorAll('.gallery-image');
-    imageSources = Array.from(galleryImages).map(img => img.src);
+    const thumbImages = document.querySelectorAll('.gallery-thumb img');
+    const mainImage = document.getElementById('galleryMainImage');
+    if (thumbImages.length) {
+        imageSources = Array.from(thumbImages).map((img) => img.src);
+    } else if (mainImage) {
+        imageSources = [mainImage.src];
+    } else {
+        imageSources = [];
+    }
     totalImages = imageSources.length;
     
     // Find the index of the clicked image
@@ -19,7 +25,7 @@ function openImageModal(imageSrc) {
     
     // If image not found in gallery (shouldn't happen in normal flow), just use index 0
     if (currentImageIndex === -1) {
-        currentImageIndex = 0;
+        currentImageIndex = typeof gallerySlideIndex === 'number' ? gallerySlideIndex : 0;
     }
     
     // Show modal first
@@ -266,101 +272,89 @@ function initBackButton() {
     }
 }
 
-// Gallery slider state
+// Gallery preview state
 let gallerySlideIndex = 0;
 let gallerySlideCount = 0;
+let galleryImageSources = [];
 
-function updateGallerySlider() {
-    const track = document.getElementById('galleryTrack');
-    if (!track) return;
-    const slides = track.querySelectorAll('.gallery-slide');
-    gallerySlideCount = slides.length;
-    if (gallerySlideIndex >= gallerySlideCount) gallerySlideIndex = Math.max(0, gallerySlideCount - 1);
-    const offset = -gallerySlideIndex * 100;
-    track.style.transform = `translateX(${offset}%)`;
-    // Update dots
-    const dots = document.querySelectorAll('.gallery-dots .dot');
-    dots.forEach((dot, i) => dot.classList.toggle('active', i === gallerySlideIndex));
-    // Disable arrows at ends
+function setGalleryIndex(index) {
+    const mainImage = document.getElementById('galleryMainImage');
+    const thumbs = document.querySelectorAll('.gallery-thumb');
+    if (!mainImage || !galleryImageSources.length) return;
+
+    gallerySlideIndex = Math.max(0, Math.min(index, galleryImageSources.length - 1));
+    const src = galleryImageSources[gallerySlideIndex];
+
+    mainImage.src = src;
+    mainImage.dataset.imageSrc = src;
+
+    thumbs.forEach((thumb, i) => {
+        const active = i === gallerySlideIndex;
+        thumb.classList.toggle('is-active', active);
+        thumb.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+
     const prevBtn = document.getElementById('galleryPrev');
     const nextBtn = document.getElementById('galleryNext');
     if (prevBtn) prevBtn.disabled = gallerySlideIndex === 0;
     if (nextBtn) nextBtn.disabled = gallerySlideIndex >= gallerySlideCount - 1;
 }
 
-function initGallerySlider() {
-    const track = document.getElementById('galleryTrack');
-    const dotsContainer = document.getElementById('galleryDots');
-    if (!track) return;
-    const slides = track.querySelectorAll('.gallery-slide');
-    gallerySlideCount = slides.length;
+function initGalleryPreview() {
+    const mainImage = document.getElementById('galleryMainImage');
+    const thumbs = document.querySelectorAll('.gallery-thumb');
+    if (!mainImage) return;
+
+    galleryImageSources = Array.from(document.querySelectorAll('.gallery-thumb')).map(
+        (thumb) => thumb.getAttribute('data-image-src')
+    );
+    if (!galleryImageSources.length) {
+        galleryImageSources = [mainImage.getAttribute('data-image-src') || mainImage.src];
+    }
+    gallerySlideCount = galleryImageSources.length;
     gallerySlideIndex = 0;
 
-    if (gallerySlideCount <= 1) {
-        const prevBtn = document.getElementById('galleryPrev');
-        const nextBtn = document.getElementById('galleryNext');
-        if (prevBtn) prevBtn.style.display = 'none';
-        if (nextBtn) nextBtn.style.display = 'none';
-        if (dotsContainer) dotsContainer.style.display = 'none';
-        return;
-    }
+    document.getElementById('galleryMainFrame')?.addEventListener('click', () => {
+        openImageModal(galleryImageSources[gallerySlideIndex]);
+    });
 
-    // Build dots
-    if (dotsContainer) {
-        dotsContainer.innerHTML = '';
-        for (let i = 0; i < gallerySlideCount; i++) {
-            const dot = document.createElement('button');
-            dot.type = 'button';
-            dot.className = 'dot' + (i === 0 ? ' active' : '');
-            dot.setAttribute('aria-label', 'Go to photo ' + (i + 1));
-            dot.addEventListener('click', () => {
-                gallerySlideIndex = i;
-                updateGallerySlider();
-            });
-            dotsContainer.appendChild(dot);
-        }
-    }
+    thumbs.forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+            const index = parseInt(thumb.getAttribute('data-gallery-index'), 10);
+            if (!Number.isNaN(index)) {
+                setGalleryIndex(index);
+            }
+        });
+    });
 
     document.getElementById('galleryPrev')?.addEventListener('click', () => {
-        if (gallerySlideIndex > 0) {
-            gallerySlideIndex--;
-            updateGallerySlider();
-        }
-    });
-    document.getElementById('galleryNext')?.addEventListener('click', () => {
-        if (gallerySlideIndex < gallerySlideCount - 1) {
-            gallerySlideIndex++;
-            updateGallerySlider();
-        }
+        if (gallerySlideIndex > 0) setGalleryIndex(gallerySlideIndex - 1);
     });
 
-    updateGallerySlider();
+    document.getElementById('galleryNext')?.addEventListener('click', () => {
+        if (gallerySlideIndex < gallerySlideCount - 1) setGalleryIndex(gallerySlideIndex + 1);
+    });
+
+    setGalleryIndex(0);
+}
+
+function initGallerySlider() {
+    initGalleryPreview();
 }
 
 // Add loading states to action buttons
 function initActionButtons() {
-    const actionBtns = document.querySelectorAll('.action-btn');
-    
-    actionBtns.forEach(btn => {
-        if (btn.classList.contains('delete-btn')) {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to delete this property?')) {
-                    e.preventDefault();
-                    return false;
-                }
-                
-                // Add loading state
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
-                this.disabled = true;
-                
-                // Re-enable after 3 seconds if form doesn't submit
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }, 3000);
-            });
-        }
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const originalHtml = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i><span>Deleting...</span>';
+            this.disabled = true;
+
+            setTimeout(() => {
+                this.innerHTML = originalHtml;
+                this.disabled = false;
+            }, 3000);
+        });
     });
 }
 

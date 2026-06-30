@@ -52,8 +52,8 @@ class ReviewController extends Controller
 
         $reviewer = $request->user();
         $propertyOwner = $property->user;
-        
-        if ($propertyOwner->id !== $reviewer->id) {
+
+        if ($propertyOwner && $propertyOwner->id !== $reviewer->id) {
             $this->createNotification(
                 $propertyOwner,
                 'review',

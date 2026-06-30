@@ -145,6 +145,21 @@
                         <span class="listing-tag">For {{ $property->listing_type }}</span>
                         
                         <button class="setting-btn"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
+                        <ul class="setting-list">
+                            <li><a href="{{route('properties.show', $property->id) }}">View</a></li>
+                            @if(auth()->check())
+                                @if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id)
+                                    <li><a href="{{ route('properties.edit', $property->id) }}">Edit</a></li>
+                                    <li>
+                                        <form action="{{ route('properties.destroy', $property->id) }}" method="POST" class="form-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this property?')">Delete</button>
+                                        </form>
+                                    </li>
+                                @endif
+                            @endif
+                        </ul>
                         @auth
                             <button
                                 type="button"
@@ -162,21 +177,6 @@
                             </button>
                         @endauth
                     </div>
-                    <ul class="setting-list">
-                        <li><a href="{{route('properties.show', $property->id) }}">View</a></li>
-                        @if(auth()->check())
-                            @if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id)
-                                <li><a href="{{ route('properties.edit', $property->id) }}">Edit</a></li>
-                                <li>
-                                    <form action="{{ route('properties.destroy', $property->id) }}" method="POST" class="form-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this property?')">Delete</button>
-                                    </form>
-                                </li>
-                            @endif
-                        @endif
-                    </ul>
                     <div class="listing-content">
                     <span class="available-from">Listed {{ $property->created_at->diffForHumans() }}</span>
                         <h3>{{ $property->title }}</h3>

@@ -56,6 +56,11 @@ class Property extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function images()
     {
         return $this->hasMany(PropertyImage::class);

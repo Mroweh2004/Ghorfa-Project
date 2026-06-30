@@ -14,62 +14,188 @@
 
 @section('content')
 <main class="property-show-page">
-    @if($property->images->count() > 0)
-    <section class="property-hero-gallery" aria-label="Property photos">
-        <div class="gallery-slider gallery-slider--hero">
-            <div class="gallery-slider-viewport">
-                <div class="gallery-slider-track" id="galleryTrack">
-                    @foreach($property->images as $image)
-                        @php $imgUrl = Storage::url($image->path); @endphp
-                        <div class="gallery-slide">
-                            <img src="{{ $imgUrl }}" alt="Property photo {{ $loop->iteration }}" class="gallery-image" onclick="openImageModal('{{ $imgUrl }}')">
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            @if($property->images->count() > 1)
-            <button type="button" class="gallery-arrow gallery-prev" id="galleryPrev" aria-label="Previous photo">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button type="button" class="gallery-arrow gallery-next" id="galleryNext" aria-label="Next photo">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <div class="gallery-dots" id="galleryDots"></div>
-            @endif
-        </div>
-    </section>
-    @else
-    <section class="property-hero-gallery property-hero-gallery--empty" aria-label="No photos">
-        <div class="no-image-placeholder">
-            <i class="fas fa-image" aria-hidden="true"></i>
-            <p>No photos available</p>
-        </div>
-    </section>
-    @endif
-
     <!-- Property Details Section -->
     <section class="property-details">
         <div class="container">
             <div class="property-layout">
-                <!-- Main Content -->
-                <div class="property-main">
-                    <!-- Header -->
-                    <div class="property-header">
-                        <div class="property-title-section">
-                            <h1 class="property-title">{{ $property->title }}</h1>
-                            <div class="property-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>{{ $property->address }}, {{ $property->city }}, {{ $property->country }}</span>
+                <div class="property-header">
+                    <div class="property-title-section">
+                        <h1 class="property-title">{{ $property->title }}</h1>
+                        <div class="property-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ $property->address }}, {{ $property->city }}, {{ $property->country }}</span>
+                        </div>
+                    </div>
+                    <div class="property-price-section">
+                        <div class="price-main">${{ number_format($property->price) }}</div>
+                        @if(($property->listing_type ?? null) === 'rent')
+                            <div class="price-period">per {{ $property->price_duration ?? 'month' }}</div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Gallery -->
+                <div class="property-gallery-column">
+                    @if($property->images->count() > 0)
+                    <div class="property-gallery-preview" id="propertyGalleryPreview">
+                        <div class="gallery-main-view">
+                            @if($property->images->count() > 1)
+                            <button type="button" class="gallery-nav gallery-nav--prev" id="galleryPrev" aria-label="Previous photo">
+                                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                            </button>
+                            @endif
+                            <button type="button" class="gallery-main-frame" id="galleryMainFrame" aria-label="View photo full size">
+                                @php $firstImgUrl = Storage::url($property->images->first()->path); @endphp
+                                <img
+                                    id="galleryMainImage"
+                                    src="{{ $firstImgUrl }}"
+                                    alt="{{ $property->title }} — photo 1"
+                                    class="gallery-image gallery-main-image"
+                                    data-image-src="{{ $firstImgUrl }}"
+                                >
+                            </button>
+                            @if($property->images->count() > 1)
+                            <button type="button" class="gallery-nav gallery-nav--next" id="galleryNext" aria-label="Next photo">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                            </button>
+                            @endif
+                        </div>
+
+                        @if($property->images->count() > 1)
+                        <div class="gallery-thumbs" id="galleryThumbs" role="tablist" aria-label="Property photo thumbnails">
+                            @foreach($property->images as $image)
+                                @php $imgUrl = Storage::url($image->path); @endphp
+                                <button
+                                    type="button"
+                                    class="gallery-thumb{{ $loop->first ? ' is-active' : '' }}"
+                                    data-gallery-index="{{ $loop->index }}"
+                                    data-image-src="{{ $imgUrl }}"
+                                    role="tab"
+                                    aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                                    aria-label="Photo {{ $loop->iteration }}"
+                                >
+                                    <img src="{{ $imgUrl }}" alt="" loading="{{ $loop->index < 5 ? 'eager' : 'lazy' }}" decoding="async">
+                                </button>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
+                    @else
+                    <div class="property-gallery-preview property-gallery-preview--empty">
+                        <div class="no-image-placeholder">
+                            <i class="fas fa-image" aria-hidden="true"></i>
+                            <p>No photos available</p>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Sidebar -->
+                <div class="property-sidebar">
+                    @php
+                        $owner = $property->landlord;
+                        $ownerInitial = $owner ? mb_strtoupper(mb_substr($owner->name, 0, 1)) : '?';
+                        $ownerPhone = $owner?->phone_nb;
+                    @endphp
+                    <div class="contact-card">
+                        <div class="contact-header">
+                            <h4>Contact Me</h4>
+                        </div>
+                        @if($owner)
+                        <div class="contact-owner">
+                            <div class="contact-owner__avatar" aria-hidden="true">{{ $ownerInitial }}</div>
+                            <div class="contact-owner__info">
+                                <span class="contact-owner__name">{{ $owner->name }}</span>
+                                <span class="contact-owner__role">Owner</span>
                             </div>
                         </div>
-                        <div class="property-price-section">
-                            <div class="price-main">${{ number_format($property->price) }}</div>
-                            @if(($property->listing_type ?? null) === 'rent')
-                                <div class="price-period">per {{ $property->price_duration ?? 'month' }}</div>
+                        @endif
+                        <div class="contact-actions contact-actions--row">
+                            @if($ownerPhone)
+                            <a href="tel:{{ preg_replace('/\s+/', '', $ownerPhone) }}" class="contact-btn contact-btn--call">
+                                Call
+                            </a>
+                            <a href="https://wa.me/{{ preg_replace('/\D+/', '', $ownerPhone) }}" class="contact-btn contact-btn--whatsapp" target="_blank" rel="noopener noreferrer">
+                                WhatsApp
+                            </a>
+                            @else
+                            <button type="button" class="contact-btn contact-btn--call" disabled>
+                                Call
+                            </button>
+                            <button type="button" class="contact-btn contact-btn--whatsapp" disabled>
+                                WhatsApp
+                            </button>
                             @endif
+                        </div>
+                        <div class="property-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>Listed {{ $property->created_at->diffForHumans() }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-eye"></i>
+                                <span>Property ID: #{{ $property->id }}</span>
+                            </div>
                         </div>
                     </div>
 
+                    @auth
+                    <div class="like-section">
+                        <button
+                            type="button"
+                            class="like-btn"
+                            data-property-id="{{ $property->id }}"
+                            data-liked="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
+                            aria-pressed="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
+                        >
+                            <i class="fa-{{ $property->isLikedBy(auth()->id()) ? 'solid' : 'regular' }} fa-heart"></i>
+                            <span>{{ $property->isLikedBy(auth()->id()) ? 'Liked' : 'Like' }}</span>
+                        </button>
+                        <div class="like-count">{{ $property->likedBy()->count() }} likes</div>
+
+                        <hr class="like-divider">
+
+                        @php
+                            $userHasReviewed = auth()->check() ? $property->hasUserReviewed(auth()->id()) : false;
+                            $userReview = auth()->check() ? $property->getUserReview(auth()->id()) : null;
+                        @endphp
+
+                        <div class="rating-summary">
+                            <div class="rating-stars">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <i class="fa-star {{ $i <= floor($avgRating) ? 'fas' : 'far' }}"></i>
+                                @endfor
+                            </div>
+                            @if($reviewsCount > 0)
+                                <span class="rating-text">{{ $avgRating }} / 5 · {{ $reviewsCount }} {{ \Illuminate\Support\Str::plural('review', $reviewsCount) }}</span>
+                            @else
+                                <span class="rating-text">No ratings yet</span>
+                            @endif
+                        </div>
+
+                        @if($userHasReviewed && $userReview)
+                            <div class="user-review-status">
+                                <div class="user-review-info">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>You reviewed this property</span>
+                                </div>
+                                <button class="review-btn edit-review-btn" data-review-id="{{ $userReview->id }}" onclick="editUserReview(this.dataset.reviewId)">
+                                    <i class="fas fa-edit"></i>
+                                    Edit Review
+                                </button>
+                            </div>
+                        @else
+                            <button class="review-btn" onclick="openReviewModal()">
+                                <i class="fas fa-star-half-alt"></i>
+                                Write a Review
+                            </button>
+                        @endif
+                    </div>
+                    @endauth
+                </div>
+
+                <!-- Main Content -->
+                <div class="property-main">
                     <!-- Property Location Map -->
                     @if($property->latitude && $property->longitude)
                     <div class="property-location-map-container">
@@ -182,93 +308,6 @@
                         @endif
                     </div>
                 </div>
-
-                <!-- Sidebar -->
-                <div class="property-sidebar">
-                    <!-- Contact Card -->
-                    <div class="contact-card">
-                        <div class="contact-header">
-                            <h4>Contact Information</h4>
-                        </div>
-                        <div class="contact-actions">
-                            <button class="contact-btn primary">
-                                <i class="fas fa-phone"></i>
-                                Call Now
-                            </button>
-                            <button class="contact-btn secondary">
-                                <i class="fas fa-envelope"></i>
-                                Send Message
-                            </button>
-                        </div>
-                        <div class="property-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span>Listed {{ $property->created_at->diffForHumans() }}</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-eye"></i>
-                                <span>Property ID: #{{ $property->id }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Like Button -->
-                    @auth
-                    <div class="like-section">
-                        <button
-                            type="button"
-                            class="like-btn"
-                            data-property-id="{{ $property->id }}"
-                            data-liked="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
-                            aria-pressed="{{ $property->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
-                        >
-                            <i class="fa-{{ $property->isLikedBy(auth()->id()) ? 'solid' : 'regular' }} fa-heart"></i>
-                            <span>{{ $property->isLikedBy(auth()->id()) ? 'Liked' : 'Like' }}</span>
-                        </button>
-                        <div class="like-count">{{ $property->likedBy()->count() }} likes</div>
-
-                        <hr class="like-divider">
-
-                        @php
-                            $userHasReviewed = auth()->check() ? $property->hasUserReviewed(auth()->id()) : false;
-                            $userReview = auth()->check() ? $property->getUserReview(auth()->id()) : null;
-                        @endphp
-
-                        <!-- Rating summary -->
-                        <div class="rating-summary">
-                            <div class="rating-stars">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <i class="fa-star {{ $i <= floor($avgRating) ? 'fas' : 'far' }}"></i>
-                                @endfor
-                            </div>
-                            @if($reviewsCount > 0)
-                                <span class="rating-text">{{ $avgRating }} / 5 · {{ $reviewsCount }} {{ \Illuminate\Support\Str::plural('review', $reviewsCount) }}</span>
-                            @else
-                                <span class="rating-text">No ratings yet</span>
-                            @endif
-                        </div>
-
-                        <!-- Review button -->
-                        @if($userHasReviewed && $userReview)
-                            <div class="user-review-status">
-                                <div class="user-review-info">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>You reviewed this property</span>
-                                </div>
-                                <button class="review-btn edit-review-btn" data-review-id="{{ $userReview->id }}" onclick="editUserReview(this.dataset.reviewId)">
-                                    <i class="fas fa-edit"></i>
-                                    Edit Review
-                                </button>
-                            </div>
-                        @else
-                            <button class="review-btn" onclick="openReviewModal()">
-                                <i class="fas fa-star-half-alt"></i>
-                                Write a Review
-                            </button>
-                        @endif
-                    </div>
-                    @endauth
-                </div>
             </div>
         </div>
     </section>
@@ -362,25 +401,28 @@
     <!-- Action Buttons -->
     <div class="property-actions">
         <div class="container">
-            <div class="actions-content">
-                <button class="action-btn back-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back
+            <div class="property-actions-bar">
+                <button type="button" class="property-action-btn property-action-btn--back back-btn">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                    <span>Back</span>
                 </button>
+
                 @auth
                     @if(auth()->user()->role === 'admin' || auth()->id() === $property->user_id)
-                        <a href="{{ route('properties.edit', $property) }}" class="action-btn edit-btn">
-                            <i class="fas fa-edit"></i>
-                            Edit Property
+                    <div class="property-actions-bar__owner">
+                        <a href="{{ route('properties.edit', $property) }}" class="property-action-btn property-action-btn--edit edit-btn">
+                            <i class="fas fa-edit" aria-hidden="true"></i>
+                            <span>Edit Property</span>
                         </a>
-                        <form class="delete-form" action="{{ route('properties.destroy', $property->id) }}" method="POST">
+                        <form class="property-actions-delete-form delete-form" action="{{ route('properties.destroy', $property->id) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this property?')">
-                                <i class="fas fa-trash"></i>
-                                Delete Property
+                            <button type="submit" class="property-action-btn property-action-btn--delete delete-btn" onclick="return confirm('Are you sure you want to delete this property?')">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
+                                <span>Delete Property</span>
                             </button>
                         </form>
+                    </div>
                     @endif
                 @endauth
             </div>

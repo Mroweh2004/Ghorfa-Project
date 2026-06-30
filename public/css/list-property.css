@@ -718,6 +718,28 @@
     position: relative; 
     margin-top: 10px;
   }
+
+  .file-upload-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .file-input--sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
   
   .file-input{
     position: absolute; 
@@ -750,6 +772,16 @@
     background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%);
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
+  }
+
+  .file-label--camera {
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    border-color: transparent;
+  }
+
+  .file-label--camera:hover {
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #1e40af 100%);
   }
   
   .file-info{ 
@@ -1042,6 +1074,27 @@
     opacity: .6;
     cursor: not-allowed;
   } 
+
+  /* =========================
+     Rent-only fields (hidden for sale listings)
+  ========================= */
+  .price-field-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+
+  .rent-only-fields {
+    display: contents;
+  }
+
+  .rent-only-fields.is-hidden,
+  .rent-only-block.is-hidden,
+  .rent-only-label.is-hidden {
+    display: none !important;
+  }
 
   /* =========================
      Rent duration units (day/week/month/year)
